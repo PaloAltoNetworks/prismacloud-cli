@@ -40,3 +40,4 @@ error.log
 # OSX
 
 .DS_Store
+output.html

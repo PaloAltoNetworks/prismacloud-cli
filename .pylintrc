@@ -8,6 +8,7 @@ fail-under=9.0
 disable=
     C0114, # missing-module-docstring
     E1102, # pc_api.get_endpoint is not callable (not-callable)
+    W0613, # Unused argument 'ctx' (unused-argument)
 
 [BASIC]
 
