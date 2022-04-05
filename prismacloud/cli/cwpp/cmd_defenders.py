@@ -10,8 +10,8 @@ def cli(ctx):
     pass
 
 
-@click.command()
-def list():
+@click.command(name="list")
+def list_defenders():
     result = pc_api.get_endpoint("defenders")
     cli_output(result)
 
@@ -28,6 +28,6 @@ def summary():
     cli_output(result)
 
 
-cli.add_command(list)
+cli.add_command(list_defenders)
 cli.add_command(names)
 cli.add_command(summary)

@@ -8,11 +8,10 @@ from prismacloud.cli.api import pc_api
 @pass_environment
 def cli(ctx):
     """List Cloud Accounts and Types"""
-    pass
 
 
-@click.command()
-def list():
+@click.command(name="list")
+def list_accounts():
     """Returns Cloud Accounts."""
     result = pc_api.cloud_accounts_list_read()
     cli_output(result)
@@ -25,13 +24,13 @@ def names():
     cli_output(result)
 
 
-@click.command()
-def type():
+@click.command(name="type")
+def cloud_type():
     """Returns all Cloud Types."""
     result = pc_api.cloud_types_list_read()
     cli_output(result)
 
 
-cli.add_command(list)
+cli.add_command(list_accounts)
 cli.add_command(names)
-cli.add_command(type)
+cli.add_command(cloud_type)
