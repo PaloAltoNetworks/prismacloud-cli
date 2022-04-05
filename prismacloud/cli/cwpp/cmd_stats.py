@@ -30,8 +30,8 @@ def events():
     cli_output(result)
 
 
-@click.command()
-def license():
+@click.command(name="license")
+def license_stats():
     result = pc_api.get_endpoint("stats/license")
     cli_output(result)
 
@@ -50,5 +50,5 @@ def vulnerabilities(cve):
 cli.add_command(daily)
 cli.add_command(dashboard)
 cli.add_command(events)
-cli.add_command(license)
+cli.add_command(license_stats)
 cli.add_command(vulnerabilities)
