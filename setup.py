@@ -8,12 +8,12 @@ from setuptools import find_namespace_packages, setup
 # README file and 2) it's easier to type in the README file than to put a raw
 # string in below ...
 
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-spec = util.spec_from_file_location(
-    "prismacloud.cli.version", os.path.join("prismacloud", "cli", "version.py")
-)
+
+spec = util.spec_from_file_location("prismacloud.cli.version", os.path.join("prismacloud", "cli", "version.py"))
 
 # noinspection PyUnresolvedReferences
 mod = util.module_from_spec(spec)
@@ -33,7 +33,7 @@ setup(
         "pandas",
         "requests",
         "tabulate",
-        "prismacloud-api"
+        "prismacloud-api",
     ],
     name="prismacloud-cli",
     version=version,
@@ -45,15 +45,15 @@ setup(
     keywords="prisma cloud cli",
     url="https://github.com/se-cloud-emea/prismacloud-cli",
     packages=find_namespace_packages(),
-    long_description=read('README.md'),
-    long_description_content_type='text/markdown',
+    long_description=read("README.md"),
+    long_description_content_type="text/markdown",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "Intended Audience :: System Administrators",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
-        "Topic :: Utilities"
+        "Topic :: Utilities",
     ],
     entry_points="""
         [console_scripts]
