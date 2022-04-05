@@ -43,7 +43,7 @@ setup(
     description=("Prisma Cloud CLI"),
     license="BSD",
     keywords="prisma cloud cli",
-    url="https://github.com/se-cloud-emea/prismacloud-cli",
+    url="https://github.com/PaloAltoNetworks/prismacloud-cli",
     packages=find_namespace_packages(),
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
