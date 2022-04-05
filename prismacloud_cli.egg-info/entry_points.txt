@@ -1,0 +1,2 @@
+[console_scripts]
+pc = prismacloud.cli:cli

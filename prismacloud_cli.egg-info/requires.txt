@@ -1,0 +1,10 @@
+requests
+pandas
+jsondiff
+ipython
+api-client
+click
+click_help_colors
+tabulate
+coloredlogs
+click_completion
