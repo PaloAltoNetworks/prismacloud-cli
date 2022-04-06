@@ -12,7 +12,7 @@ def cli(ctx):
     pass
 
 
-@click.command()
+@click.command(name="list")
 @click.option("--compliance-standard", help="Compliance standard, e.g.: 'CIS v1.4.0 (AWS)'")
 @click.option("--amount", default="1", help="Number of units selected with --unit")
 @click.option(
@@ -22,7 +22,7 @@ def cli(ctx):
     "--status", default="open", type=click.Choice(["open", "resolved", "snoozed", "dismissed"], case_sensitive=False)
 )
 @click.option("--detailed/--no-detailed", default=False)
-def list(compliance_standard, amount, unit, status, detailed):
+def list_alerts(compliance_standard, amount, unit, status, detailed):
     """Returns a list of alerts from the Prisma Cloud platform"""
     data = {
         "alert.status": status,
@@ -37,4 +37,4 @@ def list(compliance_standard, amount, unit, status, detailed):
     cli_output(result)
 
 
-cli.add_command(list)
+cli.add_command(list_alerts)
