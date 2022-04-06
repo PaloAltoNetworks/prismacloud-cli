@@ -62,7 +62,7 @@ def enable_or_disable_policies(policy_severity, all_policies, cloud_type, policy
     if policy_list_to_update:
         logging.info('API - Updating Policies ...')
         for policy in policy_list_to_update:
-            logging.info('API - Updating Policy: %s' % policy['name'])
+            logging.info('API - Updating Policy: %s', policy['name'])
             pc_api.policy_status_update(policy['policyId'], specified_policy_status_string)
         logging.info('Done.')
     else:
