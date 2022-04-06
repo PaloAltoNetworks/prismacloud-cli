@@ -92,6 +92,7 @@ The following global options are available
 ```
 Options:
   -v, --verbose                   Enables verbose mode.
+  -vv, --very_verbose             Enables very verbose mode.
   -o, --output [text|csv|json|html|columns]
   -c, --config TEXT               Select configuration
                                   ~/.prismacloud/[CONFIGURATION].json
