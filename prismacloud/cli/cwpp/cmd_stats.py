@@ -39,12 +39,22 @@ def license_stats():
 @click.command()
 @click.option("-cve", "--cve")
 def vulnerabilities(cve):
+
     if not cve:
         result = pc_api.get_endpoint("stats/vulnerabilities")
+        exit()
     else:
-        logging.debug("Parameter CVE defined, search for impacted resources")
-        result = pc_api.get_endpoint("stats/vulnerabilities/impacted-resources", {"cve": cve})
-    cli_output(result)
+        cves = cve.split(",")
+        logging.debug("CVEs to search for: {cves}")
+
+        # Get impacted resources for each cve in cves
+        result_tree = {}
+        for cve in cves:
+            result = pc_api.get_endpoint("stats/vulnerabilities/impacted-resources", {"cve": cve})
+            result_tree[cve] = result
+
+        cli_output(result_tree)
+        exit()
 
 
 cli.add_command(daily)
