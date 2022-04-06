@@ -129,7 +129,6 @@ def cli(ctx, very_verbose, verbose, configuration, output, columns=None):
         logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
         coloredlogs.install(level="ERROR")
 
-    
 
 def cli_output(data):
     """Formatted output"""

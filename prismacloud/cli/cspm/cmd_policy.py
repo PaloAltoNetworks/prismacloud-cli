@@ -66,8 +66,8 @@ def enable_or_disable_policies(policy_severity, all_policies, cloud_type, policy
             pc_api.policy_status_update(policy['policyId'], specified_policy_status_string)
         logging.info('API - All policies have been updated.')
     else:
-        logging.info('API - No Policies match the specified parameter, or all matching Policies are already in desired status')
-    # cli_output(result)
+        logging.info('API - No Policies match the specified parameter, or all matching Policies are already in desired status')    
+
 
 cli.add_command(list_policies)
 cli.add_command(enable_or_disable_policies)
