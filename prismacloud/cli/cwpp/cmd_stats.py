@@ -55,7 +55,7 @@ def vulnerabilities(cve):
 
         cli_output(result_tree)
         exit()
-        
+
 
 cli.add_command(daily)
 cli.add_command(dashboard)
