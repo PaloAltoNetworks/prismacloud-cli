@@ -1,19 +1,21 @@
 # Prisma Cloud CLI
 
-This is the Prisma Cloud CLI, a command line for [Prisma Cloud](https://www.paloaltonetworks.com/prisma/cloud) by [Palo Alto Networks](https://www.paloaltonetworks.com/)
+:+1::tada: We are excited to share with you this Prisma Cloud CLI! :tada::+1:
 
-The project is work in progress but can be easily extended to add additional cwpp and cspm commands.
 
-:warning:
-These scripts have been developed by Prisma Cloud SAs, they are not Supported by Palo Alto Networks.
+The Prisma Cloud CLI is a command line interface for [Prisma Cloud](https://www.paloaltonetworks.com/prisma/cloud) by [Palo Alto Networks](https://www.paloaltonetworks.com/).
+
+
+
+# Support
+This project has been developed by Prisma Cloud SAs and is not Supported by Palo Alto Networks.
 Nevertheless, the maintainers will make a best-effort to address issues, and (of course) contributors are encouraged to submit issues and pull requests.
-
 
 ## Getting started
 
 ### Requirements
  * Python >= 3.7
- * Pip
+ * Pip3
 
 ### Installation
 
@@ -41,8 +43,7 @@ Run the pc cli script. If you don't have a config file yet, it will help you to 
 pc version
 ```
 
-This process looks like the screenshot below. the prismacloud-cli asks you for some details, stores it in the
-credentials file and uses that file when it is already available.
+This process looks like the screenshot below. the prismacloud-cli asks you for some details, stores it in the credentials file and uses that file when it is already available.
 
 ![First run](screenshot.png)
 
@@ -106,6 +107,10 @@ pc -o columns images
 pc --columns hostname,repoTag.repo,osDistro -o csv images -l 1
 ```
 
+## Commands
+The cli has several commands to work with, see the screenshot below for an example, but use ```pc --help``` to see the latest list for your version.
+
+![Help](help.png)
 ## Use cases
 
 ### Log4J Impacted Resources
@@ -114,8 +119,26 @@ pc -o json stats vulnerabilities --cve CVE-2021-44228 | jq
 pc stats vulnerabilities --cve CVE-2021-44228
 ```
 
+Use something similar for getting the *Spring Shell* impacted resources.
+
 ### Search scan reports for images scanned by the Jenkins plugin or twistcli.
 ```
 pc scans --help
+```
+
+Select only specific columns for the output:
+
+```
 pc --columns entityInfo.repoTag.registry,entityInfo.repoTag.repo,entityInfo.repoTag.tag,entityInfo.vulnerabilitiesCount scans -l 20 -s nginx
 ```
+
+You might also want to add some additional columns and save the output as html:
+
+```
+pc --config local -o html --columns entityInfo.repoTag.registry,entityInfo.repoTag.repo,entityInfo.repoTag.tag,entityInfo.vulnerabilitiesCount,entityInfo.vulnerabilityDistribution.critical,entityInfo.vulnerabilityDistribution.high,entityInfo.vulnerabilityDistribution.medium scans -l 20 -s nginx  > /tmp/results.html
+```
+
+Then, open /tmp/results.html:
+
+![Results](results.png)
+
