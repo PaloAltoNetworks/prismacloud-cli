@@ -32,7 +32,7 @@ def enable_or_disable_policies(policy_severity, all_policies, cloud_type, policy
     specified_policy_status_string = str(specified_policy_status).lower()
     logging.info('API - Getting list of Policies ...')
     policy_list = pc_api.policy_v2_list_read()
-    logging.info(' done.')
+    logging.info('API - All policies have been fetched.')
 
     policy_list_to_update = []
     if all_policies:
@@ -64,10 +64,9 @@ def enable_or_disable_policies(policy_severity, all_policies, cloud_type, policy
         for policy in policy_list_to_update:
             logging.info('API - Updating Policy: %s', policy['name'])
             pc_api.policy_status_update(policy['policyId'], specified_policy_status_string)
-        logging.info('Done.')
+        logging.info('API - All policies have been updated.')
     else:
-        logging.info('API - No Policies match the specified parameter, or all matching Policies are already enabled or disabled.')
-    logging.info('Job completed suscessfully!')
+        logging.info('API - No Policies match the specified parameter, or all matching Policies are already in desired status')
     # cli_output(result)
 
 cli.add_command(list_policies)

@@ -108,33 +108,28 @@ Version: {0} (using API Version {1})
     ),
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
+@click.option("-vvv", "--very_verbose", is_flag=True, help="Enables very verbose mode")
 @click.option("-o", "--output", type=click.Choice(["text", "csv", "json", "html", "columns"]), default="text")
-@click.option(
-    "-c",
-    "--config",
-    "configuration",
-    help="Select configuration file in ~/.prismacloud/[CONFIGURATION].json",
-    default="credentials",
-)
+@click.option("-c", "--config", "configuration", help="Select configuration file in ~/.prismacloud/[CONFIGURATION].json", default="credentials")
 @click.option("--columns", "columns", help="Select columns for output", default=None)
 @pass_environment
 # pylint: disable=W0613
-def cli(ctx, verbose, configuration, output, columns=None):
+def cli(ctx, very_verbose, verbose, configuration, output, columns=None):
     """Define the command line"""
     ctx.configuration = configuration
     ctx.output = output
-    ctx.verbose = verbose
-    if ctx.verbose:
-        logging.basicConfig(
-            level=logging.DEBUG, format="%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s"
-        )
+
+    if verbose:
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+        coloredlogs.install(level="INFO")
+    elif very_verbose:
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
         coloredlogs.install(level="DEBUG")
     else:
-        logging.basicConfig(
-            level=logging.ERROR, format="%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s"
-        )
+        logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
         coloredlogs.install(level="ERROR")
 
+    
 
 def cli_output(data):
     """Formatted output"""
