@@ -1,6 +1,10 @@
 name: Quality
 
-on: [push, pull_request]
+on: 
+  push:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
