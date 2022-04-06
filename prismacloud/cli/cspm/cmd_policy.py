@@ -8,7 +8,6 @@ from prismacloud.cli.api import pc_api
 @click.group(
     "policy", short_help="[CSPM] Returns available policies, both system default and custom."
 )
-
 @pass_environment
 def cli(ctx):
     pass
@@ -21,10 +20,13 @@ def list_policies():
 
 
 @click.command("set", short_help="[CSPM] Tunr on and off policies")
-@click.option("--policy_severity", default="high", type=click.Choice(['low', 'medium', 'high']), help="Enable or disable Policies by Policy Severity.")
+@click.option("--policy_severity", default="high", type=click.Choice(['low', 'medium', 'high']),
+                help="Enable or disable Policies by Policy Severity.")
 @click.option("--all_policies", help="Enable or disable all Policies.")
-@click.option("--cloud_type", type=click.Choice(['aws', 'azure', 'gcp', 'oci', 'alibaba_cloud']), help="Enable or disable Policies by Cloud Type.")
-@click.option("--policy_type", type=click.Choice(['config', 'network', 'audit_event', 'anomaly']), help="Enable or disable Policies by Policy Type.")
+@click.option("--cloud_type", type=click.Choice(['aws', 'azure', 'gcp', 'oci', 'alibaba_cloud']),
+                help="Enable or disable Policies by Cloud Type.")
+@click.option("--policy_type", type=click.Choice(['config', 'network', 'audit_event', 'anomaly']),
+                help="Enable or disable Policies by Policy Type.")
 @click.option("--status", type=click.Choice(['enable', 'disable']), help="Policy status to set (enable or disable).")
 def enable_or_disable_policies(policy_severity, all_policies, cloud_type, policy_type, status):
     """Enable or Disable policies"""

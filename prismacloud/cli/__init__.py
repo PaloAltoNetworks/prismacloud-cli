@@ -110,7 +110,8 @@ Version: {0} (using API Version {1})
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
 @click.option("-vv", "--very_verbose", is_flag=True, help="Enables very verbose mode")
 @click.option("-o", "--output", type=click.Choice(["text", "csv", "json", "html", "columns"]), default="text")
-@click.option("-c", "--config", "configuration", help="Select configuration file in ~/.prismacloud/[CONFIGURATION].json", default="credentials")
+@click.option("-c", "--config", "configuration",
+                help="Select configuration file in ~/.prismacloud/[CONFIGURATION].json", default="credentials")
 @click.option("--columns", "columns", help="Select columns for output", default=None)
 @pass_environment
 # pylint: disable=W0613
