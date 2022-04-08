@@ -26,7 +26,7 @@ pd.set_option("display.precision", 3)
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 MAX_COLUMNS = 10 # Maximum columns shown with text output
-MAX_WIDTH = 40 # Maximum width of columns shown with text output
+MAX_WIDTH = 25 # Maximum width of columns shown with text output
 
 CONTEXT_SETTINGS = dict(auto_envvar_prefix="PC")
 
