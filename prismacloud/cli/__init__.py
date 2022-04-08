@@ -25,8 +25,8 @@ pd.set_option("display.colheader_justify", "center")
 pd.set_option("display.precision", 3)
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
-MAX_COLUMNS = 10 # Maximum columns shown with text output
-MAX_WIDTH = 25 # Maximum width of columns shown with text output
+MAX_COLUMNS = 10    # Maximum columns shown with text output
+MAX_WIDTH = 25      # Maximum width of columns shown with text output
 
 CONTEXT_SETTINGS = dict(auto_envvar_prefix="PC")
 
@@ -140,7 +140,7 @@ def cli(ctx, verbose, configuration, output, columns=None):
         coloredlogs.install(level="ERROR")
 
 
-def cli_output(data, sort_values = False):
+def cli_output(data, sort_values=False):
     """Formatted output"""
     # Retrieve parameters
     params = click.get_current_context().find_root().params
@@ -166,16 +166,16 @@ def cli_output(data, sort_values = False):
         try:
             data_frame["time"] = pd.to_datetime(data_frame.time)
             data_frame["lastModified"] = pd.to_datetime(data_frame.time)
-            data_frame.fillna("", inplace=True) 
+            data_frame.fillna("", inplace=True)
         except Exception:  # pylint:disable=broad-except
             logging.debug("No time field")
-            
+
         # We have a dataframe, output here after we have dropped
         # all but the selected columns
         if params["columns"]:
             logging.debug("Dropping these columns: %s", data_frame.columns.difference(columns))
-            data_frame.drop(columns=data_frame.columns.difference(columns), 
-                axis=1, inplace=True, errors="ignore")
+            data_frame.drop(columns=data_frame.columns.difference(columns),
+                            axis=1, inplace=True, errors="ignore")
         else:
             pass
 
@@ -183,10 +183,10 @@ def cli_output(data, sort_values = False):
             # Drop all but first MAX_COLUMNS columns from data_frame
             data_frame.drop(data_frame.columns[MAX_COLUMNS:], axis=1, inplace=True)
 
-            # Truncate all cells 
+            # Truncate all cells
             data_frame_truncated = data_frame.applymap(do_truncate, na_action='ignore')
-            click.secho(tabulate(data_frame_truncated, headers="keys", tablefmt="table"), 
-                fg="green")
+            click.secho(tabulate(data_frame_truncated, headers="keys", tablefmt="table"),
+                        fg="green")
         if params["output"] == "json":
             click.secho(data_frame.to_json(orient="records"), fg="green")
         if params["output"] == "csv":
@@ -217,6 +217,7 @@ def cli_output(data, sort_values = False):
         # There is no dataframe, might be just a single value, like version.
         click.echo(data)
         logging.debug("Error ingesting data into dataframe: %s", _exc)
+
 
 def do_truncate(x):
     """Truncate a string to MAX_WIDTH characters"""
