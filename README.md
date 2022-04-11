@@ -20,19 +20,22 @@ Nevertheless, the maintainers will make a best-effort to address issues, and (of
 ### Installation
 
 ```sh
-sudo pip3 install prismacloud-cli
+pip3 install --user prismacloud-cli
+export PATH=$PATH:/<PATH_TO_USERS_HOME_DIR>/.local/bin
 ```
 
 Installation on Alpine:
 ```sh
 sudo pip3 install --upgrade pip && pip3 install --upgrade setuptools
-pip3 install prismacloud-cli
+pip3 install --user prismacloud-cli
+export PATH=$PATH:/<PATH_TO_USERS_HOME_DIR>/.local/bin
 ```
 Installation on Ubuntu:
 ```sh
 sudo apt update
 sudo apt install python3-pip
-pip3 install prismacloud-cli
+pip3 install --user prismacloud-cli
+export PATH=$PATH:/home/$USER/.local/bin
 ```
 
 ### Run the script
