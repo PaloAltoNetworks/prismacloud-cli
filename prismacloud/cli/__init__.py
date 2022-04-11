@@ -229,14 +229,14 @@ def cli_output(data, sort_values=False):
         logging.debug("Error ingesting data into dataframe: %s", _exc)
 
 
-def do_truncate(x):
+def do_truncate(truncate_this):
     """Truncate a string to max_width characters"""
     try:
-        x = str(x)
-        if len(x) > settings.max_width:
-            return x[:settings.max_width] + "..."
+        truncate_this = str(truncate_this)
+        if len(truncate_this) > settings.max_width:
+            return truncate_this[:settings.max_width] + "..."
         else:
-            return x
+            return truncate_this
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error truncating: %s", _exc)
         pass
