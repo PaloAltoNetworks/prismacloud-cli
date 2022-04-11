@@ -8,5 +8,6 @@ jsondiff
 pandas
 requests
 tabulate
-prismacloud-api==4.0.1
 pydantic
+prismacloud-api
+
