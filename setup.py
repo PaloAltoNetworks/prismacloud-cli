@@ -34,6 +34,7 @@ setup(
         "requests",
         "tabulate",
         "prismacloud-api",
+        "pydantic",
     ],
     name="prismacloud-cli",
     version=version,
