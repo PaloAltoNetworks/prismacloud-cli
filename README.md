@@ -25,13 +25,8 @@ pip3 install prismacloud-cli
 
 Installation on Alpine:
 ```sh
-sudo apk add py3-virtualenv
 sudo pip3 install --upgrade pip && pip3 install --upgrade setuptools
-mkdir python_virtual_environments/
-cd python_virtual_enviornments/
-python3 -m venv prisma_cli_env
-source prisma_cli_env/bin/activate
-pip3 install prismacloud-cli
+sudo pip3 install prismacloud-cli
 ```
 
 Installation on Ubuntu:
