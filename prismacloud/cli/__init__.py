@@ -40,6 +40,7 @@ settings = Settings()
 
 CONTEXT_SETTINGS = dict(auto_envvar_prefix="PC")
 
+
 class Environment:
     """Initialize environment and define logging"""
 
