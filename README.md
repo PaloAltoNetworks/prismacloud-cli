@@ -20,19 +20,29 @@ Nevertheless, the maintainers will make a best-effort to address issues, and (of
 ### Installation
 
 ```sh
-sudo pip3 install prismacloud-cli
+pip3 install prismacloud-cli
 ```
 
 Installation on Alpine:
 ```sh
+sudo apk add py3-virtualenv
 sudo pip3 install --upgrade pip && pip3 install --upgrade setuptools
-sudo pip3 install prismacloud-cli
+mkdir python_virtual_environments/
+cd python_virtual_enviornments/
+python3 -m venv prisma_cli_env
+source prisma_cli_env/bin/activate
+pip3 install prismacloud-cli
 ```
+
 Installation on Ubuntu:
 ```sh
 sudo apt update
-sudo apt install python3-pip
-sudo pip3 install prismacloud-cli
+sudo apt install -y python3-venv python3-pip
+mkdir python_virtual_environments/
+cd python_virtual_enviornments/
+python3 -m venv prisma_cli_env
+source prisma_cli_env/bin/activate
+pip3 install prismacloud-cli
 ```
 
 ### Run the script
