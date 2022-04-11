@@ -10,11 +10,11 @@ import click_completion
 import coloredlogs
 import pandas as pd
 
-from tabulate import tabulate
-from pydantic import BaseSettings
-
 import prismacloud.api.version as api_version
 import prismacloud.cli.version as cli_version
+
+from pydantic import BaseSettings
+from tabulate import tabulate
 
 click_completion.init()
 
