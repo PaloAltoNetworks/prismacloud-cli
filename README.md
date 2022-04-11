@@ -32,7 +32,7 @@ sudo pip3 install prismacloud-cli
 Installation on Ubuntu:
 ```sh
 sudo apt update
-sudo apt install -y python3-venv python3-pip
+sudo apt install -y python3-venv python3-pip jq
 mkdir python_virtual_environments/
 cd python_virtual_enviornments/
 python3 -m venv prisma_cli_env
