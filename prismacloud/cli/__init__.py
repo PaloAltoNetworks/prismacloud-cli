@@ -10,10 +10,11 @@ import click_completion
 import coloredlogs
 import pandas as pd
 
-from tabulate import tabulate
-
 import prismacloud.api.version as api_version
 import prismacloud.cli.version as cli_version
+
+from pydantic import BaseSettings
+from tabulate import tabulate
 
 click_completion.init()
 
@@ -25,8 +26,17 @@ pd.set_option("display.colheader_justify", "center")
 pd.set_option("display.precision", 3)
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
-MAX_COLUMNS = 10    # Maximum columns shown with text output
-MAX_WIDTH = 25      # Maximum width of columns shown with text output
+
+class Settings(BaseSettings):
+    """ Prisma Cloud CLI Settings """
+
+    app_name: str = "Prisma Cloud CLI"
+    max_columns: int = 7
+    max_width: int = 25
+
+
+settings = Settings()
+
 
 CONTEXT_SETTINGS = dict(auto_envvar_prefix="PC")
 
@@ -150,6 +160,10 @@ def cli_output(data, sort_values=False):
     if isinstance(data, list):
         data_frame = pd.DataFrame(data)
 
+    # If we are in debugging mode, show settings for output
+    logging.debug("Settings: maximum width: %s", settings.max_width)
+    logging.debug("Settings: maximum number of columns: %s", settings.max_columns)
+
     # We have data from our request, send to dataframe
     try:
         data_frame_normalized = pd.json_normalize(data)
@@ -180,8 +194,8 @@ def cli_output(data, sort_values=False):
             pass
 
         if params["output"] == "text":
-            # Drop all but first MAX_COLUMNS columns from data_frame
-            data_frame.drop(data_frame.columns[MAX_COLUMNS:], axis=1, inplace=True)
+            # Drop all but first settings.max_columns columns from data_frame
+            data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
 
             # Truncate all cells
             data_frame_truncated = data_frame.applymap(do_truncate, na_action='ignore')
@@ -219,14 +233,14 @@ def cli_output(data, sort_values=False):
         logging.debug("Error ingesting data into dataframe: %s", _exc)
 
 
-def do_truncate(x):
-    """Truncate a string to MAX_WIDTH characters"""
+def do_truncate(truncate_this):
+    """Truncate a string to max_width characters"""
     try:
-        x = str(x)
-        if len(x) > MAX_WIDTH:
-            return x[:MAX_WIDTH] + "..."
+        truncate_this = str(truncate_this)
+        if len(truncate_this) > settings.max_width:
+            return truncate_this[:settings.max_width] + "..."
         else:
-            return x
+            return truncate_this
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error truncating: %s", _exc)
         pass

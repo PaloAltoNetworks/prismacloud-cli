@@ -33,6 +33,7 @@ setup(
         "pandas",
         "requests",
         "tabulate",
+        "pydantic",
         "prismacloud-api",
     ],
     name="prismacloud-cli",

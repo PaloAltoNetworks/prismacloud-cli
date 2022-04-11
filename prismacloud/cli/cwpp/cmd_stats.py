@@ -49,9 +49,9 @@ def vulnerabilities(cve):
 
         # Get impacted resources for each cve in cves
         result_tree = {}
-        for cve in cves:
-            result = pc_api.get_endpoint("stats/vulnerabilities/impacted-resources", {"cve": cve})
-            result_tree[cve] = result
+        for cve_to_check in cves:
+            result = pc_api.get_endpoint("stats/vulnerabilities/impacted-resources", {"cve": cve_to_check})
+            result_tree[cve_to_check] = result
 
         cli_output(result_tree)
         exit()
