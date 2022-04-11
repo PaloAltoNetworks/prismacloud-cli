@@ -26,6 +26,7 @@ pd.set_option("display.colheader_justify", "center")
 pd.set_option("display.precision", 3)
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
+
 class Settings(BaseSettings):
     """ Prisma Cloud CLI Settings """
 
@@ -33,7 +34,9 @@ class Settings(BaseSettings):
     max_columns: int = 7
     max_width: int = 25
 
+
 settings = Settings()
+
 
 CONTEXT_SETTINGS = dict(auto_envvar_prefix="PC")
 
