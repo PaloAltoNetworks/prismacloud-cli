@@ -26,13 +26,13 @@ sudo pip3 install prismacloud-cli
 Installation on Alpine:
 ```sh
 sudo pip3 install --upgrade pip && pip3 install --upgrade setuptools
-sudo pip3 install prismacloud-cli
+pip3 install prismacloud-cli
 ```
 Installation on Ubuntu:
 ```sh
 sudo apt update
 sudo apt install python3-pip
-sudo pip3 install prismacloud-cli
+pip3 install prismacloud-cli
 ```
 
 ### Run the script
