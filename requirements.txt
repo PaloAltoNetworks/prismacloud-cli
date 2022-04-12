@@ -9,5 +9,5 @@ pandas
 requests
 tabulate
 pydantic
-prismacloud-api
+prismacloud-api==4.0.1
 
