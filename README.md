@@ -1,11 +1,6 @@
 # Prisma Cloud CLI
 
-:+1::tada: We are excited to share with you this Prisma Cloud CLI! :tada::+1:
-
-
 The Prisma Cloud CLI is a command line interface for [Prisma Cloud](https://www.paloaltonetworks.com/prisma/cloud) by [Palo Alto Networks](https://www.paloaltonetworks.com/).
-
-
 
 # Support
 This project has been developed by Prisma Cloud SAs and is not Supported by Palo Alto Networks.
