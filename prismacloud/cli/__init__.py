@@ -9,11 +9,13 @@ import click
 import click_completion
 import coloredlogs
 import pandas as pd
-import prismacloud.cli.version as cli_version
+
 from click_help_colors import HelpColorsMultiCommand
 from pydantic import BaseSettings
 from tabulate import tabulate
 from update_checker import UpdateChecker
+
+import prismacloud.cli.version as cli_version
 
 click_completion.init()
 
