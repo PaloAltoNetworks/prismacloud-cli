@@ -10,14 +10,12 @@ import click_completion
 import coloredlogs
 import pandas as pd
 
-
-import prismacloud.api.version as api_version
 import prismacloud.cli.version as cli_version
 
 from pydantic import BaseSettings
 from tabulate import tabulate
 from update_checker import UpdateChecker
-from click_help_colors import HelpColorsGroup, HelpColorsMultiCommand
+from click_help_colors import HelpColorsMultiCommand
 
 
 click_completion.init()
@@ -44,6 +42,7 @@ Run pip3 install -U prismacloud-cli to update
     """.format(cli_version.version, update_available)
 else:
     update_available_text = ""
+
 
 class Settings(BaseSettings):
     """ Prisma Cloud CLI Settings """
@@ -126,6 +125,7 @@ class PrismaCloudCLI(HelpColorsMultiCommand):
                 continue
             return mod.cli
 
+
 @click.command(
     cls=PrismaCloudCLI,
     context_settings=CONTEXT_SETTINGS,
@@ -135,10 +135,10 @@ class PrismaCloudCLI(HelpColorsMultiCommand):
 
 Prisma Cloud CLI (version: {0})
 
-{2}
+{1}
 
 """.format(
-        cli_version.version, api_version.version, update_available_text
+        cli_version.version, update_available_text
     ),
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
@@ -168,6 +168,7 @@ def cli(ctx, very_verbose, verbose, configuration, output, columns=None):
     else:
         logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
         coloredlogs.install(level="ERROR")
+
 
 def cli_output(data, sort_values=False):
     """Formatted output"""
