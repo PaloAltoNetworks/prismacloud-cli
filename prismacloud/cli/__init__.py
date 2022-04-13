@@ -17,6 +17,7 @@ import prismacloud.cli.version as cli_version
 from pydantic import BaseSettings
 from tabulate import tabulate
 from update_checker import UpdateChecker
+from click_help_colors import HelpColorsGroup, HelpColorsMultiCommand
 
 
 click_completion.init()
@@ -86,7 +87,7 @@ cspm_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), "cspm"))
 pccs_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), "pccs"))
 
 
-class PrismaCloudCLI(click.MultiCommand):
+class PrismaCloudCLI(HelpColorsMultiCommand):
     """Collect commands"""
 
     def list_commands(self, ctx):
@@ -125,10 +126,11 @@ class PrismaCloudCLI(click.MultiCommand):
                 continue
             return mod.cli
 
-
 @click.command(
     cls=PrismaCloudCLI,
     context_settings=CONTEXT_SETTINGS,
+    help_headers_color='yellow',
+    help_options_color='green',
     help="""
 
 Prisma Cloud CLI (version: {0})
