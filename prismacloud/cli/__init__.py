@@ -32,6 +32,7 @@ class Settings(BaseSettings):
 
     app_name: str = "Prisma Cloud CLI"
     max_columns: int = 7
+    max_rows: int = 1000000
     max_width: int = 25
 
 
@@ -162,6 +163,7 @@ def cli_output(data, sort_values=False):
 
     # If we are in debugging mode, show settings for output
     logging.debug("Settings: maximum width: %s", settings.max_width)
+    logging.debug("Settings: maximum number of rows: %s", settings.max_rows)
     logging.debug("Settings: maximum number of columns: %s", settings.max_columns)
 
     # We have data from our request, send to dataframe
@@ -183,6 +185,9 @@ def cli_output(data, sort_values=False):
             data_frame.fillna("", inplace=True)
         except Exception:  # pylint:disable=broad-except
             logging.debug("No time field")
+
+        # Drop all rows after max_rows
+        data_frame.drop(data_frame.index[settings.max_rows:], inplace=True)
 
         # We have a dataframe, output here after we have dropped
         # all but the selected columns
@@ -215,7 +220,14 @@ def cli_output(data, sort_values=False):
 </head>
                 """  # noqa
             click.secho(pre_table_html)
-            click.secho(data_frame.to_html(classes="table table-sm table-striped text-center", justify="center"), fg="green")
+            click.secho(
+                data_frame.to_html(
+                    max_cols=settings.max_columns,
+                    na_rep='',
+                    classes="table table-sm table-striped text-left",
+                    justify="left"
+                    ),
+                fg="green")
             # post-table-html
             post_table_html = """
 
