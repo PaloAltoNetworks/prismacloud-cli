@@ -8,6 +8,8 @@ jsondiff
 pandas
 requests
 tabulate
+colorama
+update_checker
 pydantic
-prismacloud-api
+prismacloud-api==4.0.1
 

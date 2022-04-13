@@ -10,11 +10,14 @@ import click_completion
 import coloredlogs
 import pandas as pd
 
+
 import prismacloud.api.version as api_version
 import prismacloud.cli.version as cli_version
 
 from pydantic import BaseSettings
 from tabulate import tabulate
+from update_checker import UpdateChecker
+
 
 click_completion.init()
 
@@ -26,6 +29,20 @@ pd.set_option("display.colheader_justify", "center")
 pd.set_option("display.precision", 3)
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
+# Get available python package version
+try:
+    checker = UpdateChecker()
+    result = checker.check("prismacloud-cli", cli_version.version)
+    update_available = result.available_version
+except Exception:  # nosec
+    update_available = False
+
+if update_available:
+    update_available_text = """Update available: {} -> {}\n
+Run pip3 install -U prismacloud-cli to update
+    """.format(cli_version.version, update_available)
+else:
+    update_available_text = ""
 
 class Settings(BaseSettings):
     """ Prisma Cloud CLI Settings """
@@ -114,12 +131,12 @@ class PrismaCloudCLI(click.MultiCommand):
     context_settings=CONTEXT_SETTINGS,
     help="""
 
-Prisma Cloud CLI
+Prisma Cloud CLI (version: {0})
 
-Version: {0} (using API Version {1})
+{2}
 
 """.format(
-        cli_version.version, api_version.version
+        cli_version.version, api_version.version, update_available_text
     ),
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
@@ -149,7 +166,6 @@ def cli(ctx, very_verbose, verbose, configuration, output, columns=None):
     else:
         logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
         coloredlogs.install(level="ERROR")
-
 
 def cli_output(data, sort_values=False):
     """Formatted output"""
