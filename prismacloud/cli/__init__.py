@@ -220,7 +220,14 @@ def cli_output(data, sort_values=False):
 </head>
                 """  # noqa
             click.secho(pre_table_html)
-            click.secho(data_frame.to_html(max_cols=settings.max_columns, na_rep='', classes="table table-sm table-striped text-left", justify="left"), fg="green")
+            click.secho(
+                data_frame.to_html(
+                    max_cols=settings.max_columns,
+                    na_rep='',
+                    classes="table table-sm table-striped text-left",
+                    justify="left"
+                    ),
+                fg="green")
             # post-table-html
             post_table_html = """
 
