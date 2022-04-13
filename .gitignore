@@ -20,6 +20,7 @@ prismacloud_cli.egg-info/
 .installed.cfg
 *.egg
 *.pyc
+*.html
 *cache*/
 *$py.class
 
