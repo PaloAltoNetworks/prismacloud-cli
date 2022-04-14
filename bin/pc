@@ -3,7 +3,7 @@ import os
 import re
 import sys
 
-# Import from the local prismacloud.cli namespace.
+# Import from the local pc.cli namespace.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # pylint: disable=C0413,E0401
 from pc.cli import cli
