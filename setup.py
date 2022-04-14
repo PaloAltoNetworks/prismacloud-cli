@@ -13,7 +13,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-spec = util.spec_from_file_location("pc.cli.version", os.path.join("prismacloud", "cli", "version.py"))
+spec = util.spec_from_file_location("pc.cli.version", os.path.join("pc", "cli", "version.py"))
 
 # noinspection PyUnresolvedReferences
 mod = util.module_from_spec(spec)
