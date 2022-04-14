@@ -13,6 +13,7 @@ disable=
 # Workaround for the following issue generating inconsistent errors:
 # https://github.com/PyCQA/pylint/issues/5319
 init-hook='import sys; sys.path.append(".")'
+
 [BASIC]
 
 # Regular expression matching correct constant names. Overrides const-naming-style.
