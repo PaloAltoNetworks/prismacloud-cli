@@ -42,7 +42,7 @@ def vulnerabilities(cve):
 
     if not cve:
         result = pc_api.get_endpoint("stats/vulnerabilities")
-        exit()
+        return
     else:
         cves = cve.split(",")
         logging.debug("CVEs to search for: {cves}")
@@ -54,7 +54,6 @@ def vulnerabilities(cve):
             result_tree[cve_to_check] = result
 
         cli_output(result_tree)
-        exit()
 
 
 cli.add_command(daily)

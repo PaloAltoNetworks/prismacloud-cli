@@ -12,7 +12,6 @@ from prismacloud.api import pc_api
 import pc.cli.version as cli_version
 
 
-
 """ CLI Configuration """
 
 
