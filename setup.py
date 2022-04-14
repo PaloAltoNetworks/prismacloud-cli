@@ -41,11 +41,7 @@ setup(
     version=version,
     python_requires=">=3.7",
     author="Steven de Boer, Simon Melotte, Tom Kishel",
-    author_email="
-        stdeboer@paloaltonetworks.com, 
-        smelotte@paloaltonetworks.com, 
-        tkishel@paloaltonetworks.com, 
-        njannasch@paloaltonetworks.com",
+    author_email="stdeboer@paloaltonetworks.com, smelotte@paloaltonetworks.com, tkishel@paloaltonetworks.com",
     description=("Prisma Cloud CLI"),
     license="BSD",
     keywords="prisma cloud cli",
