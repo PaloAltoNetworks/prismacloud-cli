@@ -3,7 +3,6 @@ click
 click_completion
 click_help_colors
 coloredlogs
-ipython
 jsondiff
 pandas
 requests

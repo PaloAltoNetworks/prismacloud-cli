@@ -13,7 +13,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-spec = util.spec_from_file_location("prismacloud.cli.version", os.path.join("prismacloud", "cli", "version.py"))
+spec = util.spec_from_file_location("pc.cli.version", os.path.join("prismacloud", "cli", "version.py"))
 
 # noinspection PyUnresolvedReferences
 mod = util.module_from_spec(spec)
@@ -28,7 +28,6 @@ setup(
         "click_completion",
         "click_help_colors",
         "coloredlogs",
-        "ipython",
         "jsondiff",
         "pandas",
         "requests",
@@ -42,7 +41,7 @@ setup(
     version=version,
     python_requires=">=3.7",
     author="Steven de Boer, Simon Melotte, Tom Kishel",
-    author_email="stdeboer@paloaltonetworks.com, smelotte@paloaltonetworks.com, tkishel@paloaltonetworks.com",
+    author_email="stdeboer@paloaltonetworks.com, smelotte@paloaltonetworks.com, tkishel@paloaltonetworks.com, njannasch@paloaltonetworks.com",
     description=("Prisma Cloud CLI"),
     license="BSD",
     keywords="prisma cloud cli",
