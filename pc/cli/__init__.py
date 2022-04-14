@@ -10,7 +10,7 @@ import click_completion
 import coloredlogs
 import pandas as pd
 
-import prismacloud.cli.version as cli_version
+import pc.cli.version as cli_version
 
 from click_help_colors import HelpColorsMultiCommand
 from pydantic import BaseSettings
