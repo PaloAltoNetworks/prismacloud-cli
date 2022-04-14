@@ -9,13 +9,12 @@ import click
 import click_completion
 import coloredlogs
 import pandas as pd
-
 from click_help_colors import HelpColorsMultiCommand
 from pydantic import BaseSettings
 from tabulate import tabulate
 from update_checker import UpdateChecker
 
-import pc.cli.version as cli_version
+import prismacloud.cli.version as cli_version
 
 click_completion.init()
 
@@ -119,7 +118,7 @@ class PrismaCloudCLI(HelpColorsMultiCommand):
 
         for module_type in module_types:
             try:
-                mod = __import__(f"pc.cli.{module_type}.cmd_{cmd_name}", None, None, ["cli"])
+                mod = __import__(f"prismacloud.cli.{module_type}.cmd_{cmd_name}", None, None, ["cli"])
             except ImportError:
                 continue
             return mod.cli
