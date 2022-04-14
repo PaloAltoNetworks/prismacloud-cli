@@ -59,6 +59,6 @@ setup(
     ],
     entry_points="""
         [console_scripts]
-        pc=prismacloud.cli:cli
+        pc=pc.cli:cli
     """,
 )
