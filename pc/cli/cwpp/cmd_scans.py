@@ -1,7 +1,7 @@
 import click
 
-from prismacloud.cli import cli_output, pass_environment
-from prismacloud.cli.api import pc_api
+from pc.cli import cli_output, pass_environment
+from pc.cli.api import pc_api
 
 
 @click.command("scans", short_help="[CWPP] Retrieves scan reports for images scanned by the Jenkins plugin or twistcli")
