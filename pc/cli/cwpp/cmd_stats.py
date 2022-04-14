@@ -43,17 +43,16 @@ def vulnerabilities(cve):
     if not cve:
         result = pc_api.get_endpoint("stats/vulnerabilities")
         return
-    else:
-        cves = cve.split(",")
-        logging.debug("CVEs to search for: {cves}")
+    cves = cve.split(",")
+    logging.debug("CVEs to search for: {cves}")
 
-        # Get impacted resources for each cve in cves
-        result_tree = {}
-        for cve_to_check in cves:
-            result = pc_api.get_endpoint("stats/vulnerabilities/impacted-resources", {"cve": cve_to_check})
-            result_tree[cve_to_check] = result
+    # Get impacted resources for each cve in cves
+    result_tree = {}
+    for cve_to_check in cves:
+        result = pc_api.get_endpoint("stats/vulnerabilities/impacted-resources", {"cve": cve_to_check})
+        result_tree[cve_to_check] = result
 
-        cli_output(result_tree)
+    cli_output(result_tree)
 
 
 cli.add_command(daily)

@@ -269,11 +269,9 @@ def do_truncate(truncate_this):
         truncate_this = str(truncate_this)
         if len(truncate_this) > settings.max_width:
             return truncate_this[:settings.max_width] + "..."
-        else:
-            return truncate_this
+        return truncate_this
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error truncating: %s", _exc)
-        pass
 
 
 if __name__ == "__main__":
