@@ -10,6 +10,9 @@ disable=
     E1102, # pc_api.get_endpoint is not callable (not-callable)
     W0613, # Unused argument 'ctx' (unused-argument)
 
+# Workaround for the following issue generating inconsistent errors:
+# https://github.com/PyCQA/pylint/issues/5319
+init-hook='import sys; sys.path.append(".")'
 [BASIC]
 
 # Regular expression matching correct constant names. Overrides const-naming-style.
