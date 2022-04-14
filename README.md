@@ -45,7 +45,7 @@ pc version
 
 This process looks like the screenshot below. the prismacloud-cli asks you for some details, stores it in the credentials file and uses that file when it is already available.
 
-![First run](screenshot.png)
+![First run](https://raw.githubusercontent.com/PaloAltoNetworks/prismacloud-cli/main/screenshot.png)
 
 ### Create your own configuration
 
@@ -115,7 +115,8 @@ To overwrite the default output settings, use environment variables MAX_WIDTH (c
 ## Commands
 The cli has several commands to work with, see the screenshot below for an example, but use ```pc --help``` to see the latest list for your version.
 
-![Help](help.png)
+![Help](https://raw.githubusercontent.com/PaloAltoNetworks/prismacloud-cli/main/help.png)
+
 ## Use cases
 
 ### Log4J Impacted Resources
@@ -145,5 +146,5 @@ pc --config local -o html --columns entityInfo.repoTag.registry,entityInfo.repoT
 
 Then, open /tmp/results.html:
 
-![Results](results.png)
+![Results](https://raw.githubusercontent.com/PaloAltoNetworks/prismacloud-cli/main/results.png)
 
