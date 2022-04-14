@@ -8,9 +8,9 @@ import types
 import click
 
 import prismacloud.api.version as api_version
-import prismacloud.cli.version as cli_version
-
 from prismacloud.api import pc_api
+import pc.cli.version as cli_version
+
 
 """ CLI Configuration """
 

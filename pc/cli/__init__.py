@@ -10,11 +10,12 @@ import click_completion
 import coloredlogs
 import pandas as pd
 
-import prismacloud.api.version as api_version
-import prismacloud.cli.version as cli_version
-
+from click_help_colors import HelpColorsMultiCommand
 from pydantic import BaseSettings
 from tabulate import tabulate
+from update_checker import UpdateChecker
+
+import pc.cli.version as cli_version
 
 click_completion.init()
 
@@ -25,6 +26,21 @@ pd.set_option("display.width", 100)
 pd.set_option("display.colheader_justify", "center")
 pd.set_option("display.precision", 3)
 warnings.simplefilter(action="ignore", category=FutureWarning)
+
+# Get available python package version
+try:
+    checker = UpdateChecker()
+    result = checker.check("prismacloud-cli", cli_version.version)
+    update_available = result.available_version
+except Exception:  # nosec
+    update_available = False
+
+if update_available:
+    update_available_text = """Update available: {} -> {}\n
+Run pip3 install -U prismacloud-cli to update
+    """.format(cli_version.version, update_available)
+else:
+    update_available_text = ""
 
 
 class Settings(BaseSettings):
@@ -69,7 +85,7 @@ cspm_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), "cspm"))
 pccs_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), "pccs"))
 
 
-class PrismaCloudCLI(click.MultiCommand):
+class PrismaCloudCLI(HelpColorsMultiCommand):
     """Collect commands"""
 
     def list_commands(self, ctx):
@@ -103,7 +119,7 @@ class PrismaCloudCLI(click.MultiCommand):
 
         for module_type in module_types:
             try:
-                mod = __import__(f"prismacloud.cli.{module_type}.cmd_{cmd_name}", None, None, ["cli"])
+                mod = __import__(f"pc.cli.{module_type}.cmd_{cmd_name}", None, None, ["cli"])
             except ImportError:
                 continue
             return mod.cli
@@ -112,14 +128,16 @@ class PrismaCloudCLI(click.MultiCommand):
 @click.command(
     cls=PrismaCloudCLI,
     context_settings=CONTEXT_SETTINGS,
+    help_headers_color='yellow',
+    help_options_color='green',
     help="""
 
-Prisma Cloud CLI
+Prisma Cloud CLI (version: {0})
 
-Version: {0} (using API Version {1})
+{1}
 
 """.format(
-        cli_version.version, api_version.version
+        cli_version.version, update_available_text
     ),
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
@@ -251,11 +269,9 @@ def do_truncate(truncate_this):
         truncate_this = str(truncate_this)
         if len(truncate_this) > settings.max_width:
             return truncate_this[:settings.max_width] + "..."
-        else:
-            return truncate_this
+        return truncate_this
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error truncating: %s", _exc)
-        pass
 
 
 if __name__ == "__main__":

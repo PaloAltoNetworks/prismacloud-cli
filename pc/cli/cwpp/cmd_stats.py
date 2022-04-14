@@ -2,8 +2,8 @@ import logging
 
 import click
 
-from prismacloud.cli import cli_output, pass_environment
-from prismacloud.cli.api import pc_api
+from pc.cli import cli_output, pass_environment
+from pc.cli.api import pc_api
 
 
 @click.group("stats", short_help="[CWPP] Retrieve statistics for the resources protected by Prisma Cloud")
@@ -42,19 +42,17 @@ def vulnerabilities(cve):
 
     if not cve:
         result = pc_api.get_endpoint("stats/vulnerabilities")
-        exit()
-    else:
-        cves = cve.split(",")
-        logging.debug("CVEs to search for: {cves}")
+        return
+    cves = cve.split(",")
+    logging.debug("CVEs to search for: {cves}")
 
-        # Get impacted resources for each cve in cves
-        result_tree = {}
-        for cve_to_check in cves:
-            result = pc_api.get_endpoint("stats/vulnerabilities/impacted-resources", {"cve": cve_to_check})
-            result_tree[cve_to_check] = result
+    # Get impacted resources for each cve in cves
+    result_tree = {}
+    for cve_to_check in cves:
+        result = pc_api.get_endpoint("stats/vulnerabilities/impacted-resources", {"cve": cve_to_check})
+        result_tree[cve_to_check] = result
 
-        cli_output(result_tree)
-        exit()
+    cli_output(result_tree)
 
 
 cli.add_command(daily)
