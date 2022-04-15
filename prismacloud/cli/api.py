@@ -20,7 +20,7 @@ def map_cli_config_to_api_config():
         click.get_current_context()
     except Exception as exc:  # pylint:disable=broad-except
         logging.debug("Error getting current context: %s", exc)
-    click.get_current_context()
+    #click.get_current_context()
     settings = get_cli_config()
     return {
         "api": settings["api_endpoint"],
