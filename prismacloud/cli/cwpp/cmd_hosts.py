@@ -9,5 +9,14 @@ from prismacloud.cli.api import pc_api
 @click.option("-l", "--limit")
 @pass_environment
 def cli(ctx, limit, compliance_ids=''):
-    result = pc_api.get_endpoint("hosts", {"limit": limit, "complianceIDs": compliance_ids, "sort": "complianceIssuesCount", "reverse": "true"})
+    result = pc_api.get_endpoint(
+        "hosts",
+        {
+            "limit": limit,
+            "complianceIDs": compliance_ids,
+            "sort": "comptrimlianceIssuesCount",
+            "reverse":
+            "true"
+        }
+        )
     cli_output(result)
