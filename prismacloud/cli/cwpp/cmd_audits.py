@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 
 import click
 
-from pc.cli import cli_output, pass_environment
-from pc.cli.api import pc_api
+from prismacloud.cli import cli_output, pass_environment
+from prismacloud.cli.api import pc_api
 
 
 @click.group("audits", short_help="[CWPP] Retrieve audits for Prisma Cloud")
