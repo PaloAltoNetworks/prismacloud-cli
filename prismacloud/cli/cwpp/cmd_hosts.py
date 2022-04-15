@@ -24,4 +24,5 @@ def compliance(compliance_ids=''):
     )
     cli_output(result)
 
+
 cli.add_command(compliance)

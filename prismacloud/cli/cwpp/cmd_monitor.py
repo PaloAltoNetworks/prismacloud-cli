@@ -45,4 +45,5 @@ def compliance(compliance_ids=''):
     result = result_hosts + result_containers + result_serverless
     cli_output(result)
 
+
 cli.add_command(compliance)
