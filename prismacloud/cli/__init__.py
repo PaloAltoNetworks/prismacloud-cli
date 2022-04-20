@@ -26,20 +26,27 @@ pd.set_option("display.colheader_justify", "center")
 pd.set_option("display.precision", 3)
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
-# Get available python package version
-try:
-    checker = UpdateChecker()
-    result = checker.check("prismacloud-cli", cli_version.version)
-    update_available = result.available_version
-except Exception:  # nosec
-    update_available = False
 
-if update_available:
-    update_available_text = """Update available: {} -> {}\n
-Run pip3 install -U prismacloud-cli to update
-    """.format(cli_version.version, update_available)
-else:
-    update_available_text = ""
+def get_available_version():
+    # Get available python package version
+    try:
+        checker = UpdateChecker()
+        result = checker.check("prismacloud-cli", cli_version.version)
+        # Show available version
+        logging.debug("Available version: %s", result.available_version)
+        update_available = result.available_version
+    except Exception:  # nosec
+        update_available = False
+
+    if update_available:
+        update_available_text = """\b
+Update available: {} -> {}
+Run {} to update
+        """.format(cli_version.version, update_available, click.style("pip3 install -U prismacloud-cli", fg="red"))
+    else:
+        update_available_text = ""
+
+    return update_available_text
 
 
 class Settings(BaseSettings):
@@ -130,13 +137,11 @@ class PrismaCloudCLI(HelpColorsMultiCommand):
     help_headers_color='yellow',
     help_options_color='green',
     help="""
-
+\b
 Prisma Cloud CLI (version: {0})
-
 {1}
-
 """.format(
-        cli_version.version, update_available_text
+        cli_version.version, get_available_version()
     ),
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
@@ -275,6 +280,9 @@ def do_truncate(truncate_this):
 
 if __name__ == "__main__":
     try:
+        # Get update_available_text
+        update_available_text = get_available_version()
+
         # pylint: disable=E1120
         cli()
     except Exception as exc:  # pylint:disable=broad-except
