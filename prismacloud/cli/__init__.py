@@ -169,7 +169,7 @@ def cli(ctx, very_verbose, verbose, configuration, output, columns=None):
 
 
 def cli_output(data, sort_values=False):
-    """Formatted output"""
+    """ Parse data and format output """
     # Retrieve parameters
     params = click.get_current_context().find_root().params
     if params["columns"]:
@@ -193,8 +193,9 @@ def cli_output(data, sort_values=False):
         if data_frame_normalized.size > 0:
             logging.debug("Using normalized data")
             data_frame = data_frame_normalized
+            # Flatten nested json
+            data_frame = flatten_nested_json_df(data_frame)
 
-        # print(data_frame)
         # Do some optimization on our dataframe
         try:
             data_frame["time"] = pd.to_datetime(data_frame.time)
@@ -203,8 +204,20 @@ def cli_output(data, sort_values=False):
         except Exception:  # pylint:disable=broad-except
             logging.debug("No time field")
 
+        # If column name contains time or lastModified, convert values to datetime
+        for column in data_frame.columns:
+            if "time" in column.lower() or "lastmodified" in column.lower() or "availableAsOf" in column.lower():
+                try:
+                    data_frame[column] = pd.to_datetime(data_frame[column], unit='ms')
+                except Exception as _exc:
+                    logging.debug("Error: %s", _exc)
+                try:
+                    data_frame[column] = pd.to_datetime(data_frame[column], unit='s')
+                except Exception as _exc:
+                    logging.debug("Error: %s", _exc)
+
         # Drop all rows after max_rows
-        data_frame.drop(data_frame.index[settings.max_rows:], inplace=True)
+        data_frame = data_frame.head(settings.max_rows)
 
         # We have a dataframe, output here after we have dropped
         # all but the selected columns
@@ -260,6 +273,37 @@ def cli_output(data, sort_values=False):
         # There is no dataframe, might be just a single value, like version.
         click.echo(data)
         logging.debug("Error ingesting data into dataframe: %s", _exc)
+
+def flatten_nested_json_df(df):
+    """ Flatten nested json in our dataframe """
+    logging.debug("Flatten nested json")
+    df = df.reset_index()
+    s = (df.applymap(type) == list).all()
+    list_columns = s[s].index.tolist()
+    
+    s = (df.applymap(type) == dict).all()
+    dict_columns = s[s].index.tolist()
+    
+    while len(list_columns) > 0 or len(dict_columns) > 0:
+        new_columns = []
+
+        for col in dict_columns:
+            horiz_exploded = pd.json_normalize(df[col]).add_prefix(f'{col}.')
+            horiz_exploded.index = df.index
+            df = pd.concat([df, horiz_exploded], axis=1).drop(columns=[col])
+            new_columns.extend(horiz_exploded.columns) # inplace
+
+        for col in list_columns:
+            logging.debug(f"exploding: {col}")
+            df = df.drop(columns=[col]).join(df[col].explode().to_frame())
+            new_columns.append(col)
+
+        s = (df[new_columns].applymap(type) == list).all()
+        list_columns = s[s].index.tolist()
+
+        s = (df[new_columns].applymap(type) == dict).all()
+        dict_columns = s[s].index.tolist()
+    return df
 
 
 def do_truncate(truncate_this):
