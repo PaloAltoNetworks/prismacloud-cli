@@ -141,6 +141,7 @@ Prisma Cloud CLI (version: {0})
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
 @click.option("-vv", "--very_verbose", is_flag=True, help="Enables very verbose mode")
+@click.option("--filter", help="Add search filter")
 @click.option("-o", "--output", type=click.Choice(["text", "csv", "json", "html", "columns"]), default="text")
 @click.option(
     "-c",
@@ -152,7 +153,7 @@ Prisma Cloud CLI (version: {0})
 @click.option("--columns", "columns", help="Select columns for output", default=None)
 @pass_environment
 # pylint: disable=W0613
-def cli(ctx, very_verbose, verbose, configuration, output, columns=None):
+def cli(ctx, very_verbose, verbose, configuration, output, filter, columns=None):
     """Define the command line"""
     ctx.configuration = configuration
     ctx.output = output
@@ -215,6 +216,14 @@ def cli_output(data, sort_values=False):
                     data_frame[column] = pd.to_datetime(data_frame[column], unit='s')
                 except Exception as _exc:
                     logging.debug("Error: %s", _exc)
+
+        # If a filter is set, apply it
+        if params["filter"]:
+            try:
+                data_frame = data_frame.query(params["filter"])
+            except Exception as _exc:
+                logging.error("Error: %s", _exc)
+                exit(1)
 
         # Drop all rows after max_rows
         data_frame = data_frame.head(settings.max_rows)
