@@ -283,36 +283,37 @@ def cli_output(data, sort_values=False):
         click.echo(data)
         logging.debug("Error ingesting data into dataframe: %s", _exc)
 
-def flatten_nested_json_df(df):
+
+def flatten_nested_json_df(data_frame):
     """ Flatten nested json in our dataframe """
     logging.debug("Flatten nested json")
-    df = df.reset_index()
-    s = (df.applymap(type) == list).all()
-    list_columns = s[s].index.tolist()
-    
-    s = (df.applymap(type) == dict).all()
-    dict_columns = s[s].index.tolist()
-    
+    data_frame = data_frame.reset_index()
+    temp_s = (data_frame.applymap(type) == list).all()
+    list_columns = temp_s[temp_s].index.tolist()
+
+    temp_s = (data_frame.applymap(type) == dict).all()
+    dict_columns = temp_s[temp_s].index.tolist()
+
     while len(list_columns) > 0 or len(dict_columns) > 0:
         new_columns = []
 
         for col in dict_columns:
-            horiz_exploded = pd.json_normalize(df[col]).add_prefix(f'{col}.')
-            horiz_exploded.index = df.index
-            df = pd.concat([df, horiz_exploded], axis=1).drop(columns=[col])
-            new_columns.extend(horiz_exploded.columns) # inplace
+            horiz_exploded = pd.json_normalize(data_frame[col]).add_prefix(f'{col}.')
+            horiz_exploded.index = data_frame.index
+            data_frame = pd.concat([data_frame, horiz_exploded], axis=1).drop(columns=[col])
+            new_columns.extend(horiz_exploded.columns)  # inplace
 
         for col in list_columns:
             logging.debug(f"exploding: {col}")
-            df = df.drop(columns=[col]).join(df[col].explode().to_frame())
+            data_frame = data_frame.drop(columns=[col]).join(data_frame[col].explode().to_frame())
             new_columns.append(col)
 
-        s = (df[new_columns].applymap(type) == list).all()
-        list_columns = s[s].index.tolist()
+        temp_s = (data_frame[new_columns].applymap(type) == list).all()
+        list_columns = temp_s[temp_s].index.tolist()
 
-        s = (df[new_columns].applymap(type) == dict).all()
-        dict_columns = s[s].index.tolist()
-    return df
+        temp_s = (data_frame[new_columns].applymap(type) == dict).all()
+        dict_columns = temp_s[temp_s].index.tolist()
+    return data_frame
 
 
 def do_truncate(truncate_this):

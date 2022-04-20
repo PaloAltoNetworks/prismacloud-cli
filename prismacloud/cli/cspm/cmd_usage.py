@@ -9,7 +9,7 @@ from prismacloud.cli.api import pc_api
 def cli(ctx):
     body_params = {
         'accountIds': [],
-        'timeRange': {'type':'relative', 'value': {'unit': 'day', 'amount': 90}}
+        'timeRange': {'type': 'relative', 'value': {'unit': 'day', 'amount': 90}}
         }
     result = pc_api.resource_usage_over_time(body_params=body_params)
     cli_output(result)
