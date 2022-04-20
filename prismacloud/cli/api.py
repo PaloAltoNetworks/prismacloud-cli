@@ -90,19 +90,19 @@ def read_cli_config_file(config_file_name):
 """ Prisma Cloud API Library Wrapper """
 
 
-def get_endpoint(_self, endpoint, query_params=None, api="cwpp"):
-    """Make a GET request without using an endpoint-specific method"""
+def get_endpoint(_self, endpoint, query_params=None, api="cwpp", request_type="GET"):
+    """Make a request without using an endpoint-specific method"""
     pc_api.configure(map_cli_config_to_api_config())
-    logging.debug("Calling API Endpoint: %s", endpoint)
+    logging.debug("Calling API Endpoint (%s): %s", request_type, endpoint)
     result = None
     if api == "cspm":
-        result = pc_api.execute("GET", endpoint, query_params)
+        result = pc_api.execute(request_type, endpoint, query_params)
     if api == "cwpp":
         if not endpoint.startswith("api"):
             endpoint = "api/v1/%s" % endpoint
-        result = pc_api.execute_compute("GET", endpoint, query_params)
+        result = pc_api.execute_compute(request_type, endpoint, query_params)
     if api == "code":
-        result = pc_api.execute_code_security("GET", endpoint, query_params)
+        result = pc_api.execute_code_security(request_type, endpoint, query_params)
     return result
 
 
