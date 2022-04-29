@@ -1,7 +1,8 @@
 import logging
 import click
 
-from prismacloud.cli import cli_output, pass_environment
+# from prismacloud.cli import cli_output, pass_environment
+from prismacloud.cli import pass_environment
 from prismacloud.cli.api import pc_api
 
 
@@ -35,5 +36,6 @@ def start_pov():
 
     pc_api.anomaly_settings_config(body_params=body_params, policy_id=policy_id)
     logging.info("API - Changed Account hijacking attempts.")
+
 
 cli.add_command(start_pov)
