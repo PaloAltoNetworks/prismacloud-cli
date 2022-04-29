@@ -28,6 +28,7 @@ def start_pov():
     pc_api.enterprise_settings_config(body_params=body_params)
     logging.info("API - Changed enterprise settings.")
 
+    # Changed Account hijacking attempts policy
     policy_id = 'e12e1b44-3018-11e7-93ae-92361f002671'
     body_params = {
          'alertDisposition': "aggressive",
@@ -35,7 +36,26 @@ def start_pov():
     }
 
     pc_api.anomaly_settings_config(body_params=body_params, policy_id=policy_id)
-    logging.info("API - Changed Account hijacking attempts.")
+    logging.info("API - Changed Account hijacking attempts policy.")
+
+    # Changed Anomalous compute provisioning activity policy.
+    policy_id = 'e64fb48f-7d36-2309-dda2-2304c689116c'
+    body_params = {
+         'alertDisposition': "aggressive"
+    }
+
+    pc_api.anomaly_settings_config(body_params=body_params, policy_id=policy_id)
+    logging.info("API - Changed Anomalous compute provisioning activity policy.")
+
+    # Changed Unusual user activity policy.
+    policy_id = 'e12e1edc-3018-11e7-93ae-92361f002671'
+    body_params = {
+         'alertDisposition': "aggressive",
+         'trainingModelThreshold': "low"
+    }
+
+    pc_api.anomaly_settings_config(body_params=body_params, policy_id=policy_id)
+    logging.info("API - Changed Unusual user activity policy.")
 
 
 cli.add_command(start_pov)
