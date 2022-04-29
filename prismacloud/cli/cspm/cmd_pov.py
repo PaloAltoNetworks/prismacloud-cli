@@ -30,7 +30,7 @@ def start_pov():
     policy_id = 'e12e1b44-3018-11e7-93ae-92361f002671'
     body_params = {
          'alertDisposition': "aggressive",
-         'trainingModelThreshold': "medium"
+         'trainingModelThreshold': "low"
     }
 
     pc_api.anomaly_settings_config(body_params=body_params, policy_id=policy_id)
