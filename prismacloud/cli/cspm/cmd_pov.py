@@ -14,7 +14,7 @@ def cli(ctx):
 
 @click.command(name="start")
 def start_pov():
-    """Returns Cloud Accounts."""
+    """Set default settings to kick-off POV with customers"""
 
     body_params = {
         'sessionTimeout': 30,
