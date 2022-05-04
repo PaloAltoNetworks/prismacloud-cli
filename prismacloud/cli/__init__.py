@@ -242,6 +242,7 @@ def cli_output(data, sort_values=False):
         else:
             pass
 
+        # The usage command generates columns starting with dataPoints
         # Calculate the sum of all columns starting with dataPoints.counts
         data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
 
