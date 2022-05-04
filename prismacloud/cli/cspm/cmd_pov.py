@@ -6,7 +6,7 @@ from prismacloud.cli import pass_environment
 from prismacloud.cli.api import pc_api
 
 
-@click.group("pov", short_help="[CSPM] Set default settings to kick-off POV with customers")
+@click.group("pov", short_help="[CSPM] Set best practice settings for a project")
 @pass_environment
 def cli(ctx):
     pass
@@ -14,7 +14,7 @@ def cli(ctx):
 
 @click.command(name="start")
 def start_pov():
-    """Set default settings to kick-off POV with customers"""
+    """Set best practice settings for a project"""
 
     body_params = {
         'sessionTimeout': 30,
