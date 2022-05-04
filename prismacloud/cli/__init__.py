@@ -242,6 +242,12 @@ def cli_output(data, sort_values=False):
         else:
             pass
 
+        # Calculate the sum of all columns starting with dataPoints.counts
+        data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
+
+        # Calculate a new column usage based as percentage on column used and column workloadsPurchased
+        data_frame["usage (%)"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
+
         if params["output"] == "text":
             # Drop all but first settings.max_columns columns from data_frame
             data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
