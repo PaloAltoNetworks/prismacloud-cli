@@ -230,13 +230,16 @@ def cli_output(data, sort_values=False):
                 logging.error("Error: %s", _exc)
                 exit(1)
 
-        # The usage command generates columns starting with dataPoints
-        # Calculate the sum of all columns starting with dataPoints.counts
-        data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
+        try:
+            # The usage command generates columns starting with dataPoints
+            # Calculate the sum of all columns starting with dataPoints.counts
+            data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
 
-        # Calculate a new column usage based as percentage on column used and column workloadsPurchased
-        data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
-        # Extra columns are added, proceed.
+            # Calculate a new column usage based as percentage on column used and column workloadsPurchased
+            data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
+            # Extra columns are added, proceed.
+        except:
+            logging.debug("No dataPoints.counts or workloadsPurchased column")
 
         # Drop all rows after max_rows
         data_frame = data_frame.head(settings.max_rows)
