@@ -239,7 +239,7 @@ def cli_output(data, sort_values=False):
             data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
             # Extra columns are added, proceed.
         except Exception as _exc:
-            logging.debug("No dataPoints.counts or workloadsPurchased column found")
+            logging.debug("Information: %s", _exc)
 
         # Drop all rows after max_rows
         data_frame = data_frame.head(settings.max_rows)
