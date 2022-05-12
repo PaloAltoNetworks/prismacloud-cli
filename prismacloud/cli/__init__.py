@@ -120,13 +120,12 @@ class PrismaCloudCLI(HelpColorsMultiCommand):
 
         # Find the command file and import it.
         # This file can be in the cwpp folder, cspm folder, or pccs folder.
-
         module_types = ["cwpp", "cspm", "pccs"]
 
         for module_type in module_types:
             try:
                 mod = __import__(f"prismacloud.cli.{module_type}.cmd_{cmd_name}", None, None, ["cli"])
-            except ImportError:
+            except ImportE
                 continue
             return mod.cli
 
