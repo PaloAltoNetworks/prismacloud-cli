@@ -246,9 +246,6 @@ def cli_output(data, sort_values=False):
         except Exception as _exc:
             logging.debug("Information: %s", _exc)
 
-        # Drop all rows after max_rows
-        data_frame = data_frame.head(settings.max_rows)
-
         # Change all nan values to empty string
         data_frame = data_frame.fillna("")
 
@@ -268,6 +265,9 @@ def cli_output(data, sort_values=False):
 
     # Before we show the output, remove duplicate rows
     data_frame = data_frame.drop_duplicates()
+
+    # Drop all rows after max_rows
+    data_frame = data_frame.head(settings.max_rows)
 
     try:
         if params["output"] == "text":
