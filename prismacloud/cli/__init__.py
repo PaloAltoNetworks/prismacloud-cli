@@ -5,6 +5,7 @@ import os
 import sys
 import warnings
 import traceback
+import re
 
 import click
 import click_completion
@@ -252,9 +253,14 @@ def cli_output(data, sort_values=False):
         # We have a dataframe, output here after we have dropped
         # all but the selected columns
         if params["columns"]:
-            logging.debug("Dropping these columns: %s", data_frame.columns.difference(columns))
-            data_frame.drop(columns=data_frame.columns.difference(columns),
-                            axis=1, inplace=True, errors="ignore")
+            # logging.debug("Dropping these columns: %s", data_frame.columns.difference(columns))
+            # data_frame.drop(columns=data_frame.columns.difference(columns),
+            #                 axis=1, inplace=True, errors="ignore")
+
+            # Find columns in data_frame whose name contains one of the 
+            # values of parameter columns and filter on the resulting columns
+            logging.debug("Filtering columns based on case-insensitive regex: " + (r"(" + "|".join(columns) + ")"))
+            data_frame = data_frame.filter(regex=re.compile("(" + "|".join(columns) + ")", re.I))
         else:
             pass
     except Exception as _exc:  # pylint:disable=broad-except
@@ -263,8 +269,11 @@ def cli_output(data, sort_values=False):
         logging.debug("Error ingesting data into dataframe: %s", _exc)
         exit(1)
 
-    # Before we show the output, remove duplicate rows
-    data_frame = data_frame.drop_duplicates()
+    # Before we show the output, try to remove duplicate rows
+    try:
+        data_frame = data_frame.drop_duplicates()
+    except Exception as _exc:
+        logging.debug("Error dropping duplicates: %s", _exc)
 
     # Drop all rows after max_rows
     data_frame = data_frame.head(settings.max_rows)
