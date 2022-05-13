@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import warnings
+import traceback
 
 import click
 import click_completion
@@ -125,7 +126,7 @@ class PrismaCloudCLI(HelpColorsMultiCommand):
         for module_type in module_types:
             try:
                 mod = __import__(f"prismacloud.cli.{module_type}.cmd_{cmd_name}", None, None, ["cli"])
-            except ImportE
+            except ImportError:
                 continue
             return mod.cli
 
@@ -251,15 +252,21 @@ def cli_output(data, sort_values=False):
                             axis=1, inplace=True, errors="ignore")
         else:
             pass
+    except Exception as _exc:  # pylint:disable=broad-except
+        # There is no dataframe, might be just a single value, like version.
+        click.echo(data)
+        logging.debug("Error ingesting data into dataframe: %s", _exc)
+        exit(1)
 
+    try:
         if params["output"] == "text":
             # Drop all but first settings.max_columns columns from data_frame
             data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
 
             # Truncate all cells
             data_frame_truncated = data_frame.applymap(do_truncate, na_action='ignore')
-            click.secho(tabulate(data_frame_truncated, headers="keys", tablefmt="table"),
-                        fg="green")
+            table_output = tabulate(data_frame_truncated, headers="keys", tablefmt="table")
+            click.secho(table_output, fg="green")
         if params["output"] == "json":
             click.secho(data_frame.to_json(orient="records"), fg="green")
         if params["output"] == "csv":
@@ -296,43 +303,43 @@ def cli_output(data, sort_values=False):
     except Exception as _exc:  # pylint:disable=broad-except
         # There is no dataframe, might be just a single value, like version.
         click.echo(data)
-        logging.debug("Error ingesting data into dataframe: %s", _exc)
+        logging.debug("Error: %s", _exc)
+        # Show line number of error
+        logging.debug("Error: %s", _exc.__traceback__.tb_lineno)
 
 
 def flatten_nested_json_df(data_frame):
     """ Flatten nested json in our dataframe """
     logging.debug("Flatten nested json")
+
+    logging.debug(data_frame.shape)
     data_frame = data_frame.reset_index()
-    temp_s = (data_frame.applymap(type) == list).all()
-    list_columns = temp_s[temp_s].index.tolist()
 
     temp_s = (data_frame.applymap(type) == dict).all()
     dict_columns = temp_s[temp_s].index.tolist()
+    logging.debug(dict_columns)
 
-    while len(list_columns) > 0 or len(dict_columns) > 0:
+    while len(dict_columns) > 0:
         new_columns = []
 
         for col in dict_columns:
+            logging.debug(f"Flattening: {col}")
             horiz_exploded = pd.json_normalize(data_frame[col]).add_prefix(f'{col}.')
             horiz_exploded.index = data_frame.index
             data_frame = pd.concat([data_frame, horiz_exploded], axis=1).drop(columns=[col])
             new_columns.extend(horiz_exploded.columns)  # inplace
 
-        for col in list_columns:
-            logging.debug(f"exploding: {col}")
-            data_frame = data_frame.drop(columns=[col]).join(data_frame[col].explode().to_frame())
-            new_columns.append(col)
-
-        temp_s = (data_frame[new_columns].applymap(type) == list).all()
-        list_columns = temp_s[temp_s].index.tolist()
+        logging.debug("New columns after flattening: %s", new_columns)
 
         temp_s = (data_frame[new_columns].applymap(type) == dict).all()
         dict_columns = temp_s[temp_s].index.tolist()
+    logging.debug(data_frame.shape)
     return data_frame
 
 
 def do_truncate(truncate_this):
     """Truncate a string to max_width characters"""
+
     try:
         truncate_this = str(truncate_this)
         if len(truncate_this) > settings.max_width:
