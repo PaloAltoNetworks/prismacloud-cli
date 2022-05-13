@@ -233,16 +233,24 @@ def cli_output(data, sort_values=False):
         try:
             # The usage command generates columns starting with dataPoints
             # Calculate the sum of all columns starting with dataPoints.counts
-            data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
+
+            # If we have a column named dataPoints.counts, we can calculate the sum 
+            if "dataPoints.counts" in data_frame.columns:
+                data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
 
             # Calculate a new column usage based as percentage on column used and column workloadsPurchased
-            data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
+            # If we have a column named workloadsPurchased, we can calculate the percentage
+            if "workloadsPurchased" in data_frame.columns:
+                data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
             # Extra columns are added, proceed.
         except Exception as _exc:
             logging.debug("Information: %s", _exc)
 
         # Drop all rows after max_rows
         data_frame = data_frame.head(settings.max_rows)
+
+        # Change all nan values to empty string
+        data_frame = data_frame.fillna("")
 
         # We have a dataframe, output here after we have dropped
         # all but the selected columns
