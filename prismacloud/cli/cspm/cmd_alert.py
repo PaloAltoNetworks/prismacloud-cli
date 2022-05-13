@@ -37,8 +37,6 @@ def list_alerts(compliance_standard, amount, unit, status, detailed, policy_id):
     }
 
     result = pc_api.get_endpoint("alert", query_params=data, api="cspm")
-    print(result)
-    #result = pc_api.alert_v2_list_read(query_params=data)
     cli_output(result)
 
 

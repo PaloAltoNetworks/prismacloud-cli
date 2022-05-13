@@ -21,8 +21,8 @@ click_completion.init()
 
 # Set defaults
 pd.set_option("display.max_rows", None)
-pd.set_option("display.max_columns", 4)
-pd.set_option("display.width", 100)
+pd.set_option("display.max_columns", 400)
+pd.set_option("display.width", 1000)
 pd.set_option("display.colheader_justify", "center")
 pd.set_option("display.precision", 3)
 warnings.simplefilter(action="ignore", category=FutureWarning)
@@ -266,6 +266,9 @@ def cli_output(data, sort_values=False):
         logging.debug("Error ingesting data into dataframe: %s", _exc)
         exit(1)
 
+    # Before we show the output, remove duplicate rows
+    data_frame = data_frame.drop_duplicates()
+
     try:
         if params["output"] == "text":
             # Drop all but first settings.max_columns columns from data_frame
@@ -319,29 +322,33 @@ def cli_output(data, sort_values=False):
 def flatten_nested_json_df(data_frame):
     """ Flatten nested json in our dataframe """
     logging.debug("Flatten nested json")
-
-    logging.debug(data_frame.shape)
     data_frame = data_frame.reset_index()
+    temp_s = (data_frame.applymap(type) == list).all()
+    list_columns = temp_s[temp_s].index.tolist()
 
     temp_s = (data_frame.applymap(type) == dict).all()
     dict_columns = temp_s[temp_s].index.tolist()
-    logging.debug(dict_columns)
 
-    while len(dict_columns) > 0:
+    while len(list_columns) > 0 or len(dict_columns) > 0:
         new_columns = []
 
         for col in dict_columns:
-            logging.debug(f"Flattening: {col}")
+            logging.debug("Flatten column: %s", col)
             horiz_exploded = pd.json_normalize(data_frame[col]).add_prefix(f'{col}.')
             horiz_exploded.index = data_frame.index
             data_frame = pd.concat([data_frame, horiz_exploded], axis=1).drop(columns=[col])
             new_columns.extend(horiz_exploded.columns)  # inplace
 
-        logging.debug("New columns after flattening: %s", new_columns)
+        for col in list_columns:
+            logging.debug(f"Flattening: {col}")
+            data_frame = data_frame.drop(columns=[col]).join(data_frame[col].explode().to_frame())
+            new_columns.append(col)
+
+        temp_s = (data_frame[new_columns].applymap(type) == list).all()
+        list_columns = temp_s[temp_s].index.tolist()
 
         temp_s = (data_frame[new_columns].applymap(type) == dict).all()
         dict_columns = temp_s[temp_s].index.tolist()
-    logging.debug(data_frame.shape)
     return data_frame
 
 
