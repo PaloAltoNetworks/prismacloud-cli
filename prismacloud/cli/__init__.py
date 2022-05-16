@@ -228,6 +228,9 @@ def cli_output(data, sort_values=False):
                 data_frame = data_frame.query(params["query_filter"])
             except Exception as _exc:  # pylint:disable=broad-except
                 logging.error("Error in query filter: %s", _exc)
+                logging.error("You might be filtering on a dynamic column.")
+                logging.error("For example, if a certain tag does not exist, there is no way to filter on it.")
+                logging.error("The given filter has not been applied.")
 
         try:
             # The usage command generates columns starting with dataPoints
