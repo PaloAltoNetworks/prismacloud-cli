@@ -4,7 +4,6 @@ import logging
 import os
 import sys
 import warnings
-import traceback
 import re
 
 import click
@@ -235,7 +234,7 @@ def cli_output(data, sort_values=False):
             # The usage command generates columns starting with dataPoints
             # Calculate the sum of all columns starting with dataPoints.counts
 
-            # If we have a column named dataPoints.counts, we can calculate the sum 
+            # If we have a column named dataPoints.counts, we can calculate the sum
             if "dataPoints.counts" in data_frame.columns:
                 data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
 
@@ -257,7 +256,7 @@ def cli_output(data, sort_values=False):
             # data_frame.drop(columns=data_frame.columns.difference(columns),
             #                 axis=1, inplace=True, errors="ignore")
 
-            # Find columns in data_frame whose name contains one of the 
+            # Find columns in data_frame whose name contains one of the
             # values of parameter columns and filter on the resulting columns
             logging.debug("Filtering columns based on case-insensitive regex: " + (r"(" + "|".join(columns) + ")"))
             data_frame = data_frame.filter(regex=re.compile("(" + "|".join(columns) + ")", re.I))
@@ -324,8 +323,6 @@ def cli_output(data, sort_values=False):
         # There is no dataframe, might be just a single value, like version.
         click.echo(data)
         logging.debug("Error: %s", _exc)
-        # Show line number of error
-        logging.debug("Error: %s", _exc.__traceback__.tb_lineno)
 
 
 def flatten_nested_json_df(data_frame):
