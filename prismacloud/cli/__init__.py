@@ -36,21 +36,21 @@ def get_available_version():
         # Show available version
         logging.debug("Available version: %s", result.available_version)
         update_available = result.available_version
-    except Exception:  # nosec
+    except Exception:  # pylint:disable=broad-except
         update_available = False
 
     if update_available:
-        update_available_text = """\b
+        update_available_text_block = """\b
 Update available: {} -> {}
 Run {} to update
         """.format(cli_version.version, update_available, click.style("pip3 install -U prismacloud-cli", fg="red"))
     else:
-        update_available_text = ""
+        update_available_text_block = ""
 
-    return update_available_text
+    return update_available_text_block
 
 
-class Settings(BaseSettings):
+class Settings(BaseSettings):  # pylint:disable=too-few-public-methods
     """ Prisma Cloud CLI Settings """
 
     app_name: str = "Prisma Cloud CLI"
@@ -146,7 +146,7 @@ Prisma Cloud CLI (version: {0})
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
 @click.option("-vv", "--very_verbose", is_flag=True, help="Enables very verbose mode")
-@click.option("--filter", help="Add search filter")
+@click.option("--filter", "query_filter", help="Add search filter")
 @click.option("-o", "--output", type=click.Choice(["text", "csv", "json", "html", "columns"]), default="text")
 @click.option(
     "-c",
@@ -158,7 +158,7 @@ Prisma Cloud CLI (version: {0})
 @click.option("--columns", "columns", help="Select columns for output", default=None)
 @pass_environment
 # pylint: disable=W0613
-def cli(ctx, very_verbose, verbose, configuration, output, filter, columns=None):
+def cli(ctx, very_verbose, verbose, configuration, output, query_filter, columns=None):
     """Define the command line"""
     ctx.configuration = configuration
     ctx.output = output
@@ -215,20 +215,22 @@ def cli_output(data, sort_values=False):
             if "time" in column.lower() or "lastmodified" in column.lower() or "availableAsOf" in column.lower():
                 try:
                     data_frame[column] = pd.to_datetime(data_frame[column], unit='ms')
-                except Exception as _exc:
+                except Exception as _exc:  # pylint:disable=broad-except
                     logging.debug("Error: %s", _exc)
                 try:
                     data_frame[column] = pd.to_datetime(data_frame[column], unit='s')
-                except Exception as _exc:
+                except Exception as _exc:  # pylint:disable=broad-except
                     logging.debug("Error: %s", _exc)
 
         # If a filter is set, apply it
-        if params["filter"]:
+        if params["query_filter"]:
             try:
-                data_frame = data_frame.query(params["filter"])
-            except Exception as _exc:
-                logging.error("Error: %s", _exc)
-                exit(1)
+                data_frame = data_frame.query(params["query_filter"])
+            except Exception as _exc:  # pylint:disable=broad-except
+                logging.error("Error in query filter: %s", _exc)
+                logging.error("You might be filtering on a dynamic column.")
+                logging.error("For example, if a certain tag does not exist, there is no way to filter on it.")
+                logging.error("The given filter has not been applied.")
 
         try:
             # The usage command generates columns starting with dataPoints
@@ -243,7 +245,7 @@ def cli_output(data, sort_values=False):
             if "workloadsPurchased" in data_frame.columns:
                 data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
             # Extra columns are added, proceed.
-        except Exception as _exc:
+        except Exception as _exc:  # pylint:disable=broad-except
             logging.debug("Information: %s", _exc)
 
         # Change all nan values to empty string
@@ -258,7 +260,8 @@ def cli_output(data, sort_values=False):
 
             # Find columns in data_frame whose name contains one of the
             # values of parameter columns and filter on the resulting columns
-            logging.debug("Filtering columns based on case-insensitive regex: " + (r"(" + "|".join(columns) + ")"))
+            regex_ = (r"(" + "|".join(columns) + ")")
+            logging.debug("Filtering columns based on case-insensitive regex: %s", regex_)
             data_frame = data_frame.filter(regex=re.compile("(" + "|".join(columns) + ")", re.I))
         else:
             pass
@@ -266,12 +269,12 @@ def cli_output(data, sort_values=False):
         # There is no dataframe, might be just a single value, like version.
         click.echo(data)
         logging.debug("Error ingesting data into dataframe: %s", _exc)
-        exit(1)
+        sys.exit(1)
 
     # Before we show the output, try to remove duplicate rows
     try:
         data_frame = data_frame.drop_duplicates()
-    except Exception as _exc:
+    except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error dropping duplicates: %s", _exc)
 
     # Drop all rows after max_rows
@@ -346,7 +349,7 @@ def flatten_nested_json_df(data_frame):
             new_columns.extend(horiz_exploded.columns)  # inplace
 
         for col in list_columns:
-            logging.debug(f"Flattening: {col}")
+            logging.debug("Flattening column: %s", col)
             data_frame = data_frame.drop(columns=[col]).join(data_frame[col].explode().to_frame())
             new_columns.append(col)
 
@@ -368,6 +371,7 @@ def do_truncate(truncate_this):
         return truncate_this
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error truncating: %s", _exc)
+        return truncate_this
 
 
 if __name__ == "__main__":

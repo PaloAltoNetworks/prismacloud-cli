@@ -1,4 +1,5 @@
 import click
+import logging
 
 from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
@@ -36,8 +37,22 @@ def list_alerts(compliance_standard, amount, unit, status, detailed, policy_id):
         "timeUnit": unit
     }
 
-    result = pc_api.get_endpoint("alert", query_params=data, api="cspm")
-    cli_output(result)
+    # Fetch the alerts
+    alerts = pc_api.get_endpoint("alert", query_params=data, api="cspm")
+
+    # We want to get the related policy information so fetch the policies
+    policies = pc_api.policy_list_read()
+
+    # Iterate through alerts and add the policy description
+    logging.debug("Iterating through alerts and adding policy information")
+    for alert in alerts:
+        for policy in policies:
+            if policy["policyId"] == alert["policyId"]:
+                alert["policy.name"] = policy["name"]
+                alert["policy.description"] = policy["description"]
+    logging.debug("Done iterating through alerts and adding policy information")
+
+    cli_output(alerts)
 
 
 cli.add_command(list_alerts)

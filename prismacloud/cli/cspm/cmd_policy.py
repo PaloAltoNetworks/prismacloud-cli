@@ -18,7 +18,7 @@ def list_policies():
     cli_output(result)
 
 
-@click.command("set", short_help="[CSPM] Tunr on and off policies")
+@click.command("set", short_help="[CSPM] Turn on and off policies")
 @click.option(
     "--policy_severity",
     default="high",
