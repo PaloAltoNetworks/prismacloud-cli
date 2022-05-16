@@ -11,7 +11,7 @@ Nevertheless, the maintainers will make a best-effort to address issues, and (of
 ## Getting started
 
 ### Requirements
- * Python >= 3.7
+ * Python >= 3.8
  * Pip3
 
 ### Installation
