@@ -10,6 +10,5 @@ tabulate
 colorama
 update_checker
 pydantic
-re
 prismacloud-api==4.0.1
 
