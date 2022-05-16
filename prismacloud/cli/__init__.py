@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import warnings
+import re
 
 import click
 import click_completion
@@ -20,8 +21,8 @@ click_completion.init()
 
 # Set defaults
 pd.set_option("display.max_rows", None)
-pd.set_option("display.max_columns", 4)
-pd.set_option("display.width", 100)
+pd.set_option("display.max_columns", 400)
+pd.set_option("display.width", 1000)
 pd.set_option("display.colheader_justify", "center")
 pd.set_option("display.precision", 3)
 warnings.simplefilter(action="ignore", category=FutureWarning)
@@ -120,7 +121,6 @@ class PrismaCloudCLI(HelpColorsMultiCommand):
 
         # Find the command file and import it.
         # This file can be in the cwpp folder, cspm folder, or pccs folder.
-
         module_types = ["cwpp", "cspm", "pccs"]
 
         for module_type in module_types:
@@ -233,34 +233,59 @@ def cli_output(data, sort_values=False):
         try:
             # The usage command generates columns starting with dataPoints
             # Calculate the sum of all columns starting with dataPoints.counts
-            data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
+
+            # If we have a column named dataPoints.counts, we can calculate the sum
+            if "dataPoints.counts" in data_frame.columns:
+                data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
 
             # Calculate a new column usage based as percentage on column used and column workloadsPurchased
-            data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
+            # If we have a column named workloadsPurchased, we can calculate the percentage
+            if "workloadsPurchased" in data_frame.columns:
+                data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
             # Extra columns are added, proceed.
         except Exception as _exc:
             logging.debug("Information: %s", _exc)
 
-        # Drop all rows after max_rows
-        data_frame = data_frame.head(settings.max_rows)
+        # Change all nan values to empty string
+        data_frame = data_frame.fillna("")
 
         # We have a dataframe, output here after we have dropped
         # all but the selected columns
         if params["columns"]:
-            logging.debug("Dropping these columns: %s", data_frame.columns.difference(columns))
-            data_frame.drop(columns=data_frame.columns.difference(columns),
-                            axis=1, inplace=True, errors="ignore")
+            # logging.debug("Dropping these columns: %s", data_frame.columns.difference(columns))
+            # data_frame.drop(columns=data_frame.columns.difference(columns),
+            #                 axis=1, inplace=True, errors="ignore")
+
+            # Find columns in data_frame whose name contains one of the
+            # values of parameter columns and filter on the resulting columns
+            logging.debug("Filtering columns based on case-insensitive regex: " + (r"(" + "|".join(columns) + ")"))
+            data_frame = data_frame.filter(regex=re.compile("(" + "|".join(columns) + ")", re.I))
         else:
             pass
+    except Exception as _exc:  # pylint:disable=broad-except
+        # There is no dataframe, might be just a single value, like version.
+        click.echo(data)
+        logging.debug("Error ingesting data into dataframe: %s", _exc)
+        exit(1)
 
+    # Before we show the output, try to remove duplicate rows
+    try:
+        data_frame = data_frame.drop_duplicates()
+    except Exception as _exc:
+        logging.debug("Error dropping duplicates: %s", _exc)
+
+    # Drop all rows after max_rows
+    data_frame = data_frame.head(settings.max_rows)
+
+    try:
         if params["output"] == "text":
             # Drop all but first settings.max_columns columns from data_frame
             data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
 
             # Truncate all cells
             data_frame_truncated = data_frame.applymap(do_truncate, na_action='ignore')
-            click.secho(tabulate(data_frame_truncated, headers="keys", tablefmt="table"),
-                        fg="green")
+            table_output = tabulate(data_frame_truncated, headers="keys", tablefmt="table")
+            click.secho(table_output, fg="green")
         if params["output"] == "json":
             click.secho(data_frame.to_json(orient="records"), fg="green")
         if params["output"] == "csv":
@@ -297,7 +322,7 @@ def cli_output(data, sort_values=False):
     except Exception as _exc:  # pylint:disable=broad-except
         # There is no dataframe, might be just a single value, like version.
         click.echo(data)
-        logging.debug("Error ingesting data into dataframe: %s", _exc)
+        logging.debug("Error: %s", _exc)
 
 
 def flatten_nested_json_df(data_frame):
@@ -314,13 +339,14 @@ def flatten_nested_json_df(data_frame):
         new_columns = []
 
         for col in dict_columns:
+            logging.debug("Flatten column: %s", col)
             horiz_exploded = pd.json_normalize(data_frame[col]).add_prefix(f'{col}.')
             horiz_exploded.index = data_frame.index
             data_frame = pd.concat([data_frame, horiz_exploded], axis=1).drop(columns=[col])
             new_columns.extend(horiz_exploded.columns)  # inplace
 
         for col in list_columns:
-            logging.debug(f"exploding: {col}")
+            logging.debug(f"Flattening: {col}")
             data_frame = data_frame.drop(columns=[col]).join(data_frame[col].explode().to_frame())
             new_columns.append(col)
 
@@ -334,6 +360,7 @@ def flatten_nested_json_df(data_frame):
 
 def do_truncate(truncate_this):
     """Truncate a string to max_width characters"""
+
     try:
         truncate_this = str(truncate_this)
         if len(truncate_this) > settings.max_width:
