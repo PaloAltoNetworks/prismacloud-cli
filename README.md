@@ -1,5 +1,7 @@
 # Prisma Cloud CLI
 
+[![Code Quality Check](https://github.com/steven-deboer/prismacloud-cli/actions/workflows/quality.yml/badge.svg)](https://github.com/steven-deboer/prismacloud-cli/actions/workflows/quality.yml)
+
 The Prisma Cloud CLI is a command line interface for [Prisma Cloud](https://www.paloaltonetworks.com/prisma/cloud) by [Palo Alto Networks](https://www.paloaltonetworks.com/).
 
 # Support
