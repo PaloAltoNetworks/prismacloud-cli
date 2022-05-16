@@ -273,6 +273,9 @@ def cli_output(data, sort_values=False):
 
     # Before we show the output, try to remove duplicate rows
     try:
+        # Convert all columns to string
+        data_frame = data_frame.applymap(str)
+
         data_frame = data_frame.drop_duplicates()
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error dropping duplicates: %s", _exc)
