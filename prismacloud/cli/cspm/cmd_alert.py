@@ -42,6 +42,10 @@ def list_alerts(compliance_standard, amount, unit, status, detailed, policy_id, 
     # Fetch the alerts
     alerts = pc_api.get_endpoint("alert", query_params=data, api="cspm")
 
+    # Add a new column with a url to the alert investigate page
+    for alert in alerts:
+        alert["alert.resource.url"] = f"https://app.eu.prismacloud.io/investigate/details?resourceId={alert['resource']['rrn']}"
+
     # We want to get the related policy information so fetch the policies
     policies = pc_api.policy_list_read()
 
