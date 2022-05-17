@@ -345,16 +345,23 @@ def flatten_nested_json_df(data_frame):
         new_columns = []
 
         for col in dict_columns:
-            logging.debug("Flatten column: %s", col)
+            logging.debug("Flatten (dict) column: %s", col)
             horiz_exploded = pd.json_normalize(data_frame[col]).add_prefix(f'{col}.')
             horiz_exploded.index = data_frame.index
             data_frame = pd.concat([data_frame, horiz_exploded], axis=1).drop(columns=[col])
             new_columns.extend(horiz_exploded.columns)  # inplace
 
         for col in list_columns:
-            logging.debug("Flattening column: %s", col)
-            data_frame = data_frame.drop(columns=[col]).join(data_frame[col].explode().to_frame())
-            new_columns.append(col)
+            # Calculate level based on number of dots
+            level = len(col.split("."))
+
+            # Only flatten if level is smaller then 3 or ending with tags
+            if level < 3 or col.endswith("tags"):
+                logging.debug("Flatten (list) column: %s (level %s)", col, level)
+                data_frame = data_frame.drop(columns=[col]).join(data_frame[col].explode().to_frame())
+                new_columns.append(col)
+            else:
+                logging.debug("Not flattening (list) column: %s (level %s)", col, level)
 
         temp_s = (data_frame[new_columns].applymap(type) == list).all()
         list_columns = temp_s[temp_s].index.tolist()
