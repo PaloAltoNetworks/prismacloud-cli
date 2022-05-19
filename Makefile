@@ -4,7 +4,7 @@
 test:
 	@pc -o csv policy >> /dev/null 2>&1 && echo "success!" || echo "failure!"
 	@pc stats vulnerabilities --cve CVE-2022-0847 >> /dev/null 2>&1 && echo "success!" || echo "failure!"
-	@pc -o json policy | jq >> /dev/null 2>&1 && echo "success!" || echo "failure!"
+	@pc -o json policy list | jq >> /dev/null 2>&1 && echo "success!" || echo "failure!"
 	@pc tags >> /dev/null 2>&1 && echo "success!" || echo "failure!"
 	@pc stats dashboard >> /dev/null 2>&1 && echo "success!" || echo "failure!"
 	@pc -o json stats dashboard >> /dev/null 2>&1 && echo "success!" || echo "failure!"

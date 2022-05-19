@@ -57,6 +57,7 @@ class Settings(BaseSettings):  # pylint:disable=too-few-public-methods
     max_columns: int = 7
     max_rows: int = 1000000
     max_width: int = 25
+    max_levels: int = 2
 
 
 settings = Settings()
@@ -188,6 +189,7 @@ def cli_output(data, sort_values=False):
     logging.debug("Settings: maximum width: %s", settings.max_width)
     logging.debug("Settings: maximum number of rows: %s", settings.max_rows)
     logging.debug("Settings: maximum number of columns: %s", settings.max_columns)
+    logging.debug("Settings: maximum number of levels to flatten: %s", settings.max_levels)
 
     # We have data from our request, send to dataframe
     try:
@@ -236,17 +238,17 @@ def cli_output(data, sort_values=False):
             # The usage command generates columns starting with dataPoints
             # Calculate the sum of all columns starting with dataPoints.counts
 
-            # If we have a column named dataPoints.counts, we can calculate the sum
-            if "dataPoints.counts" in data_frame.columns:
+            # If we have one or more columns with dataPoints.counts,
+            # calculate the sum of all columns starting with dataPoints.counts
+            if len(data_frame.filter(regex="dataPoints.counts").columns) > 0:
                 data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
-
             # Calculate a new column usage based as percentage on column used and column workloadsPurchased
             # If we have a column named workloadsPurchased, we can calculate the percentage
             if "workloadsPurchased" in data_frame.columns:
                 data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
             # Extra columns are added, proceed.
         except Exception as _exc:  # pylint:disable=broad-except
-            logging.debug("Information: %s", _exc)
+            logging.debug("Could not calculate columns: %s", _exc)
 
         # Change all nan values to empty string
         data_frame = data_frame.fillna("")
@@ -355,8 +357,9 @@ def flatten_nested_json_df(data_frame):
             # Calculate level based on number of dots
             level = len(col.split("."))
 
-            # Only flatten if level is smaller then 3 or ending with tags
-            if level < 3 or col.endswith("tags"):
+            # Only flatten if level is smaller then settings.max_levels (default: 2) or
+            # ends with tags
+            if level < settings.max_levels or col.endswith("tags"):
                 logging.debug("Flatten (list) column: %s (level %s)", col, level)
                 data_frame = data_frame.drop(columns=[col]).join(data_frame[col].explode().to_frame())
                 new_columns.append(col)
