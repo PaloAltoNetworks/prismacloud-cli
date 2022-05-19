@@ -238,17 +238,17 @@ def cli_output(data, sort_values=False):
             # The usage command generates columns starting with dataPoints
             # Calculate the sum of all columns starting with dataPoints.counts
 
-            # If we have a column named dataPoints.counts, we can calculate the sum
-            if "dataPoints.counts" in data_frame.columns:
+            # If we have one or more columns with dataPoints.counts,
+            # calculate the sum of all columns starting with dataPoints.counts
+            if len(data_frame.filter(regex="dataPoints.counts").columns) > 0:
                 data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
-
             # Calculate a new column usage based as percentage on column used and column workloadsPurchased
             # If we have a column named workloadsPurchased, we can calculate the percentage
             if "workloadsPurchased" in data_frame.columns:
                 data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
             # Extra columns are added, proceed.
         except Exception as _exc:  # pylint:disable=broad-except
-            logging.debug("Information: %s", _exc)
+            logging.debug("Could not calculate columns: %s", _exc)
 
         # Change all nan values to empty string
         data_frame = data_frame.fillna("")
