@@ -339,6 +339,7 @@ def flatten_nested_json_df(data_frame):
     data_frame = data_frame.reset_index()
     temp_s = (data_frame.applymap(type) == list).all()
     list_columns = temp_s[temp_s].index.tolist()
+    print(list_columns)
 
     temp_s = (data_frame.applymap(type) == dict).all()
     dict_columns = temp_s[temp_s].index.tolist()
@@ -358,8 +359,8 @@ def flatten_nested_json_df(data_frame):
             level = len(col.split("."))
 
             # Only flatten if level is smaller then settings.max_levels (default: 2) or
-            # ends with tags
-            if level < settings.max_levels or col.endswith("tags"):
+            # contains tags
+            if level < settings.max_levels or "tags" in col:
                 logging.debug("Flatten (list) column: %s (level %s)", col, level)
                 data_frame = data_frame.drop(columns=[col]).join(data_frame[col].explode().to_frame())
                 new_columns.append(col)

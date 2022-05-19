@@ -35,7 +35,7 @@ def cli(ctx, query, amount, unit, field=""):
     search_params["withResourceJson"] = False
     search_params["query"] = query
 
-    logging.debug("API - Getting the RQL results ...", end="")
+    logging.debug("API - Getting the RQL results ...")
     if query.startswith("config from"):
         result_list = pc_api.search_config_read(search_params=search_params)
     elif query.startswith("network from"):
