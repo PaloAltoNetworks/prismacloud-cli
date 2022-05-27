@@ -339,7 +339,6 @@ def flatten_nested_json_df(data_frame):
     data_frame = data_frame.reset_index()
     temp_s = (data_frame.applymap(type) == list).all()
     list_columns = temp_s[temp_s].index.tolist()
-    print(list_columns)
 
     temp_s = (data_frame.applymap(type) == dict).all()
     dict_columns = temp_s[temp_s].index.tolist()
