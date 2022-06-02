@@ -273,6 +273,9 @@ def cli_output(data, sort_values=False):
         logging.debug("Error ingesting data into dataframe: %s", _exc)
         sys.exit(1)
 
+    # Before we show the output, remove the index column (which is not data_frame.index).
+    data_frame.drop(columns='index', inplace=True)
+
     # Before we show the output, try to remove duplicate rows
     try:
         # Convert all columns to string
@@ -292,12 +295,14 @@ def cli_output(data, sort_values=False):
 
             # Truncate all cells
             data_frame_truncated = data_frame.applymap(do_truncate, na_action='ignore')
-            table_output = tabulate(data_frame_truncated, headers="keys", tablefmt="table")
+            table_output = tabulate(data_frame_truncated, headers="keys", tablefmt="table", showindex=False)
             click.secho(table_output, fg="green")
         if params["output"] == "json":
+            # Cannot use 'index=False' here, otherwise '.to_json' returns a hash instead of an array of hashes.
+            # But '.to_json' does not output the index anyway.
             click.secho(data_frame.to_json(orient="records"), fg="green")
         if params["output"] == "csv":
-            click.secho(data_frame.to_csv(), fg="green")
+            click.secho(data_frame.to_csv(index=False), fg="green")
         if params["output"] == "html":
             # pre-table-html
             pre_table_html = """
@@ -310,6 +315,7 @@ def cli_output(data, sort_values=False):
             click.secho(pre_table_html)
             click.secho(
                 data_frame.to_html(
+                    index=False,
                     max_cols=settings.max_columns,
                     na_rep='',
                     classes="table table-sm table-striped text-left",
