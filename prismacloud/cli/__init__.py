@@ -273,8 +273,10 @@ def cli_output(data, sort_values=False):
         logging.debug("Error ingesting data into dataframe: %s", _exc)
         sys.exit(1)
 
-    # Before we show the output, remove the index column (which is not data_frame.index).
-    data_frame.drop(columns='index', inplace=True)
+    # Before we show the output, remove the index column (which is not data_frame.index),
+    # but only if the column exists.
+    if "index" in data_frame.columns:
+        data_frame.drop(columns=["index"], inplace=True)
 
     # Before we show the output, try to remove duplicate rows
     try:
