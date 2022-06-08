@@ -27,8 +27,8 @@ def list_policies():
     help="Enable or disable Policies by Policy Severity.",
 )
 @click.option(
-    "--all_policies/--custom_policies",
-    default=False,
+    "--all_policies",
+    is_flag=True,
     help="Enable or disable all Policies."
 )
 @click.option(
