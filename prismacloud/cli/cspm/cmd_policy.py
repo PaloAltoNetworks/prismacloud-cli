@@ -20,27 +20,36 @@ def list_policies():
 
 @click.command("set", short_help="[CSPM] Turn on and off policies")
 @click.option(
-    "--policy-severity",
+    "--policy_severity",
     default="high",
     type=click.Choice(["low", "medium", "high"]),
     help="Enable or disable Policies by Policy Severity.",
 )
-@click.option("--all_policies", help="Enable or disable all Policies.")
 @click.option(
-    "--cloud-type",
+    "--all_policies",
+    is_flag=True,
+    help="Enable or disable all Policies."
+)
+@click.option(
+    "--cloud_type",
     type=click.Choice(["aws", "azure", "gcp", "oci", "alibaba_cloud"]),
     help="Enable or disable Policies by Cloud Type.",
 )
 @click.option(
-    "--policy-type",
+    "--policy_type",
     type=click.Choice(["config", "network", "audit_event", "anomaly"]),
     help="Enable or disable Policies by Policy Type.",
 )
 @click.option(
-    "--compliance-standard",
-    help="Enable or disable Policies by Compliance Standard",
+    "--compliance_standard",
+    default=None,
+    help="Enable or disable Policies by Compliance Standard, e.g.: 'CIS v1.4.0 (AWS)'",
 )
-@click.option("--status", type=click.Choice(["enable", "disable"]), help="Policy status to set (enable or disable).")
+@click.option(
+    "--status",
+    type=click.Choice(["enable", "disable"]),
+    help="Policy status to set (enable or disable)."
+)
 def enable_or_disable_policies(policy_severity, all_policies, cloud_type, policy_type, status, compliance_standard):
     """Enable or Disable policies"""
     specified_policy_status = bool(status.lower() == "enable")

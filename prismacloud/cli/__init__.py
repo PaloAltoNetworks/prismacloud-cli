@@ -66,6 +66,7 @@ settings = Settings()
 CONTEXT_SETTINGS = dict(auto_envvar_prefix="PC")
 
 
+# pylint: disable=R0201
 class Environment:
     """Initialize environment and define logging"""
 
@@ -74,7 +75,6 @@ class Environment:
         self.verbose = False
         self.home = os.getcwd()
 
-    # pylint: disable=R0201
     def log(self, msg, *args):
         """Logs a message to stderr"""
         if args:
