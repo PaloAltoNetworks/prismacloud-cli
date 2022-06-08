@@ -19,8 +19,6 @@ def list_policies():
 
 
 @click.command("set", short_help="[CSPM] Turn on and off policies")
-
-
 @click.option(
     "--policy_severity",
     default="high",
@@ -52,8 +50,6 @@ def list_policies():
     type=click.Choice(["enable", "disable"]),
     help="Policy status to set (enable or disable)."
 )
-
-
 def enable_or_disable_policies(policy_severity, all_policies, cloud_type, policy_type, status, compliance_standard):
     """Enable or Disable policies"""
     specified_policy_status = bool(status.lower() == "enable")
