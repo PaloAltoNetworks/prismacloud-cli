@@ -1,4 +1,3 @@
-from email.policy import default
 import logging
 
 import click
@@ -19,6 +18,8 @@ def list_policies():
     cli_output(result)
 
 @click.command("set", short_help="[CSPM] Turn on and off policies")
+
+
 @click.option(
     "--policy_severity",
     default="high",
