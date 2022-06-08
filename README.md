@@ -155,11 +155,11 @@ Then, open /tmp/results.html:
 
 ```console
 pc policy set --help
-pc -vv policy set --status enable --compliance-standard "CIS v1.4.0 (AWS)"
+pc -vv policy set --status enable --compliance_standard 'CIS v1.4.0 (AWS)'
 ```
 
 ### Disable CSPM policies with Prisma Cloud CLI
 
 ```console
-pc -vv policy set --status disable --compliance-standard "CIS v1.4.0 (AWS)"
+pc -vv policy set --status disable --compliance_standard 'CIS v1.4.0 (AWS)'
 ```
