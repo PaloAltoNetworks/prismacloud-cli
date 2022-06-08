@@ -8,12 +8,13 @@ import types
 try:
     from pathlib import Path
     homefolder = str(Path.home())
-except:
+except Exception as _exc:
+    logging.debug("Searching homefolder with pathlib not working, fallback: %s", _exc)
     if "USERPROFILE" in os.environ:
         homefolder = os.environ["USERPROFILE"]
     else:
         homefolder = os.environ["HOME"]
-        
+
 import click
 import prismacloud.api.version as api_version
 from prismacloud.api import pc_api
