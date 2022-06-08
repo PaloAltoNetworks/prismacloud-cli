@@ -5,6 +5,16 @@ import logging
 import os
 import types
 
+try:
+    from pathlib import Path
+    homefolder = str(Path.home())
+except Exception as _exc:
+    logging.debug("Searching homefolder with pathlib not working, fallback: %s", _exc)
+    if "USERPROFILE" in os.environ:
+        homefolder = os.environ["USERPROFILE"]
+    else:
+        homefolder = os.environ["HOME"]
+
 import click
 import prismacloud.api.version as api_version
 from prismacloud.api import pc_api
@@ -44,7 +54,7 @@ def get_cli_config():
     logging.info(
         "Running prismacloud-cli version %s using prismacloud-api version %s", cli_version.version, api_version.version
     )
-    config_directory = os.environ["HOME"] + "/.prismacloud/"
+    config_directory = homefolder + "/.prismacloud/"
     config_file_name = config_directory + params["configuration"] + ".json"
     if not os.path.exists(config_directory):
         logging.info("Configuration directory does not exist, creating $HOME/.prismacloud")
