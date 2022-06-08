@@ -151,3 +151,15 @@ Then, open /tmp/results.html:
 ![Results](https://raw.githubusercontent.com/PaloAltoNetworks/prismacloud-cli/main/results.png)
 
 
+### Enable CSPM policies with Prisma Cloud CLI
+
+```console
+pc policy set --help
+pc -vv policy set --status enable --compliance-standard "CIS v1.4.0 (AWS)"
+```
+
+### Disable CSPM policies with Prisma Cloud CLI
+
+```console
+pc -vv policy set --status disable --compliance-standard "CIS v1.4.0 (AWS)"
+```
