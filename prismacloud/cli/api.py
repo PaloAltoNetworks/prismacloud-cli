@@ -8,7 +8,7 @@ import types
 try:
     from pathlib import Path
     homefolder = str(Path.home())
-except Exception as _exc:
+except Exception as _exc:  # pylint:disable=broad-except
     logging.debug("Searching homefolder with pathlib not working, fallback: %s", _exc)
     if "USERPROFILE" in os.environ:
         homefolder = os.environ["USERPROFILE"]
@@ -41,13 +41,52 @@ def map_cli_config_to_api_config():
 
 
 def get_cli_config():
-    """Read or write cli configuration from or to a file"""
+    '''
+    Try to access params["configuration"]. If this is equal to
+    env or environment, try to read environment variables
+
+    PC_SAAS_API_ENDPOINT
+    PC_COMPUTE_API_ENDPOINT
+    PC_ACCESS_KEY
+    PC_SECRET_KEY
+
+    If not all of these are set, try to read a config file.
+    '''
+
     params = {}
     try:
         params = click.get_current_context().find_root().params
     except Exception as exc:  # pylint:disable=broad-except
         params["configuration"] = "credentials"
         logging.debug("Error getting current context: %s", exc)
+
+    # If params["configuration"] is environment
+    # try to read environment variables
+    try:
+        if params["configuration"] == "environment":
+            logging.debug("Using environment variables")
+            config = {}
+            config["api_endpoint"] = os.environ.get("PC_SAAS_API_ENDPOINT", "")
+            config["pcc_api_endpoint"] = os.environ.get("PC_COMPUTE_API_ENDPOINT", "")
+            config["access_key_id"] = os.environ.get("PC_ACCESS_KEY", "")
+            config["secret_key"] = os.environ.get("PC_SECRET_KEY", "")
+
+            logging.debug("Environment variable found: PC_SAAS_API_ENDPOINT: %s", config["api_endpoint"])
+            logging.debug("Environment variable found: PC_COMPUTE_API_ENDPOINT: %s", config["pcc_api_endpoint"])
+
+            # Mask all except the first two characters of PC_ACCESS_KEY and PC_SECRET_KEY
+            masked_access_key = config["access_key_id"][:3] + "*" * (len(config["access_key_id"]) - 4)
+            masked_secret_key = config["secret_key"][:3] + "*" * (len(config["secret_key"]) - 4)
+
+            logging.debug("Environment variable found: PC_ACCESS_KEY: %s", masked_access_key)
+            logging.debug("Environment variable found: PC_SECRET_KEY: %s", masked_secret_key)
+
+            return config
+    except Exception as exc:  # pylint:disable=broad-except
+        logging.debug("Error getting current context: %s", exc)
+
+    """Read or write cli configuration from or to a file"""
+
     # To fix calling 'pc' without a command.
     if "configuration" not in params:
         params["configuration"] = "credentials"
