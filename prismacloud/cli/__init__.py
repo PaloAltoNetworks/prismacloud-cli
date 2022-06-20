@@ -59,6 +59,11 @@ class Settings(BaseSettings):  # pylint:disable=too-few-public-methods
     max_width: int = 25
     max_levels: int = 2
 
+    pc_saas_api_endpoint: str = False
+    pc_compute_api_endpoint: str = False
+    pc_access_key: str = False
+    pc_secret_key: str = False
+
 
 settings = Settings()
 
@@ -66,7 +71,6 @@ settings = Settings()
 CONTEXT_SETTINGS = dict(auto_envvar_prefix="PC")
 
 
-# pylint: disable=R0201
 class Environment:
     """Initialize environment and define logging"""
 

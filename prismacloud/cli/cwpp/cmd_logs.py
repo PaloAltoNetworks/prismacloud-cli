@@ -30,12 +30,13 @@ def console(limit=150):
 @click.option(
     "-t",
     "--type",
+    "type_",
     type=click.Choice(['login', 'profile', 'settings', 'rule', 'user', 'group', 'credential', 'tag'], case_sensitive=True),
     help="Type of log to retrieve",
-    required=False
+    required=False,
     )
 @click.option("-h", "--hours", default=1, help="Show results for last n hours")
-def audit(type='', hours=1):
+def audit(type_='', hours=1):
     # Calculate utc time since x hours ago (default 1)
     utc_time = datetime.datetime.utcnow() - datetime.timedelta(hours=hours)
     from_ = utc_time
@@ -43,7 +44,7 @@ def audit(type='', hours=1):
     # Convert from_ to isoformat and add a Z at the end
     from_ = from_.isoformat() + "Z"
 
-    result = pc_api.get_endpoint("audits/mgmt", {"type": type, "from": from_, "reverse": "true", "sort": "time"})
+    result = pc_api.get_endpoint("audits/mgmt", {"type": type_, "from": from_, "reverse": "true", "sort": "time"})
     cli_output(result)
 
 
