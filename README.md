@@ -90,7 +90,7 @@ PC_SECRET_KEY
 
 And then run pc referring to a configuration called environment:
 
-pc --config environment <command>
+`pc --config environment <command>`
 
 ## Examples
 ```
