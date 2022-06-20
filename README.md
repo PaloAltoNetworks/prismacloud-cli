@@ -81,8 +81,11 @@ By setting the environment variables:
 
 `
 PC_SAAS_API_ENDPOINT
+
 PC_COMPUTE_API_ENDPOINT
+
 PC_ACCESS_KEY
+
 PC_SECRET_KEY
 `
 
