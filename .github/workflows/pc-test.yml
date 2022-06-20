@@ -29,7 +29,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install prismacloud-cli -U
 
-      - name: Test Prisma Cloud CLI
+      - name: Check connectivity
         env:
           PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
           PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
@@ -37,3 +37,12 @@ jobs:
           PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
         run: |
           pc -vv --config environment check
+
+      - name: Check connectivity
+        env:
+          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
+          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+        run: |
+          pc -vv --config environment license
