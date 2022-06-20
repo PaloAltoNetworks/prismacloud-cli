@@ -79,7 +79,6 @@ pc --config demo -o csv policy
 ### Use environment variables for configuration
 By setting the environment variables:
 
-`
 PC_SAAS_API_ENDPOINT
 
 PC_COMPUTE_API_ENDPOINT
@@ -87,7 +86,7 @@ PC_COMPUTE_API_ENDPOINT
 PC_ACCESS_KEY
 
 PC_SECRET_KEY
-`
+
 
 And then run pc referring to a configuration called environment:
 
