@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  test-cli:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,6 +25,9 @@ jobs:
 
       - name: Build package
         run: python -m build
+
+      - name: Install package
+        run: pip install .
 
       - name: Check connectivity
         env:
