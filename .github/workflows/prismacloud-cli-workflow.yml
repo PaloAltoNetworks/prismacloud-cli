@@ -46,6 +46,7 @@ jobs:
         flake8 . --count --statistics
 
   test:
+    needs: qa
     runs-on: ubuntu-latest
 
     steps:
@@ -132,6 +133,7 @@ jobs:
           pc --config environment alert list --unit hour --amount 1 > /dev/null
 
   deploy:
+  needs: test
     runs-on: ubuntu-latest
 
     steps:
