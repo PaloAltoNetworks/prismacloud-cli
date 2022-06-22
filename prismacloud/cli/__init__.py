@@ -181,13 +181,11 @@ def cli(ctx, very_verbose, verbose, configuration, output, query_filter, columns
 
 def cli_output(data, sort_values=False):
     """ Parse data and format output """
+
     # Retrieve parameters
     params = click.get_current_context().find_root().params
     if params["columns"]:
         columns = params["columns"].split(",")
-    # Check type of data
-    if isinstance(data, list):
-        data_frame = pd.DataFrame(data)
 
     # If we are in debugging mode, show settings for output
     logging.debug("Settings: maximum width: %s", settings.max_width)
@@ -195,87 +193,87 @@ def cli_output(data, sort_values=False):
     logging.debug("Settings: maximum number of columns: %s", settings.max_columns)
     logging.debug("Settings: maximum number of levels to flatten: %s", settings.max_levels)
 
-    # We have data from our request, send to dataframe
+    # If there is no data structure, just a single string value, like with 'pc version'.
+    if isinstance(data, str):
+        data = {"": data}
+
+    # https://pandas.pydata.org/docs/reference/api/pandas.json_normalize.html
+    # json_normalize() requires a dictionary or list of dictionaries
+    # normalize = False
+    # if isinstance(data, dict):
+    #     normalize = True
+    # if isinstance(data, list):
+    #     if all(isinstance(item, dict) for item in data)
+    #         normalize = True
     try:
         data_frame_normalized = pd.json_normalize(data)
+    except Exception as _exc: # pylint:disable=broad-except
+        logging.error("Error converting data via json_normalize(): %s", _exc)
+        sys.exit(1)
 
-        # If the size of our normalized data is 0, something went wrong
-        # and we don't use the normalized data.
-        # Otherwise, use the normalized data.
-        if data_frame_normalized.size > 0:
-            logging.debug("Using normalized data")
-            data_frame = data_frame_normalized
-            # Flatten nested json
-            data_frame = flatten_nested_json_df(data_frame)
-
-        # Do some optimization on our dataframe
+    # If the size of our normalized data is 0, something went wrong but no exception was raised.
+    if data_frame_normalized.size > 0:
+        logging.debug("Using json_normalize() data")
+        data_frame = flatten_nested_json_df(data_frame_normalized)
+    else:
         try:
-            data_frame["time"] = pd.to_datetime(data_frame.time)
-            data_frame["lastModified"] = pd.to_datetime(data_frame.time)
-            data_frame.fillna("", inplace=True)
-        except Exception:  # pylint:disable=broad-except
-            logging.debug("No time field")
+            data_frame = pd.DataFrame(data)
+        except Exception as _exc: # pylint:disable=broad-except
+            logging.error("Error converting data via DataFrame(): %s", _exc)
+            sys.exit(1)
 
-        # If column name contains time or lastModified, convert values to datetime
-        for column in data_frame.columns:
-            if "time" in column.lower() or "lastmodified" in column.lower() or "availableAsOf" in column.lower():
-                try:
-                    data_frame[column] = pd.to_datetime(data_frame[column], unit='ms')
-                except Exception as _exc:  # pylint:disable=broad-except
-                    logging.debug("Error: %s", _exc)
+    # If a column contains time, try convert it to datetime
+    for column in data_frame.columns:
+        if column.lower() in ["time", "lastmodified", "availableasof"]:
+            try:
+                data_frame[column] = pd.to_datetime(data_frame[column], unit='ms')
+            except Exception as _exc:  # pylint:disable=broad-except
+                logging.debug("Error converting column to milliseconds: %s", _exc)
                 try:
                     data_frame[column] = pd.to_datetime(data_frame[column], unit='s')
                 except Exception as _exc:  # pylint:disable=broad-except
-                    logging.debug("Error: %s", _exc)
+                    logging.debug("Error converting column to seconds: %s", _exc)
 
-        # If a filter is set, apply it
-        if params["query_filter"]:
-            try:
-                data_frame = data_frame.query(params["query_filter"])
-            except Exception as _exc:  # pylint:disable=broad-except
-                logging.error("Error in query filter: %s", _exc)
-                logging.error("You might be filtering on a dynamic column.")
-                logging.error("For example, if a certain tag does not exist, there is no way to filter on it.")
-                logging.error("The given filter has not been applied.")
+    data_frame.fillna('', inplace=True)
 
+    # If a filter is set, try to apply it
+    if params["query_filter"]:
         try:
-            # The usage command generates columns starting with dataPoints
-            # Calculate the sum of all columns starting with dataPoints.counts
+            data_frame = data_frame.query(params["query_filter"])
+        except Exception as _exc: # pylint:disable=broad-except
+            logging.error("Error applying query filter: %s", _exc)
+            logging.error("You might be filtering on a dynamic column.")
+            logging.error("For example, if a certain tag does not exist, there is no way to filter on it.")
+            logging.error("The given filter has not been applied.")
 
-            # If we have one or more columns with dataPoints.counts,
-            # calculate the sum of all columns starting with dataPoints.counts
-            if len(data_frame.filter(regex="dataPoints.counts").columns) > 0:
-                data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
-            # Calculate a new column usage based as percentage on column used and column workloadsPurchased
-            # If we have a column named workloadsPurchased, we can calculate the percentage
-            if "workloadsPurchased" in data_frame.columns:
-                data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
-            # Extra columns are added, proceed.
-        except Exception as _exc:  # pylint:disable=broad-except
-            logging.debug("Could not calculate columns: %s", _exc)
+    # The usage command generates columns starting with dataPoints
+    try:
+        # If we have one or more columns with dataPoints.counts,
+        # calculate the sum of all columns starting with dataPoints.counts
+        if len(data_frame.filter(regex="dataPoints.counts").columns) > 0:
+            data_frame["used"] = data_frame.filter(regex="dataPoints.counts").sum(axis=1)
+        # Calculate a new column usage based as percentage on column used and column workloadsPurchased
+        # If we have a column named workloadsPurchased, we can calculate the percentage
+        if "workloadsPurchased" in data_frame.columns:
+            data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
+        # Extra columns are added, proceed.
+    except Exception as _exc: # pylint:disable=broad-except
+        logging.debug("Error calculating columns: %s", _exc)
 
-        # Change all nan values to empty string
-        data_frame = data_frame.fillna("")
+    # Change all nan values to empty string
+    data_frame = data_frame.fillna("")
 
-        # We have a dataframe, output here after we have dropped
-        # all but the selected columns
-        if params["columns"]:
-            # logging.debug("Dropping these columns: %s", data_frame.columns.difference(columns))
-            # data_frame.drop(columns=data_frame.columns.difference(columns),
-            #                 axis=1, inplace=True, errors="ignore")
+    # We have a dataframe, output here after we have dropped all but the selected columns
+    if params["columns"]:
+        # logging.debug("Dropping these columns: %s", data_frame.columns.difference(columns))
+        # data_frame.drop(columns=data_frame.columns.difference(columns),
+        #                 axis=1, inplace=True, errors="ignore")
 
-            # Find columns in data_frame whose name contains one of the
-            # values of parameter columns and filter on the resulting columns
-            regex_ = (r"(" + "|".join(columns) + ")")
-            logging.debug("Filtering columns based on case-insensitive regex: %s", regex_)
-            data_frame = data_frame.filter(regex=re.compile("(" + "|".join(columns) + ")", re.I))
-        else:
-            pass
-    except Exception as _exc:  # pylint:disable=broad-except
-        # There is no dataframe, might be just a single value, like version.
-        click.echo(data)
-        logging.debug("Error ingesting data into dataframe: %s", _exc)
-        sys.exit(1)
+        # Find columns in data_frame whose name contains one of the
+        # values of parameter columns and filter on the resulting columns
+        regex_ = (r"(" + "|".join(columns) + ")")
+        logging.debug("Filtering columns based on case-insensitive regex: %s", regex_)
+        data_frame = data_frame.filter(regex=re.compile("(" + "|".join(columns) + ")", re.I))
 
     # Before we show the output, remove the index column (which is not data_frame.index),
     # but only if the column exists.
@@ -286,9 +284,8 @@ def cli_output(data, sort_values=False):
     try:
         # Convert all columns to string
         data_frame = data_frame.applymap(str)
-
         data_frame = data_frame.drop_duplicates()
-    except Exception as _exc:  # pylint:disable=broad-except
+    except Exception as _exc: # pylint:disable=broad-except
         logging.debug("Error dropping duplicates: %s", _exc)
 
     # Drop all rows after max_rows
@@ -298,7 +295,6 @@ def cli_output(data, sort_values=False):
         if params["output"] == "text":
             # Drop all but first settings.max_columns columns from data_frame
             data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
-
             # Truncate all cells
             data_frame_truncated = data_frame.applymap(do_truncate, na_action='ignore')
             table_output = tabulate(data_frame_truncated, headers="keys", tablefmt="table", showindex=False)
