@@ -207,7 +207,7 @@ def cli_output(data, sort_values=False):
     #         normalize = True
     try:
         data_frame_normalized = pd.json_normalize(data)
-    except Exception as _exc: # pylint:disable=broad-except
+    except Exception as _exc:  # pylint:disable=broad-except
         logging.error("Error converting data via json_normalize(): %s", _exc)
         sys.exit(1)
 
@@ -218,7 +218,7 @@ def cli_output(data, sort_values=False):
     else:
         try:
             data_frame = pd.DataFrame(data)
-        except Exception as _exc: # pylint:disable=broad-except
+        except Exception as _exc:  # pylint:disable=broad-except
             logging.error("Error converting data via DataFrame(): %s", _exc)
             sys.exit(1)
 
@@ -240,7 +240,7 @@ def cli_output(data, sort_values=False):
     if params["query_filter"]:
         try:
             data_frame = data_frame.query(params["query_filter"])
-        except Exception as _exc: # pylint:disable=broad-except
+        except Exception as _exc:  # pylint:disable=broad-except
             logging.error("Error applying query filter: %s", _exc)
             logging.error("You might be filtering on a dynamic column.")
             logging.error("For example, if a certain tag does not exist, there is no way to filter on it.")
@@ -257,7 +257,7 @@ def cli_output(data, sort_values=False):
         if "workloadsPurchased" in data_frame.columns:
             data_frame["usage"] = data_frame["used"] / data_frame["workloadsPurchased"] * 100
         # Extra columns are added, proceed.
-    except Exception as _exc: # pylint:disable=broad-except
+    except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error calculating columns: %s", _exc)
 
     # Change all nan values to empty string
@@ -285,7 +285,7 @@ def cli_output(data, sort_values=False):
         # Convert all columns to string
         data_frame = data_frame.applymap(str)
         data_frame = data_frame.drop_duplicates()
-    except Exception as _exc: # pylint:disable=broad-except
+    except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error dropping duplicates: %s", _exc)
 
     # Drop all rows after max_rows
