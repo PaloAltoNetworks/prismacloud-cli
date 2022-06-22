@@ -1,4 +1,4 @@
-name: Prisma Cloud CLI Workflow
+name: Prisma Cloud CLI Build Workflow
 
 on: 
   push:
