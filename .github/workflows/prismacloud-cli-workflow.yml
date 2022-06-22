@@ -133,7 +133,7 @@ jobs:
           pc --config environment alert list --unit hour --amount 1 > /dev/null
 
   deploy:
-  needs: test
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
