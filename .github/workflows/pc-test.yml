@@ -45,7 +45,7 @@ jobs:
           PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
           PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
         run: |
-          pc --help
+          pc --config environment --help
 
       - name: Check usage
         env:
