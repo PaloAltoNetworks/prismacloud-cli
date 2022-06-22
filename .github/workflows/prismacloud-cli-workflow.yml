@@ -1,0 +1,164 @@
+name: Prisma Cloud CLI Workflow
+
+on: 
+  push:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Install pylint
+      run: |
+        pip install pylint
+
+    - name: Analysing the code with pylint
+      run: |
+        pylint $(git ls-files '*.py')
+
+    - name: Install flake8
+      run: |
+        pip install flake8
+
+    - name: Analysing the code with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # execute overall flake8 scan
+        flake8 . --count --statistics
+
+  test:
+    needs: qa
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+          pip install pylint
+          pip install -r requirements.txt
+
+      - name: Build package
+        run: python -m build
+
+      - name: Install package
+        run: pip install .
+
+      - name: Check connectivity
+        env:
+          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
+          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+        run: |
+          pc --config environment check
+
+      - name: Check usage
+        env:
+          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
+          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+        run: |
+          pc --config environment usage > /dev/null
+
+      - name: Check defenders summary
+        env:
+          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
+          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+        run: |
+          pc --config environment defenders summary > /dev/null
+
+      - name: Check login events
+        env:
+          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
+          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+        run: |
+          pc --config environment logs audit --type login > /dev/null
+
+      - name: Check tags
+        env:
+          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
+          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+        run: |
+          pc --config environment tags > /dev/null
+
+      - name: Check cloud names
+        env:
+          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
+          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+        run: |
+          pc --config environment cloud names > /dev/null
+
+      - name: Check alert list
+        env:
+          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
+          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+        run: |
+          pc --config environment alert list --unit hour --amount 1 > /dev/null
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+          pip install pylint
+          pip install -r requirements.txt
+
+      - name: Analysing the code with pylint
+        run: |
+          pylint $(git ls-files '*.py')
+
+      - name: Build package
+        run: python -m build
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
