@@ -78,6 +78,15 @@ jobs:
         run: |
           pc --config environment check
 
+      - name: Check CWPP version  # (previously exit code 1, should pass now)
+        env:
+          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
+          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+        run: |
+          pc --config environment check
+
       - name: Check usage
         env:
           PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
