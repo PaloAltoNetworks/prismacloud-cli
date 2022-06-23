@@ -339,6 +339,9 @@ def cli_output(data, sort_values=False):
         # There is no dataframe, might be just a single value, like version.
         click.echo(data)
         logging.debug("Error: %s", _exc)
+        # We have shown normal data through this exception.
+        # Exit with code 0 instead of 1.
+        sys.exit(0)
 
 
 def flatten_nested_json_df(data_frame):
