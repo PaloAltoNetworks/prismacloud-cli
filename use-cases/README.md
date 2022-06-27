@@ -2,4 +2,4 @@
 
 ## Webinar on the 29th of June 16:00-17:00 CET (10:00-11:00 EST)
 
-[link](june-2022.md)
+[Webinar Use-Cases](./june-2022.md)
