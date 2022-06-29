@@ -114,18 +114,18 @@ def read_cli_config_from_environment():
         config_env_settings["access_key_id"]    = os.environ.get("PC_ACCESS_KEY", "")
         config_env_settings["secret_key"]       = os.environ.get("PC_SECRET_KEY", "")
         # Normalize URLs.
-        config["api_endpoint"] = PrismaCloudUtility.normalize_api(config_env_settings["api_endpoint"])
-        config["pcc_api_endpoint"] = PrismaCloudUtility.normalize_api_compute(config_env_settings["pcc_api_endpoint"])
+        config_env_settings["api_endpoint"] = PrismaCloudUtility.normalize_api(config_env_settings["api_endpoint"])
+        config_env_settings["pcc_api_endpoint"] = PrismaCloudUtility.normalize_api_compute(config_env_settings["pcc_api_endpoint"])
         # Mask all except the first two characters of keys when debugging.
         masked_access_key = config_env_settings["access_key_id"][:3] + "*" * (len(config_env_settings["access_key_id"]) - 4)
-        masked_secret_key = config["secret_key"][:3] + "*" * (len(config["secret_key"]) - 4)
+        masked_secret_key = config_env_settings["secret_key"][:3] + "*" * (len(config_env_settings["secret_key"]) - 4)
         logging.debug("Environment variable found: PC_SAAS_API_ENDPOINT: %s", config_env_settings["api_endpoint"])
         logging.debug("Environment variable found: PC_COMPUTE_API_ENDPOINT: %s", config_env_settings["pcc_api_endpoint"])
         logging.debug("Environment variable found: PC_ACCESS_KEY: %s", masked_access_key)
         logging.debug("Environment variable found: PC_SECRET_KEY: %s", masked_secret_key)
     except Exception as exc: # pylint:disable=broad-except
         logging.debug("Error reading from environment: %s", exc)
-    logging.debug("Configuration read from environment: %s", config_file_name)
+    logging.debug("Configuration read from environment")
     return config_env_settings
 
 
