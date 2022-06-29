@@ -31,6 +31,7 @@ def map_cli_config_to_api_config():
     except Exception as exc: # pylint:disable=broad-except
         logging.debug("Error getting current context: %s", exc)
     settings = get_cli_config()
+    # Note that the Compute URL can be retrieved from a CSPM API call in SaaS, so in that case is optional.
     return {
         "api":         settings["api_endpoint"],
         "api_compute": settings["pcc_api_endpoint"],
