@@ -8,7 +8,7 @@ import types
 try:
     from pathlib import Path
     home_directory = str(Path.home())
-except Exception as _exc: # pylint:disable=broad-except
+except Exception as _exc:  # pylint:disable=broad-except
     logging.debug("Error identifying home directory using pathlib: %s", _exc)
     if "USERPROFILE" in os.environ:
         home_directory = os.environ["USERPROFILE"]
@@ -16,7 +16,7 @@ except Exception as _exc: # pylint:disable=broad-except
         home_directory = os.environ["HOME"]
 
 import click
-from prismacloud.api import pc_api, PrismaCloudUtility
+from prismacloud.api import pc_api, PrismaCloudUtility as pc_util
 import prismacloud.api.version as api_version
 import prismacloud.cli.version as cli_version
 
@@ -28,7 +28,7 @@ def map_cli_config_to_api_config():
     """Map cli configuration to api configuration"""
     try:
         click.get_current_context()
-    except Exception as exc: # pylint:disable=broad-except
+    except Exception as exc:  # pylint:disable=broad-except
         logging.debug("Error getting current context: %s", exc)
     settings = get_cli_config()
     # Note that the Compute URL can be retrieved from a CSPM API call in SaaS, so in that case is optional.
@@ -43,7 +43,7 @@ def map_cli_config_to_api_config():
 
 def get_cli_config():
     '''
-    Try to access params["configuration"]. 
+    Try to access params["configuration"].
     If it is equal to env or environment, try to read the following environment variables.
 
         PC_SAAS_API_ENDPOINT
@@ -54,12 +54,12 @@ def get_cli_config():
     If all of those are not set, try to read the config file specified by params["configuration"].
     '''
 
-    logging.info("Running prismacloud-cli version %s using prismacloud-api version %s", cli_version.version, api_version.version)
+    logging.info("Running prismacloud-cli version %s / prismacloud-api version %s", cli_version.version, api_version.version)
 
     params = {}
     try:
         params = click.get_current_context().find_root().params
-    except Exception as exc: # pylint:disable=broad-except
+    except Exception as exc:  # pylint:disable=broad-except
         logging.debug("Error getting current context to find root params: %s", exc)
         params["configuration"] = "credentials"
 
@@ -82,24 +82,28 @@ def get_cli_config():
         logging.info("Configuration directory does not exist, creating %s", config_directory)
         try:
             os.makedirs(config_directory)
-        except Exception as exc: # pylint:disable=broad-except
+        except Exception as exc:  # pylint:disable=broad-except
             logging.info("Error creating configuration directory: %s", exc)
 
     if os.path.exists(config_file_name):
         config_file_settings = read_cli_config_file(config_file_name)
-        # Normalize
-        config_file_settings["api_endpoint"] = PrismaCloudUtility.normalize_api(config_file_settings["api_endpoint"])
-        config_file_settings["pcc_api_endpoint"] = PrismaCloudUtility.normalize_api_compute(config_file_settings["pcc_api_endpoint"])
+        # Normalize URLs.
+        config_file_settings["api_endpoint"] = pc_util.normalize_api(config_file_settings["api_endpoint"])
+        config_file_settings["pcc_api_endpoint"] = pc_util.normalize_api_compute(config_file_settings["pcc_api_endpoint"])
     else:
         config_file_settings = {
-            "api_endpoint":     input("Enter your CSPM API URL (Optional if PCCE), eg: api.prismacloud.io: "),
-            "pcc_api_endpoint": input("Enter your CWPP API URL (Optional if PCEE), eg: example.cloud.twistlock.com/tenant or twistlock.example.com: "),
-            "access_key_id":    input("Enter your Access Key (or Username if PCCE): "),
-            "secret_key":       input("Enter your Secret Key (or Password if PCCE): ")
+            "api_endpoint":
+                input("Enter your CSPM API URL (Optional if PCCE), eg: api.prismacloud.io: "),
+            "pcc_api_endpoint":
+                input("Enter your CWPP API URL (Optional if PCEE), eg: example.twistlock.com/tenant or twistlock.example.com: "),  # noqa: E501
+            "access_key_id":
+                input("Enter your Access Key (or Username if PCCE): "),
+            "secret_key":
+                input("Enter your Secret Key (or Password if PCCE): ")
         }
         # Normalize URLs.
-        config_file_settings["api_endpoint"] = PrismaCloudUtility.normalize_api(config_file_settings["api_endpoint"])
-        config_file_settings["pcc_api_endpoint"] = PrismaCloudUtility.normalize_api_compute(config_file_settings["pcc_api_endpoint"])
+        config_file_settings["api_endpoint"] = pc_util.normalize_api(config_file_settings["api_endpoint"])
+        config_file_settings["pcc_api_endpoint"] = pc_util.normalize_api_compute(config_file_settings["pcc_api_endpoint"])
         write_cli_config_file(config_file_name, config_file_settings)
     return config_file_settings
 
@@ -109,13 +113,13 @@ def read_cli_config_from_environment():
     logging.debug("Reading configuration from environment")
     config_env_settings = {}
     try:
-        config_env_settings["api_endpoint"]     = os.environ.get("PC_SAAS_API_ENDPOINT", "")
+        config_env_settings["api_endpoint"] = os.environ.get("PC_SAAS_API_ENDPOINT", "")
         config_env_settings["pcc_api_endpoint"] = os.environ.get("PC_COMPUTE_API_ENDPOINT", "")
-        config_env_settings["access_key_id"]    = os.environ.get("PC_ACCESS_KEY", "")
-        config_env_settings["secret_key"]       = os.environ.get("PC_SECRET_KEY", "")
+        config_env_settings["access_key_id"] = os.environ.get("PC_ACCESS_KEY", "")
+        config_env_settings["secret_key"] = os.environ.get("PC_SECRET_KEY", "")
         # Normalize URLs.
-        config_env_settings["api_endpoint"] = PrismaCloudUtility.normalize_api(config_env_settings["api_endpoint"])
-        config_env_settings["pcc_api_endpoint"] = PrismaCloudUtility.normalize_api_compute(config_env_settings["pcc_api_endpoint"])
+        config_env_settings["api_endpoint"] = pc_util.normalize_api(config_env_settings["api_endpoint"])
+        config_env_settings["pcc_api_endpoint"] = pc_util.normalize_api_compute(config_env_settings["pcc_api_endpoint"])
         # Mask all except the first two characters of keys when debugging.
         masked_access_key = config_env_settings["access_key_id"][:3] + "*" * (len(config_env_settings["access_key_id"]) - 4)
         masked_secret_key = config_env_settings["secret_key"][:3] + "*" * (len(config_env_settings["secret_key"]) - 4)
@@ -123,7 +127,7 @@ def read_cli_config_from_environment():
         logging.debug("Environment variable found: PC_COMPUTE_API_ENDPOINT: %s", config_env_settings["pcc_api_endpoint"])
         logging.debug("Environment variable found: PC_ACCESS_KEY: %s", masked_access_key)
         logging.debug("Environment variable found: PC_SECRET_KEY: %s", masked_secret_key)
-    except Exception as exc: # pylint:disable=broad-except
+    except Exception as exc:  # pylint:disable=broad-except
         logging.debug("Error reading from environment: %s", exc)
     logging.debug("Configuration read from environment")
     return config_env_settings
@@ -135,7 +139,7 @@ def read_cli_config_file(config_file_name):
     try:
         with open(config_file_name, "r") as config_file:
             config_file_settings = json.load(config_file)
-    except Exception as exc: # pylint:disable=broad-except
+    except Exception as exc:  # pylint:disable=broad-except
         logging.info("Error reading configuration from file: %s", exc)
     # api_endpoint can be unspecified with PCCE, but this API SDK needs it to be defined at least as an empty string.
     if not ("api_endpoint" in config_file_settings and config_file_settings["api_endpoint"]):
@@ -151,7 +155,7 @@ def write_cli_config_file(config_file_name, config_file_settings):
         json_string = json.dumps(config_file_settings, sort_keys=True, indent=4)
         with open(config_file_name, "w") as config_file:
             config_file.write(json_string)
-    except Exception as exc: # pylint:disable=broad-except
+    except Exception as exc:  # pylint:disable=broad-except
         logging.info("Error writing configuration to file: %s", exc)
     logging.debug("Configuration written to file: %s", config_file_name)
 
