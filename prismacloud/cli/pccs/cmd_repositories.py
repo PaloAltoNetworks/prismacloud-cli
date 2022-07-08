@@ -18,7 +18,7 @@ def list_repositories():
     cli_output(result)
 
 
-@click.command("set", short_help="Update repository")
+@click.command("update", short_help="Update repository")
 @click.option(
     "--integration_type",
     default="github",
