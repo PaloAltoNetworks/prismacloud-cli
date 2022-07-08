@@ -7,6 +7,7 @@ import types
 
 try:
     from pathlib import Path
+
     homefolder = str(Path.home())
 except Exception as _exc:  # pylint:disable=broad-except
     logging.debug("Searching homefolder with pathlib not working, fallback: %s", _exc)
@@ -41,7 +42,7 @@ def map_cli_config_to_api_config():
 
 
 def get_cli_config():
-    '''
+    """
     Try to access params["configuration"]. If this is equal to
     env or environment, try to read environment variables
 
@@ -51,7 +52,7 @@ def get_cli_config():
     PC_SECRET_KEY
 
     If not all of these are set, try to read a config file.
-    '''
+    """
 
     params = {}
     try:

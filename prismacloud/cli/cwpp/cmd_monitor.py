@@ -12,33 +12,15 @@ def cli(ctx):
 
 @click.command()
 @click.option("--complianceids", "compliance_ids", help="Filter by compliance id.")
-def compliance(compliance_ids=''):
+def compliance(compliance_ids=""):
     result_hosts = pc_api.get_endpoint(
-        "hosts",
-        {
-            "complianceIDs": compliance_ids,
-            "sort": "complianceIssuesCount",
-            "reverse":
-            "true"
-        }
+        "hosts", {"complianceIDs": compliance_ids, "sort": "complianceIssuesCount", "reverse": "true"}
     )
     result_containers = pc_api.get_endpoint(
-        "containers",
-        {
-            "complianceIDs": compliance_ids,
-            "sort": "info.complianceIssuesCount",
-            "reverse":
-            "true"
-        }
+        "containers", {"complianceIDs": compliance_ids, "sort": "info.complianceIssuesCount", "reverse": "true"}
     )
     result_serverless = pc_api.get_endpoint(
-        "serverless",
-        {
-            "complianceIDs": compliance_ids,
-            "sort": "complianceIssuesCount",
-            "reverse":
-            "true"
-        }
+        "serverless", {"complianceIDs": compliance_ids, "sort": "complianceIssuesCount", "reverse": "true"}
     )
 
     # Concatenate results

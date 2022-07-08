@@ -36,7 +36,7 @@ def list_alerts(compliance_standard, amount, unit, status, detailed, policy_id, 
         "policy.id": policy_id,
         "timeAmount": amount,
         "timeType": "relative",
-        "timeUnit": unit
+        "timeUnit": unit,
     }
 
     # Fetch the alerts

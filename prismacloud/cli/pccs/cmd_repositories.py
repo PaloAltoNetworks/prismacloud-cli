@@ -22,7 +22,9 @@ def list_repositories():
 @click.option(
     "--integration_type",
     default="github",
-    type=click.Choice(["github", "githubEnterprise", "gitlab", "gitlabEnterprise", "bitbucket", "bitbucketEnterprise", "azureRepos"]),
+    type=click.Choice(
+        ["github", "githubEnterprise", "gitlab", "gitlabEnterprise", "bitbucket", "bitbucketEnterprise", "azureRepos"]
+    ),
     help="Type of the integration to update",
 )
 @click.option(
@@ -43,10 +45,10 @@ def list_repositories():
 def repository_update(integration_type, integration_id, repositories, separator):
     """Update repository"""
     logging.info("API - Updating repositories ...")
-    
+
     body_params = {}
-    
-    if (integration_id == None):
+
+    if integration_id is None:
         logging.info("API - Using the integration type of %s", integration_type)
         body_params["type"] = integration_type
     else:
@@ -54,9 +56,9 @@ def repository_update(integration_type, integration_id, repositories, separator)
         body_params["id"] = integration_id
 
     body_params["data"] = repositories.split(separator)
-    
+
     logging.info("API - List of repositories to be updated: %s", body_params["data"])
-    result = pc_api.repositories_update(body_params=body_params)    
+    result = pc_api.repositories_update(body_params=body_params)
     logging.info("API - Repository has been updated: %s", result)
 
 
