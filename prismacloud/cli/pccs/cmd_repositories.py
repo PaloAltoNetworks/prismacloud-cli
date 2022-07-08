@@ -1,11 +1,57 @@
+import logging
+
 import click
 
 from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
 
 
-@click.command("repositories", short_help="[PCCS] Output details about the repositories onboardes to PCCS")
+@click.group("repositories", short_help="[PCCS] Interact with repositories")
 @pass_environment
-def cli(ctx):  # pylint: disable=no-value-for-parameter
+def cli(ctx):
+    pass
+
+
+@click.command("list", short_help="Output details about the repositories onboardes to PCCS")
+def list_repositories():
     result = pc_api.repositories_list_read(query_params={"errorsCount": "true"})
     cli_output(result)
+
+
+@click.command("set", short_help="Update repository")
+@click.option(
+    "--integration_type",
+    default="github",
+    type=click.Choice(["github", "githubEnterprise", "gitlab", "gitlabEnterprise", "bitbucket", "bitbucketEnterprise", "azureRepos"]),
+    help="Type of the integration to update",
+)
+@click.option(
+    "--integration_id",
+    default=None,
+    help="ID of the integration to update",
+)
+@click.option(
+    "--repositories",
+    default=None,
+    help="List of repositories separated by #. The seperator can be customize with --seperator option.",
+)
+@click.option(
+    "--separator",
+    default="#",
+    help="Use different separator than #",
+)
+def repository_update(integration_type, integration_id, repositories, separator):
+    """Update repository"""
+    logging.info("API - Updating repository ...")
+    
+    body_params = {}
+    body_params["type"] = integration_type
+    body_params["data"] = repositories.split(separator)
+    
+    logging.info("API - Repository name to be updated: %s", body_params)
+    result = pc_api.repositories_update(body_params=body_params)    
+    logging.info("API - Repository has been updated: %s", result)
+
+
+cli.add_command(list_repositories)
+cli.add_command(repository_update)
