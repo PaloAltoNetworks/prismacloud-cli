@@ -42,13 +42,20 @@ def list_repositories():
 )
 def repository_update(integration_type, integration_id, repositories, separator):
     """Update repository"""
-    logging.info("API - Updating repository ...")
+    logging.info("API - Updating repositories ...")
     
     body_params = {}
-    body_params["type"] = integration_type
+    
+    if (integration_id == None):
+        logging.info("API - Using the integration type of %s", integration_type)
+        body_params["type"] = integration_type
+    else:
+        logging.info("API - Using the integration ID: %s", integration_id)
+        body_params["id"] = integration_id
+
     body_params["data"] = repositories.split(separator)
     
-    logging.info("API - Repository name to be updated: %s", body_params)
+    logging.info("API - List of repositories to be updated: %s", body_params["data"])
     result = pc_api.repositories_update(body_params=body_params)    
     logging.info("API - Repository has been updated: %s", result)
 
