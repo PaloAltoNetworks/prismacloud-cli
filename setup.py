@@ -36,7 +36,7 @@ setup(
         "update_checker",
         "pydantic",
         "datetime",
-        "prismacloud-api==4.0.1",
+        "prismacloud-api==4.0.6",
     ],
     name="prismacloud-cli",
     version=version,
