@@ -43,7 +43,9 @@ def get_available_version():
         update_available_text_block = """\b
 Update available: {} -> {}
 Run {} to update
-        """.format(cli_version.version, update_available, click.style("pip3 install -U prismacloud-cli", fg="red"))
+        """.format(
+            cli_version.version, update_available, click.style("pip3 install -U prismacloud-cli", fg="red")
+        )
     else:
         update_available_text_block = ""
 
@@ -51,7 +53,7 @@ Run {} to update
 
 
 class Settings(BaseSettings):  # pylint:disable=too-few-public-methods
-    """ Prisma Cloud CLI Settings """
+    """Prisma Cloud CLI Settings"""
 
     app_name: str = "Prisma Cloud CLI"
     max_columns: int = 7
@@ -139,8 +141,8 @@ class PrismaCloudCLI(HelpColorsMultiCommand):
 @click.command(
     cls=PrismaCloudCLI,
     context_settings=CONTEXT_SETTINGS,
-    help_headers_color='yellow',
-    help_options_color='green',
+    help_headers_color="yellow",
+    help_options_color="green",
     help="""
 \b
 Prisma Cloud CLI (version: {0})
@@ -180,7 +182,7 @@ def cli(ctx, very_verbose, verbose, configuration, output, query_filter, columns
 
 
 def cli_output(data, sort_values=False):
-    """ Parse data and format output """
+    """Parse data and format output"""
 
     # Retrieve parameters
     params = click.get_current_context().find_root().params
@@ -226,15 +228,15 @@ def cli_output(data, sort_values=False):
     for column in data_frame.columns:
         if column.lower() in ["time", "lastmodified", "availableasof"]:
             try:
-                data_frame[column] = pd.to_datetime(data_frame[column], unit='ms')
+                data_frame[column] = pd.to_datetime(data_frame[column], unit="ms")
             except Exception as _exc:  # pylint:disable=broad-except
                 logging.debug("Error converting column to milliseconds: %s", _exc)
                 try:
-                    data_frame[column] = pd.to_datetime(data_frame[column], unit='s')
+                    data_frame[column] = pd.to_datetime(data_frame[column], unit="s")
                 except Exception as _exc:  # pylint:disable=broad-except
                     logging.debug("Error converting column to seconds: %s", _exc)
 
-    data_frame.fillna('', inplace=True)
+    data_frame.fillna("", inplace=True)
 
     # If a filter is set, try to apply it
     if params["query_filter"]:
@@ -271,7 +273,7 @@ def cli_output(data, sort_values=False):
 
         # Find columns in data_frame whose name contains one of the
         # values of parameter columns and filter on the resulting columns
-        regex_ = (r"(" + "|".join(columns) + ")")
+        regex_ = r"(" + "|".join(columns) + ")"
         logging.debug("Filtering columns based on case-insensitive regex: %s", regex_)
         data_frame = data_frame.filter(regex=re.compile("(" + "|".join(columns) + ")", re.I))
 
@@ -296,7 +298,7 @@ def cli_output(data, sort_values=False):
             # Drop all but first settings.max_columns columns from data_frame
             data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
             # Truncate all cells
-            data_frame_truncated = data_frame.applymap(do_truncate, na_action='ignore')
+            data_frame_truncated = data_frame.applymap(do_truncate, na_action="ignore")
             table_output = tabulate(data_frame_truncated, headers="keys", tablefmt="table", showindex=False)
             click.secho(table_output, fg="green")
         if params["output"] == "json":
@@ -319,11 +321,12 @@ def cli_output(data, sort_values=False):
                 data_frame.to_html(
                     index=False,
                     max_cols=settings.max_columns,
-                    na_rep='',
+                    na_rep="",
                     classes="table table-sm table-striped text-left",
-                    justify="left"
-                    ),
-                fg="green")
+                    justify="left",
+                ),
+                fg="green",
+            )
             # post-table-html
             post_table_html = """
 
@@ -345,7 +348,7 @@ def cli_output(data, sort_values=False):
 
 
 def flatten_nested_json_df(data_frame):
-    """ Flatten nested json in our dataframe """
+    """Flatten nested json in our dataframe"""
     logging.debug("Flatten nested json")
     data_frame = data_frame.reset_index()
     temp_s = (data_frame.applymap(type) == list).all()
@@ -359,7 +362,7 @@ def flatten_nested_json_df(data_frame):
 
         for col in dict_columns:
             logging.debug("Flatten (dict) column: %s", col)
-            horiz_exploded = pd.json_normalize(data_frame[col]).add_prefix(f'{col}.')
+            horiz_exploded = pd.json_normalize(data_frame[col]).add_prefix(f"{col}.")
             horiz_exploded.index = data_frame.index
             data_frame = pd.concat([data_frame, horiz_exploded], axis=1).drop(columns=[col])
             new_columns.extend(horiz_exploded.columns)  # inplace
@@ -391,7 +394,7 @@ def do_truncate(truncate_this):
     try:
         truncate_this = str(truncate_this)
         if len(truncate_this) > settings.max_width:
-            return truncate_this[:settings.max_width] + "..."
+            return truncate_this[: settings.max_width] + "..."
         return truncate_this
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error truncating: %s", _exc)

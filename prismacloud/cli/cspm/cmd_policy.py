@@ -25,11 +25,7 @@ def list_policies():
     type=click.Choice(["low", "medium", "high"]),
     help="Enable or disable Policies by Policy Severity.",
 )
-@click.option(
-    "--all_policies",
-    is_flag=True,
-    help="Enable or disable all Policies."
-)
+@click.option("--all_policies", is_flag=True, help="Enable or disable all Policies.")
 @click.option(
     "--cloud_type",
     type=click.Choice(["aws", "azure", "gcp", "oci", "alibaba_cloud"]),
@@ -45,11 +41,7 @@ def list_policies():
     default=None,
     help="Enable or disable Policies by Compliance Standard, e.g.: 'CIS v1.4.0 (AWS)'",
 )
-@click.option(
-    "--status",
-    type=click.Choice(["enable", "disable"]),
-    help="Policy status to set (enable or disable)."
-)
+@click.option("--status", type=click.Choice(["enable", "disable"]), help="Policy status to set (enable or disable).")
 def enable_or_disable_policies(policy_severity, all_policies, cloud_type, policy_type, status, compliance_standard):
     """Enable or Disable policies"""
     specified_policy_status = bool(status.lower() == "enable")
@@ -60,12 +52,12 @@ def enable_or_disable_policies(policy_severity, all_policies, cloud_type, policy
 
     policy_list_to_update = []
     if compliance_standard is not None:
-        logging.info('API - Getting list of Policies by Compliance Standard: %s', compliance_standard)
+        logging.info("API - Getting list of Policies by Compliance Standard: %s", compliance_standard)
         policy_list = pc_api.compliance_standard_policy_v2_list_read(compliance_standard)
         logging.info("API - Done")
         for policy in policy_list:
             # Do not update a policy if it is already in the desired state.
-            if policy['enabled'] is not specified_policy_status:
+            if policy["enabled"] is not specified_policy_status:
                 policy_list_to_update.append(policy)
     else:
         if all_policies:

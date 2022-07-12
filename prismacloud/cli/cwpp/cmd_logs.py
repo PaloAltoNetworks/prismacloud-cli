@@ -31,12 +31,12 @@ def console(limit=150):
     "-t",
     "--type",
     "type_",
-    type=click.Choice(['login', 'profile', 'settings', 'rule', 'user', 'group', 'credential', 'tag'], case_sensitive=True),
+    type=click.Choice(["login", "profile", "settings", "rule", "user", "group", "credential", "tag"], case_sensitive=True),
     help="Type of log to retrieve",
     required=False,
-    )
+)
 @click.option("-h", "--hours", default=1, help="Show results for last n hours")
-def audit(type_='', hours=1):
+def audit(type_="", hours=1):
     # Calculate utc time since x hours ago (default 1)
     utc_time = datetime.datetime.utcnow() - datetime.timedelta(hours=hours)
     from_ = utc_time
