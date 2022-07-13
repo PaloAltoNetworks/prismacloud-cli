@@ -31,13 +31,13 @@ def map_cli_config_to_api_config():
     except Exception as exc:  # pylint:disable=broad-except
         logging.debug("Error getting current context: %s", exc)
     settings = get_cli_config()
-    # Note that the Compute URL can be retrieved from a CSPM API call in SaaS, so in that case is optional.
+    # Map keys between API and CLI.
     return {
         "api":         settings["api_endpoint"],
         "api_compute": settings["pcc_api_endpoint"],
         "username":    settings["access_key_id"],
         "password":    settings["secret_key"],
-        "ca_bundle":   False,
+        "ca_bundle":   settings["ca_bundle"],
     }
 
 
@@ -74,23 +74,45 @@ def get_cli_config():
             return config_env_settings
 
     # Read or write configuration from or to a file.
-
     config_directory = home_directory + "/.prismacloud/"
     config_file_name = config_directory + params["configuration"] + ".json"
 
-    if not os.path.exists(config_directory):
-        logging.info("Configuration directory does not exist, creating %s", config_directory)
-        try:
-            os.makedirs(config_directory)
-        except Exception as exc:  # pylint:disable=broad-except
-            logging.info("Error creating configuration directory: %s", exc)
+    # Fallback to the API file extension.
+    if not os.path.exists(config_file_name):
+        config_file_name = config_directory + params["configuration"] + ".conf"
 
     if os.path.exists(config_file_name):
         config_file_settings = read_cli_config_file(config_file_name)
+        # Normalize keys between API and CLI.
+        if not "api_endpoint" in config_file_settings and "api" in config_file_settings:
+            config_file_settings["api_endpoint"] = config_file_settings.pop("api")
+        if not "pcc_api_endpoint" in config_file_settings and "api_compute" in config_file_settings:
+            config_file_settings["pcc_api_endpoint"] = config_file_settings.pop("api_compute")
+        if not "access_key_id" in config_file_settings and "username" in config_file_settings:
+            config_file_settings["access_key_id"] = config_file_settings.pop("username")
+        if not "secret_key" in config_file_settings and "password" in config_file_settings:
+            config_file_settings["secret_key"] = config_file_settings.pop("password")
+        # Note that, with PCCE, api_endpoint is unspecified.
+        # But the API needs it to be defined at least as an empty string.
+        if not ("api_endpoint" in config_file_settings and config_file_settings["api_endpoint"]):
+            config_file_settings["api_endpoint"] = ""
+        # Note that, with PCEE, pcc_api_endpoint can be retrieved via CSPM API call, so it is optional.
+        # But the API needs it to be defined at least as an empty string.
+        if not ("pcc_api_endpoint" in config_file_settings and config_file_settings["pcc_api_endpoint"]):
+            config_file_settings["pcc_api_endpoint"] = ""
+        # ca_bundle can be True, False, or the path to a file.
+        if not ("ca_bundle" in config_file_settings):
+            config_file_settings["ca_bundle"] = False
         # Normalize URLs.
-        config_file_settings["api_endpoint"] = pc_util.normalize_api(config_file_settings["api_endpoint"])
-        config_file_settings["pcc_api_endpoint"] = pc_util.normalize_api_compute(config_file_settings["pcc_api_endpoint"])
+        config_file_settings["api_endpoint"] = pc_util.normalize_api(config_file_settings.get("api_endpoint"))
+        config_file_settings["pcc_api_endpoint"] = pc_util.normalize_api_compute(config_file_settings.get("pcc_api_endpoint"))
     else:
+        if not os.path.exists(config_directory):
+            logging.info("Configuration directory does not exist, creating %s", config_directory)
+            try:
+                os.makedirs(config_directory)
+            except Exception as exc:  # pylint:disable=broad-except
+                logging.info("Error creating configuration directory: %s", exc)
         config_file_settings = {
             "api_endpoint":
                 input("Enter your CSPM API URL (Optional if PCCE), eg: api.prismacloud.io: "),
@@ -99,7 +121,9 @@ def get_cli_config():
             "access_key_id":
                 input("Enter your Access Key (or Username if PCCE): "),
             "secret_key":
-                input("Enter your Secret Key (or Password if PCCE): ")
+                input("Enter your Secret Key (or Password if PCCE): "),
+            "ca_bundle":
+                False
         }
         # Normalize URLs.
         config_file_settings["api_endpoint"] = pc_util.normalize_api(config_file_settings["api_endpoint"])
@@ -117,6 +141,7 @@ def read_cli_config_from_environment():
         config_env_settings["pcc_api_endpoint"] = os.environ.get("PC_COMPUTE_API_ENDPOINT", "")
         config_env_settings["access_key_id"] = os.environ.get("PC_ACCESS_KEY", "")
         config_env_settings["secret_key"] = os.environ.get("PC_SECRET_KEY", "")
+        config_env_settings["ca_bundle"] = False
         # Normalize URLs.
         config_env_settings["api_endpoint"] = pc_util.normalize_api(config_env_settings["api_endpoint"])
         config_env_settings["pcc_api_endpoint"] = pc_util.normalize_api_compute(config_env_settings["pcc_api_endpoint"])
@@ -136,14 +161,12 @@ def read_cli_config_from_environment():
 def read_cli_config_file(config_file_name):
     """Read cli configuration from a file"""
     logging.debug("Reading configuration from file: %s", config_file_name)
+    config_file_settings = {}
     try:
         with open(config_file_name, "r") as config_file:
             config_file_settings = json.load(config_file)
     except Exception as exc:  # pylint:disable=broad-except
         logging.info("Error reading configuration from file: %s", exc)
-    # api_endpoint can be unspecified with PCCE, but this API SDK needs it to be defined at least as an empty string.
-    if not ("api_endpoint" in config_file_settings and config_file_settings["api_endpoint"]):
-        config_file_settings["api_endpoint"] = ""
     logging.debug("Configuration read from file: %s", config_file_name)
     return config_file_settings
 
