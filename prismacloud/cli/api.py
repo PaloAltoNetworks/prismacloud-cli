@@ -84,13 +84,13 @@ def get_cli_config():
     if os.path.exists(config_file_name):
         config_file_settings = read_cli_config_file(config_file_name)
         # Normalize keys between API and CLI.
-        if not "api_endpoint" in config_file_settings and "api" in config_file_settings:
+        if "api_endpoint" not in config_file_settings and "api" in config_file_settings:
             config_file_settings["api_endpoint"] = config_file_settings.pop("api")
-        if not "pcc_api_endpoint" in config_file_settings and "api_compute" in config_file_settings:
+        if "pcc_api_endpoint" not in config_file_settings and "api_compute" in config_file_settings:
             config_file_settings["pcc_api_endpoint"] = config_file_settings.pop("api_compute")
-        if not "access_key_id" in config_file_settings and "username" in config_file_settings:
+        if "access_key_id" not in config_file_settings and "username" in config_file_settings:
             config_file_settings["access_key_id"] = config_file_settings.pop("username")
-        if not "secret_key" in config_file_settings and "password" in config_file_settings:
+        if "secret_key" not in config_file_settings and "password" in config_file_settings:
             config_file_settings["secret_key"] = config_file_settings.pop("password")
         # Note that, with PCCE, api_endpoint is unspecified.
         # But the API needs it to be defined at least as an empty string.

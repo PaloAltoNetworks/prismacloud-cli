@@ -8,12 +8,12 @@ from prismacloud.cli.api import pc_api
 @click.command("saas_version", short_help="[CSPM] Shows SaaS (CSPM and CWPP) version")
 @pass_environment
 def cli(ctx):
-    version_string = pc_api.get_endpoint("version", api = "cspm")
+    version_string = pc_api.get_endpoint("version", api="cspm")
     version_tag = "unknown"
     version_sha = "unknown"
     if version_string:
         try:
-            results = re.search('Tag: (.+?), Version:\s+(.+)', version_string)
+            results = re.search(r"Tag: (.+?), Version:\s+(.+)", version_string)
             if results:
                 version_tag = results.group(1)
                 version_sha = results.group(2)
