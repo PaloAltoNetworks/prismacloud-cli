@@ -7,5 +7,6 @@ from prismacloud.cli.api import pc_api
 @click.command("version", short_help="[CWPP] Shows CWPP version.")
 @pass_environment
 def cli(ctx):
-    version = pc_api.get_endpoint("version")
+    compute_version = pc_api.get_endpoint("version", api="cwpp")
+    version = {"cwpp_version": compute_version}
     cli_output(version)
