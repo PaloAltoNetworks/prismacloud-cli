@@ -231,7 +231,7 @@ def process_data_frame(data):
             sys.exit(1)
 
     # If a column contains time, try convert it to datetime
-    for column in data_frame.columns:
+    for column in str(data_frame.columns):
         if column.lower() in ["time", "lastmodified", "availableasof"]:
             try:
                 data_frame[column] = pd.to_datetime(data_frame[column], unit="ms")
