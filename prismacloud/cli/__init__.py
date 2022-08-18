@@ -169,16 +169,14 @@ def cli(ctx, very_verbose, verbose, configuration, output, query_filter, columns
     """Define the command line"""
     ctx.configuration = configuration
     ctx.output = output
+    log_format = "%(asctime)s - %(levelname)s - %(message)s"
 
     if verbose:
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-        coloredlogs.install(level="INFO")
+        coloredlogs.install(level="INFO", fmt=log_format)
     elif very_verbose:
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
-        coloredlogs.install(level="DEBUG")
+        coloredlogs.install(level="DEBUG", fmt=log_format)
     else:
-        logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
-        coloredlogs.install(level="ERROR")
+        coloredlogs.install(level="ERROR", fmt=log_format)
 
 
 def get_parameters():
