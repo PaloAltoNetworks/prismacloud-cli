@@ -203,11 +203,8 @@ def log_settings():
     logging.debug("  Max levels: %s", settings.max_levels)
 
 
-def cli_output(data, sort_values=False):
-    """Parse data and format output"""
+def process_data_frame(data):
     params, columns = get_parameters()
-    log_settings()  # Log settings in debug level
-
     # https://pandas.pydata.org/docs/reference/api/pandas.json_normalize.html
     # json_normalize() requires a dictionary or list of dictionaries
     # normalize = False
@@ -302,6 +299,22 @@ def cli_output(data, sort_values=False):
     # Drop all rows after max_rows
     data_frame = data_frame.head(settings.max_rows)
 
+    return data_frame
+
+
+def cli_output(data, sort_values=False):
+    """Parse data and format output"""
+    params = get_parameters()[0]
+    log_settings()  # Log settings in debug level
+
+    # Read data, convert to dataframe and process it
+    data_frame = process_data_frame(data)
+
+    # Generate and show the output
+    show_output(data_frame, params)
+
+
+def show_output(data_frame, params):
     try:
         if params["output"] == "text":
             # Drop all but first settings.max_columns columns from data_frame
