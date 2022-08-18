@@ -205,10 +205,8 @@ def log_settings():
 
 def cli_output(data, sort_values=False):
     """Parse data and format output"""
-
     params, columns = get_parameters()
-
-    log_settings()
+    log_settings()  # Log settings in debug level
 
     # https://pandas.pydata.org/docs/reference/api/pandas.json_normalize.html
     # json_normalize() requires a dictionary or list of dictionaries
