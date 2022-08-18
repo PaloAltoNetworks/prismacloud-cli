@@ -203,10 +203,6 @@ def cli_output(data, sort_values=False):
     logging.debug("Settings: maximum number of columns: %s", settings.max_columns)
     logging.debug("Settings: maximum number of levels to flatten: %s", settings.max_levels)
 
-    # If there is no data structure, just a single string value, like with 'pc version'.
-    if isinstance(data, str):
-        data = {"": data}
-
     # https://pandas.pydata.org/docs/reference/api/pandas.json_normalize.html
     # json_normalize() requires a dictionary or list of dictionaries
     # normalize = False
