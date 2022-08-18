@@ -180,6 +180,7 @@ def cli(ctx, very_verbose, verbose, configuration, output, query_filter, columns
         logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
         coloredlogs.install(level="ERROR")
 
+
 def get_parameters():
     """Get parameters from command line"""
 
@@ -189,19 +190,27 @@ def get_parameters():
     # If there is a parameter columns, split it into a list
     if params["columns"]:
         columns = params["columns"].split(",")
+    else:
+        columns = False
 
-    return params
+    return params, columns
+
+
+def log_settings():
+    """Log settings"""
+    logging.debug("Settings:")
+    logging.debug("  Max columns: %s", settings.max_columns)
+    logging.debug("  Max rows: %s", settings.max_rows)
+    logging.debug("  Max width: %s", settings.max_width)
+    logging.debug("  Max levels: %s", settings.max_levels)
+
 
 def cli_output(data, sort_values=False):
     """Parse data and format output"""
 
-    params = get_parameters()
+    params, columns = get_parameters()
 
-    # If we are in debugging mode, show settings for output
-    logging.debug("Settings: maximum width: %s", settings.max_width)
-    logging.debug("Settings: maximum number of rows: %s", settings.max_rows)
-    logging.debug("Settings: maximum number of columns: %s", settings.max_columns)
-    logging.debug("Settings: maximum number of levels to flatten: %s", settings.max_levels)
+    log_settings()
 
     # https://pandas.pydata.org/docs/reference/api/pandas.json_normalize.html
     # json_normalize() requires a dictionary or list of dictionaries
