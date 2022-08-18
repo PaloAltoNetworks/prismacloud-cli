@@ -180,14 +180,22 @@ def cli(ctx, very_verbose, verbose, configuration, output, query_filter, columns
         logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
         coloredlogs.install(level="ERROR")
 
+def get_parameters():
+    """Get parameters from command line"""
+
+    # Retrieve parameters
+    params = click.get_current_context().find_root().params
+
+    # If there is a parameter columns, split it into a list
+    if params["columns"]:
+        columns = params["columns"].split(",")
+
+    return params
 
 def cli_output(data, sort_values=False):
     """Parse data and format output"""
 
-    # Retrieve parameters
-    params = click.get_current_context().find_root().params
-    if params["columns"]:
-        columns = params["columns"].split(",")
+    params = get_parameters()
 
     # If we are in debugging mode, show settings for output
     logging.debug("Settings: maximum width: %s", settings.max_width)
