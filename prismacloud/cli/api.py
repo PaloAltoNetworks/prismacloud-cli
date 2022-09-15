@@ -192,13 +192,27 @@ def get_endpoint(_self, endpoint, query_params=None, api="cwpp", request_type="G
     logging.debug("Calling API Endpoint (%s): %s", request_type, endpoint)
     result = None
     if api == "cspm":
-        result = pc_api.execute(request_type, endpoint, query_params)
+        try:
+            result = pc_api.execute(request_type, endpoint, query_params)
+        except Exception as exc:  # pylint:disable=broad-except
+            logging.error("There was an error executing the request. Check if this API (cspm) is available in your environment.")  # noqa: E501
+            logging.error("Please check your config and try again. Error: %s", exc)  # noqa: E501
+            exit(1)
     if api == "cwpp":
         if not endpoint.startswith("api"):
             endpoint = "api/v1/%s" % endpoint
-        result = pc_api.execute_compute(request_type, endpoint, query_params)
+            try:
+                result = pc_api.execute_compute(request_type, endpoint, query_params)
+            except Exception as exc:  # pylint:disable=broad-except
+                logging.error("There was an error executing the request: %s", exc)
+                exit(1)
     if api == "code":
-        result = pc_api.execute_code_security(request_type, endpoint, query_params)
+        try:
+            result = pc_api.execute_code_security(request_type, endpoint, query_params)
+        except Exception as exc:  # pylint:disable=broad-except
+            logging.error("There was an error executing the request. Check if this API (code) is available in your environment.")  # noqa: E501
+            logging.error("Please check your config and try again. Error: %s", exc)  # noqa: E501
+            exit(1)
     return result
 
 

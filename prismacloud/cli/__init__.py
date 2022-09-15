@@ -169,36 +169,42 @@ def cli(ctx, very_verbose, verbose, configuration, output, query_filter, columns
     """Define the command line"""
     ctx.configuration = configuration
     ctx.output = output
+    log_format = "%(asctime)s - %(levelname)s - %(message)s"
 
     if verbose:
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-        coloredlogs.install(level="INFO")
+        coloredlogs.install(level="INFO", fmt=log_format)
     elif very_verbose:
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
-        coloredlogs.install(level="DEBUG")
+        coloredlogs.install(level="DEBUG", fmt=log_format)
     else:
-        logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
-        coloredlogs.install(level="ERROR")
+        coloredlogs.install(level="ERROR", fmt=log_format)
 
 
-def cli_output(data, sort_values=False):
-    """Parse data and format output"""
+def get_parameters():
+    """Get parameters from command line"""
 
     # Retrieve parameters
     params = click.get_current_context().find_root().params
+
+    # If there is a parameter columns, split it into a list
     if params["columns"]:
         columns = params["columns"].split(",")
+    else:
+        columns = False
 
-    # If we are in debugging mode, show settings for output
-    logging.debug("Settings: maximum width: %s", settings.max_width)
-    logging.debug("Settings: maximum number of rows: %s", settings.max_rows)
-    logging.debug("Settings: maximum number of columns: %s", settings.max_columns)
-    logging.debug("Settings: maximum number of levels to flatten: %s", settings.max_levels)
+    return params, columns
 
-    # If there is no data structure, just a single string value, like with 'pc version'.
-    if isinstance(data, str):
-        data = {"": data}
 
+def log_settings():
+    """Log settings"""
+    logging.debug("Settings:")
+    logging.debug("  Max columns: %s", settings.max_columns)
+    logging.debug("  Max rows: %s", settings.max_rows)
+    logging.debug("  Max width: %s", settings.max_width)
+    logging.debug("  Max levels: %s", settings.max_levels)
+
+
+def process_data_frame(data):
+    params, columns = get_parameters()
     # https://pandas.pydata.org/docs/reference/api/pandas.json_normalize.html
     # json_normalize() requires a dictionary or list of dictionaries
     # normalize = False
@@ -225,7 +231,7 @@ def cli_output(data, sort_values=False):
             sys.exit(1)
 
     # If a column contains time, try convert it to datetime
-    for column in data_frame.columns:
+    for column in str(data_frame.columns):
         if column.lower() in ["time", "lastmodified", "availableasof"]:
             try:
                 data_frame[column] = pd.to_datetime(data_frame[column], unit="ms")
@@ -293,6 +299,22 @@ def cli_output(data, sort_values=False):
     # Drop all rows after max_rows
     data_frame = data_frame.head(settings.max_rows)
 
+    return data_frame
+
+
+def cli_output(data, sort_values=False):
+    """Parse data and format output"""
+    params = get_parameters()[0]
+    log_settings()  # Log settings in debug level
+
+    # Read data, convert to dataframe and process it
+    data_frame = process_data_frame(data)
+
+    # Generate and show the output
+    show_output(data_frame, params, data)
+
+
+def show_output(data_frame, params, data):
     try:
         if params["output"] == "text":
             # Drop all but first settings.max_columns columns from data_frame
