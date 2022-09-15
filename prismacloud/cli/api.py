@@ -203,7 +203,7 @@ def get_endpoint(_self, endpoint, query_params=None, api="cwpp", request_type="G
             endpoint = "api/v1/%s" % endpoint
             try:
                 result = pc_api.execute_compute(request_type, endpoint, query_params)
-            except Exception as exc:
+            except Exception as exc:  # pylint:disable=broad-except
                 logging.error("There was an error executing the request: %s", exc)
                 exit(1)
     if api == "code":

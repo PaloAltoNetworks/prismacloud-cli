@@ -311,10 +311,10 @@ def cli_output(data, sort_values=False):
     data_frame = process_data_frame(data)
 
     # Generate and show the output
-    show_output(data_frame, params)
+    show_output(data_frame, params, data)
 
 
-def show_output(data_frame, params):
+def show_output(data_frame, params, data):
     try:
         if params["output"] == "text":
             # Drop all but first settings.max_columns columns from data_frame
