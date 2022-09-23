@@ -40,6 +40,45 @@ def map_cli_config_to_api_config():
         "ca_bundle":   settings["ca_bundle"],
     }
 
+def community_supported():
+    """If the community supported message has not been accepted yet, it must be shown
+    with the possibility to accept."""
+    community_supported_message = """# Community Supported
+This template/solution is released under an as-is, best effort,
+support policy. These scripts should be seen as community
+supported and Palo Alto Networks will contribute our expertise as
+and when possible. We do not provide technical support or help in
+using or troubleshooting the components of the project through our
+normal support options such as Palo Alto Networks support teams,
+or ASC (Authorized Support Centers) partners and backline support
+options. The underlying product used (Prisma Cloud) by the scripts
+or templates are still supported, but the support is only for the
+product functionality and not for help in deploying or using the
+template or script itself.
+
+Unless explicitly tagged, all projects or work posted in our
+GitHub repository (at https://github.com/PaloAltoNetworks) or
+sites other than our official Downloads page on
+https://support.paloaltonetworks.com are provided under the best
+effort policy.
+"""
+
+    # Check if message already has been accepted
+    config_directory = home_directory + "/.prismacloud/"
+    community_support_accepted = config_directory + ".community_supported_accepted"
+    if os.path.exists(community_support_accepted):
+        return True
+    else:
+        print(community_supported_message)
+        answer = input("Type yes to confirm you have read the message above: ")
+        if any(answer.lower() == f for f in ["yes", 'y']):
+            print("Message accepted.")
+            # Create file to check next time
+            with open(community_support_accepted, "w") as _accepted:
+                _accepted.write("Yes")
+        else:
+            print("You need to confirm you have read the message above.")
+            exit(1)
 
 def get_cli_config():
     '''
@@ -55,6 +94,8 @@ def get_cli_config():
     '''
 
     logging.info("Running prismacloud-cli version %s / prismacloud-api version %s", cli_version.version, api_version.version)
+
+    community_supported()  # Check if support message has been shown and accepted
 
     params = {}
     try:
