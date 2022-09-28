@@ -75,6 +75,8 @@ effort policy.
         if any(answer.lower() == f for f in ["yes", 'y']):
             print("Message accepted.")
             # Create file to check next time
+            if not os.path.exists(config_directory):
+                os.mkdir(config_directory)
             with open(community_support_accepted, "w") as _accepted:
                 _accepted.write("Yes")
         else:
