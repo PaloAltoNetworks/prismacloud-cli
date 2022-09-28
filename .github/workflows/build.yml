@@ -68,6 +68,9 @@ jobs:
 
       - name: Install package
         run: pip install .
+        
+      - name: Accept Support Message
+        run: touch ~/.prismacloud/.community_supported_accepted
 
       - name: Check connectivity
         env:
