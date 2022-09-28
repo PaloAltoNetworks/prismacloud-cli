@@ -40,6 +40,7 @@ def map_cli_config_to_api_config():
         "ca_bundle":   settings["ca_bundle"],
     }
 
+
 def community_supported():
     """If the community supported message has not been accepted yet, it must be shown
     with the possibility to accept."""
@@ -79,6 +80,7 @@ effort policy.
         else:
             print("You need to confirm you have read the message above.")
             exit(1)
+
 
 def get_cli_config():
     '''
