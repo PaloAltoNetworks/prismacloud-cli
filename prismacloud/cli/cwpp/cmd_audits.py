@@ -26,7 +26,7 @@ def container(limit=5):
     from_field = last_hour_date_time.strftime("%Y-%m-%dT%H:%M:%S.%f%z")[:-3] + "Z"
     to_field = "2030-01-01T00:00:00.000Z"
     result = pc_api.get_endpoint(
-        "audits/firewall/app/container", {"from": from_field, "to": to_field, "sort": "time", "reverse": "true"}
+        "audits/runtime/container", {"from": from_field, "to": to_field, "sort": "time", "reverse": "true"}
     )
     cli_output(result)
 
