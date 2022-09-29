@@ -30,6 +30,7 @@ def container(limit=5):
     )
     cli_output(result)
 
+
 @click.command()
 @click.option("-l", "--limit", default=5, help="Number of documents to return")
 def firewall(limit=5):
@@ -47,6 +48,7 @@ def firewall(limit=5):
         "audits/firewall/app/container", {"from": from_field, "to": to_field, "sort": "time", "reverse": "true"}
     )
     cli_output(result)
+
 
 cli.add_command(container)
 cli.add_command(firewall)
