@@ -74,9 +74,13 @@ effort policy.
         answer = input("Type yes to confirm you have read the message above: ")
         if any(answer.lower() == f for f in ["yes", 'y']):
             print("Message accepted.")
-            # Create file to check next time
+            # Create file to check next time            
             if not os.path.exists(config_directory):
-                os.mkdir(config_directory)
+                logging.info("Configuration directory does not exist, creating %s", config_directory)
+                try:
+                    os.mkdir(config_directory)
+                except Exception as exc:  # pylint:disable=broad-except
+                    logging.info("Error creating configuration directory: %s", exc)
             with open(community_support_accepted, "w") as _accepted:
                 _accepted.write("Yes")
         else:
