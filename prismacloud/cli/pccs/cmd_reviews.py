@@ -1,5 +1,3 @@
-import logging
-
 import click
 
 from prismacloud.cli import cli_output, pass_environment
