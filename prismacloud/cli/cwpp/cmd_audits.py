@@ -19,7 +19,26 @@ def container(limit=5):
 
     Sample usage:
 
-    pc --config local --columns ruleName,msg,containerName,requestHost,subnet audits container
+    pc --config local --columns os,msg,type,attackType,severity,containerName,hostname audits container
+
+    """
+    last_hour_date_time = datetime.now() - timedelta(hours=3)
+    from_field = last_hour_date_time.strftime("%Y-%m-%dT%H:%M:%S.%f%z")[:-3] + "Z"
+    to_field = "2030-01-01T00:00:00.000Z"
+    result = pc_api.get_endpoint(
+        "audits/runtime/container", {"from": from_field, "to": to_field, "sort": "time", "reverse": "true"}
+    )
+    cli_output(result)
+
+
+@click.command()
+@click.option("-l", "--limit", default=5, help="Number of documents to return")
+def firewall(limit=5):
+    """
+
+    Sample usage:
+
+    pc --config local --columns ruleName,msg,containerName,requestHost,subnet audits firewall
 
     """
     last_hour_date_time = datetime.now() - timedelta(hours=3)
@@ -32,3 +51,4 @@ def container(limit=5):
 
 
 cli.add_command(container)
+cli.add_command(firewall)
