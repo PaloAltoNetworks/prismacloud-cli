@@ -42,7 +42,7 @@ def host_auto_deploy_read():
 )
 @click.option(
     "--console_hostname",
-    default="europe-west3.cloud.twistlock.com",
+    default="",
     help="Console Hostname",
 )
 @click.option(
