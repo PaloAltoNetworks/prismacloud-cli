@@ -5,9 +5,9 @@ import sys
 
 # Import from the local prismacloud.cli namespace.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# pylint: disable=C0413,E0401
 from prismacloud.cli import cli
 
 if __name__ == '__main__':
+    print(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
     sys.exit(cli())
