@@ -89,7 +89,7 @@ def host_auto_deploy_update(provider, aws_region_type, bucket_region, console_ho
             autodefend["collections"] = [cloud_collection]    
             body_params.append(autodefend)
     else:    
-        logging.error("API - ERROR No cloud account were found. ", result)
+        logging.error("API - ERROR No cloud account were found. ")
 
     if body_params:
         logging.info("API - List of rules to be updated %s", body_params)
