@@ -74,7 +74,7 @@ effort policy.
         answer = input("Type yes to confirm you have read the message above: ")
         if any(answer.lower() == f for f in ["yes", 'y']):
             print("Message accepted.")
-            # Create file to check next time            
+            # Create file to check next time
             if not os.path.exists(config_directory):
                 logging.info("Configuration directory does not exist, creating %s", config_directory)
                 try:

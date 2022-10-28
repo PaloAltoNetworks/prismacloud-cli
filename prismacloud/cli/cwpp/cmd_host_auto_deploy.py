@@ -62,7 +62,6 @@ def host_auto_deploy_update(provider, aws_region_type, bucket_region, console_ho
             logging.info("API - Found Credential: %s", credential['_id'])
             cloud_accounts.append(credential['_id'])
 
-
     body_params = []
     if cloud_accounts:
         logging.info("API - All cloud accounts: %s", cloud_accounts)
@@ -77,7 +76,6 @@ def host_auto_deploy_update(provider, aws_region_type, bucket_region, console_ho
                 cloud_collection = collection
                 logging.info("API - Found collection: %s", cloud_collection)
 
-
         for cloud_account in cloud_accounts:
             autodefend = {}
             autodefend["provider"] = provider
@@ -86,9 +84,9 @@ def host_auto_deploy_update(provider, aws_region_type, bucket_region, console_ho
             autodefend["awsRegionType"] = aws_region_type
             autodefend["bucketRegion"] = bucket_region
             autodefend["consoleHostname"] = console_hostname
-            autodefend["collections"] = [cloud_collection]    
+            autodefend["collections"] = [cloud_collection]
             body_params.append(autodefend)
-    else:    
+    else:
         logging.error("API - ERROR No cloud account were found. ")
 
     if body_params:
@@ -143,9 +141,7 @@ def host_auto_deploy_create(provider, name, credential_id, aws_region_type, buck
     """Update repository"""
     logging.info("API - Updating host auto-defend rule")
 
-
     body_params = []
-
     cloud_collection = ""
     collections = pc_api.get_endpoint("collections")
     for collection in collections:
@@ -156,7 +152,6 @@ def host_auto_deploy_create(provider, name, credential_id, aws_region_type, buck
             cloud_collection = collection
             logging.info("API - Found collection: %s", cloud_collection)
 
-
     autodefend = {}
     autodefend["provider"] = provider
     autodefend["name"] = name
@@ -164,7 +159,7 @@ def host_auto_deploy_create(provider, name, credential_id, aws_region_type, buck
     autodefend["awsRegionType"] = aws_region_type
     autodefend["bucketRegion"] = bucket_region
     autodefend["consoleHostname"] = console_hostname
-    autodefend["collections"] = [cloud_collection]    
+    autodefend["collections"] = [cloud_collection]
     body_params.append(autodefend)
 
     if body_params:
