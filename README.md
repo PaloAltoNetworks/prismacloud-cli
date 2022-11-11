@@ -55,14 +55,13 @@ This process looks like the screenshot below. the prismacloud-cli asks you for s
 Create an access key from Settings then Access key
 Get the path to console from Compute tab, System, Utilities
 
-Create a file into home directory .prismacloud/credentials.json with the following structure
+Create a file into home directory .prismacloud/credentials.json with the following structure.
 
 ```json
 {
-  "api_endpoint": "__REDACTED__",
-  "pcc_api_endpoint": "__REDACTED__",
-  "access_key_id": "__REDACTED__",
-  "secret_key": "__REDACTED__"
+  "url":      "__REDACTED__",
+  "identity": "__REDACTED__",
+  "secret":   "__REDACTED__"
 }
 ```
 
@@ -78,16 +77,14 @@ pc --config demo -o csv policy
 ```
 
 ### Use environment variables for configuration
+
 By setting the environment variables:
 
-PC_SAAS_API_ENDPOINT
-
-PC_COMPUTE_API_ENDPOINT
-
-PC_ACCESS_KEY
-
-PC_SECRET_KEY
-
+```
+PC_URL
+PC_IDENTITY
+PC_SECRET
+```
 
 And then run pc referring to a configuration called environment:
 
