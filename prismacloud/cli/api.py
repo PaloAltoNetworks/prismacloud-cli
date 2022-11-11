@@ -10,7 +10,7 @@ try:
     from pathlib import Path
     home_directory = str(Path.home())
 except Exception as _exc:  # pylint:disable=broad-except
-    logging.debug("Error identifying home directory using pathlib: %s", _exc)
+    logging.debug("Error identifying home directory: %s", _exc)
     if "USERPROFILE" in os.environ:
         home_directory = os.environ["USERPROFILE"]
     else:
@@ -28,75 +28,60 @@ import prismacloud.cli.version as cli_version
 
 
 def community_supported():
-    """If the community supported message has not been accepted yet, it must be shown
-    with the possibility to accept."""
-    community_supported_message = """# Community Supported
-This template/solution is released under an as-is, best effort,
-support policy. These scripts should be seen as community
-supported and Palo Alto Networks will contribute our expertise as
-and when possible. We do not provide technical support or help in
-using or troubleshooting the components of the project through our
-normal support options such as Palo Alto Networks support teams,
-or ASC (Authorized Support Centers) partners and backline support
-options. The underlying product used (Prisma Cloud) by the scripts
-or templates are still supported, but the support is only for the
-product functionality and not for help in deploying or using the
-template or script itself.
+    """ If the community supported message has not been accepted yet,
+        it must be shown with the possibility to accept. """
 
-Unless explicitly tagged, all projects or work posted in our
-GitHub repository (at https://github.com/PaloAltoNetworks) or
-sites other than our official Downloads page on
-https://support.paloaltonetworks.com are provided under the best
-effort policy.
+    community_supported_message = """
+# Community Supported
+
+This solution is released under an as-is, best-effort, support policy.
+
+This solution should be seen as community-supported, and Palo Alto Networks will 
+contribute our expertise as and when possible. We do not provide technical support 
+or help in using or troubleshooting the components of this solution through our normal 
+support options such as Palo Alto Networks support teams, Authorized Support Centers, 
+partners, and backline support options. The underlying product (Prisma Cloud) used  
+by these scripts is still supported, but the support is only for the product 
+functionality itself and not for help in using this solution itself.
+
+Unless explicitly tagged, all projects or work posted in our GitHub organization 
+(at https://github.com/PaloAltoNetworks) or sites other than our official Downloads page 
+(on https://support.paloaltonetworks.com) are provided under this policy.
 """
 
-    # Check if message already has been accepted
+    # Check if the message already has been accepted.
     config_directory = home_directory + "/.prismacloud/"
     community_support_accepted = config_directory + ".community_supported_accepted"
     if os.path.exists(community_support_accepted):
         return True
     print(community_supported_message)
-    answer = input("Type yes to confirm you have read the message above: ")
-    if any(answer.lower() == f for f in ["yes", 'y']):
-        print("Message accepted.")
-        # Create file to check next time
+    answer = input("Enter 'y' or 'yes' to confirm you have read the message above: ")
+    print()
+    if any(answer.lower() == f for f in ['y', 'yes']):
+        print("Message confirmed.")
+        print()
+        # Create file to verify that the message already has been accepted.
         if not os.path.exists(config_directory):
             logging.info("Configuration directory does not exist, creating %s", config_directory)
             try:
-                os.mkdir(config_directory)
+                os.makedirs(config_directory)
             except Exception as exc:  # pylint:disable=broad-except
                 logging.info("Error creating configuration directory: %s", exc)
         with open(community_support_accepted, "w") as _accepted:
             _accepted.write("Yes")
     else:
-        print("You need to confirm you have read the message above.")
+        print("You need to confirm the message above to use this command. Exiting.")
+        print()
         sys.exit(1)
     return True
 
 
-def map_cli_config_to_api_config():
-    """ Map keys between the Prisma Cloud API package and Prisma Cloud CLI package """
-    try:
-        click.get_current_context()
-    except Exception as exc:  # pylint:disable=broad-except
-        logging.debug("Error getting current context: %s", exc)
-    settings = get_cli_config()
-    return {
-        # API Key      Current CLI Key          Deprecated CLI Key(s)
-        "name":        settings.get('name', ''),
-        "url":         settings.get('url',      settings.get('api_endpoint', settings.get('pcc_api_endpoint', ''))),
-        "identity":    settings.get('identity', settings.get('access_key_id', '')),
-        "secret":      settings.get('secret',   settings.get('secret_key', '')),
-        "verify":      settings.get('verify',   settings.get('ca_bundle', False))
-    }
-
-
 def read_cli_config_from_environment():
-    """Read cli configuration from environment"""
+    """ Read configuration from environment """
     logging.debug("Reading configuration from environment")
     settings = {}
     try:
-        # API Key              Current CLI Key               Deprecated CLI Key(s)
+        # API Key              Current CLI ENV VAR           Deprecated CLI ENV VAR(s)
         settings["name"]     = os.environ.get("PC_NAME",     "")
         settings["url"]      = os.environ.get("PC_URL",      os.environ.get("PC_SAAS_API_ENDPOINT", os.environ.get("PC_COMPUTE_API_ENDPOINT", "")))
         settings["identity"] = os.environ.get("PC_IDENTITY", os.environ.get("PC_ACCESS_KEY", ""))
@@ -111,24 +96,25 @@ def read_cli_config_from_environment():
         logging.debug("Environment variable found: PC_IDENTITY/PC_ACCESS_KEY: %s", masked_identity)
         logging.debug("Environment variable found: PC_SECRET/PC_SECRET_KEY: %s",   masked_secret)
     except Exception as exc:  # pylint:disable=broad-except
-        logging.debug("Error reading from environment: %s", exc)
+        logging.debug("Error reading configuration from environment: %s", exc)
     logging.debug("Configuration read from environment")
     return settings
 
 
 def get_cli_config():
-    '''
+    """
     Try to access params["configuration"].
     If it is equal to env or environment, try to read the following environment variables.
 
-        # Current CLI Variable     Deprecated CLI Variable(s)
+        # Current CLI ENV VAR      Deprecated CLI ENV VAR(s)
         PC_URL                     PC_SAAS_API_ENDPOINT, PC_COMPUTE_API_ENDPOINT
         PC_IDENTITY                PC_ACCESS_KEY
         PC_SECRET                  PC_SECRET_KEY
         PC_VERIFY                  PC_CA_BUNDLE
 
-    If PC_URL,PC_IDENTITY,PC_SECRET are not set, try to read the config file specified by params["configuration"].
-    '''
+    If PC_URL, PC_IDENTITY and PC_SECRET are not set, try to read the configuration file specified by params["configuration"].
+    The PC_VERIFY setting can be a boolean or a string path to a file, as per the 'verify' parameter of requests.request().
+    """
 
     logging.info("Running prismacloud-cli version %s / prismacloud-api version %s", cli_version.version, api_version.version)
 
@@ -145,27 +131,25 @@ def get_cli_config():
     if "configuration" not in params:
         params["configuration"] = "credentials"
 
-    # Try to read environment variables.
+    # Try to read configuration from environment.
     if params["configuration"] in ["env", "environment"]:
         config_env_settings = read_cli_config_from_environment()
         if config_env_settings:
             return config_env_settings
 
-    # Read or write configuration from or to a file.
+    # Read (or write) configuration from (or to) a file.
     config_directory = home_directory + "/.prismacloud/"
     config_file_name = config_directory + params["configuration"] + ".json"
-    # Fallback to the API file extension.
     if not os.path.exists(config_file_name):
         config_file_name = config_directory + params["configuration"] + ".conf"
 
     if os.path.exists(config_file_name):
         settings = read_cli_config_file(config_file_name)
-        # API Key          Current CLI Key                   Deprecated CLI Key(s)
-        settings["url"]      = settings.get('url',           settings.pop('api_endpoint', settings.pop('pcc_api_endpoint', settings.pop('api', settings.pop('api_compute', '')))))
-        settings["identity"] = settings.get('access_key_id', settings.get('username', ''))
-        settings["secret"]   = settings.get('secret_key',    settings.get('password', ''))
-        settings["verify"]   = settings.get('verify',        settings.get('ca_bundle', False))
-        # The 'verify' setting can be a boolean or a string path to a file, as per the 'verify' parameter of requests.request().
+        # API Key              Current CLI Key               Deprecated CLI Key(s)
+        settings["url"]      = settings.get('url',           settings.pop('api_endpoint',  settings.pop('api', settings.pop('pcc_api_endpoint', settings.pop('api_compute', '')))))
+        settings["identity"] = settings.get('identity',      settings.pop('access_key_id', settings.pop('username', '')))
+        settings["secret"]   = settings.get('secret_key',    settings.pop('secret_key',    settings.pop('password', '')))
+        settings["verify"]   = settings.get('verify',        settings.pop('ca_bundle', False))
         # Normalize URL.
         settings["url"] = pc_util.normalize_api(settings["url"])
     else:
@@ -184,14 +168,31 @@ def get_cli_config():
                 input("Secret Key (or Compute Password, if PCCE): "),
             "verify": False
         }
-        # Normalize URLs.
+        # Normalize URL.
         settings["url"] = pc_util.normalize_api(settings["url"])
         write_cli_config_file(config_file_name, settings)
     return settings
 
 
+def map_cli_config_to_api_config():
+    """ Map keys between the Prisma Cloud API package and Prisma Cloud CLI package """
+    try:
+        click.get_current_context()
+    except Exception as exc:  # pylint:disable=broad-except
+        logging.debug("Error getting current context: %s", exc)
+    settings = get_cli_config()
+    return {
+        # API Key      Current CLI Key          Deprecated CLI Key(s)
+        "name":        settings.get('name', ''),
+        "url":         settings.get('url',      settings.get('api_endpoint',  settings.get('api', settings.get('pcc_api_endpoint', settings.get('api_compute', ''))))),
+        "identity":    settings.get('identity', settings.get('access_key_id', settings.get('username', ''))),
+        "secret":      settings.get('secret',   settings.get('secret_key',    settings.get('password', ''))),
+        "verify":      settings.get('verify',   settings.get('ca_bundle', False))
+    }
+
+
 def read_cli_config_file(config_file_name):
-    """Read cli configuration from a file"""
+    """ Read cli configuration from a file """
     logging.debug("Reading configuration from file: %s", config_file_name)
     config_file_settings = {}
     try:
@@ -204,7 +205,7 @@ def read_cli_config_file(config_file_name):
 
 
 def write_cli_config_file(config_file_name, config_file_settings):
-    """Write cli configuration to a file"""
+    """ Write cli configuration to a file """
     logging.debug("Writing configuration to file: %s", config_file_name)
     try:
         json_string = json.dumps(config_file_settings, sort_keys=True, indent=4)
@@ -219,7 +220,7 @@ def write_cli_config_file(config_file_name, config_file_settings):
 
 
 def get_endpoint(_self, endpoint, query_params=None, api="cwpp", request_type="GET"):
-    """Make a request without using an endpoint-specific method"""
+    """ Make a request without using an endpoint-specific method """
     pc_api.configure(map_cli_config_to_api_config())
     logging.debug("Calling API Endpoint (%s): %s", request_type, endpoint)
     result = None
@@ -236,7 +237,8 @@ def get_endpoint(_self, endpoint, query_params=None, api="cwpp", request_type="G
             try:
                 result = pc_api.execute_compute(request_type, endpoint, query_params)
             except Exception as exc:  # pylint:disable=broad-except
-                logging.error("There was an error executing the request: %s", exc)
+                logging.error("There was an error executing the request. Check if this API (CWP) is available in your environment.")  # noqa: E501
+                logging.error("Please check your config and try again. Error: %s", exc)  # noqa: E501
                 sys.exit(1)
     if api == "code":
         try:
