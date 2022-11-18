@@ -61,10 +61,9 @@ class Settings(BaseSettings):  # pylint:disable=too-few-public-methods
     max_width: int = 25
     max_levels: int = 2
 
-    pc_saas_api_endpoint: str = False
-    pc_compute_api_endpoint: str = False
-    pc_access_key: str = False
-    pc_secret_key: str = False
+    url: str = False
+    identity: str = False
+    secret: str = False
 
 
 settings = Settings()
