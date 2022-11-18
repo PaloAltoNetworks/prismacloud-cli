@@ -33,8 +33,8 @@ def packages_(limit=50):
         for package in i["packages"]:
             # Go through list of packages
             for p_in_image in package["pkgs"]:
-                p_in_image['image_id'] = i['id']
-                p_in_image['image_tag'] = i['repoTag']['registry'] + "/" + i['repoTag']['repo'] + ":" + i['repoTag']['tag']
+                p_in_image["image_id"] = i["id"]
+                p_in_image["image_tag"] = i["repoTag"]["registry"] + "/" + i["repoTag"]["repo"] + ":" + i["repoTag"]["tag"]
                 package_list.append(p_in_image)
 
     cli_output(package_list)
