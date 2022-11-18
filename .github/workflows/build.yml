@@ -76,72 +76,65 @@ jobs:
 
       - name: Check connectivity
         env:
-          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
-          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
         run: |
+          echo $PC_URL
           pc --config environment check
 
       - name: Check CWPP version  # (previously exit code 1, should pass now)
         env:
-          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
-          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
         run: |
           pc --config environment check
 
       - name: Check usage
         env:
-          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
-          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
         run: |
           pc --config environment usage > /dev/null
 
       - name: Check defenders summary
         env:
-          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
-          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
         run: |
           pc --config environment defenders summary > /dev/null
 
       - name: Check login events
         env:
-          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
-          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
         run: |
           pc --config environment logs audit --type login > /dev/null
 
       - name: Check tags
         env:
-          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
-          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
         run: |
           pc --config environment tags > /dev/null
 
       - name: Check cloud names
         env:
-          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
-          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
         run: |
           pc --config environment cloud names > /dev/null
 
       - name: Check alert list
         env:
-          PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
-          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
         run: |
           pc --config environment alert list --unit hour --amount 1 > /dev/null

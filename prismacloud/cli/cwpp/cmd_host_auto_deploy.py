@@ -22,17 +22,13 @@ def host_auto_deploy_read():
 @click.option(
     "--provider",
     default="aws",
-    type=click.Choice(
-        ["aws", "azure", "gcp"]
-    ),
+    type=click.Choice(["aws", "azure", "gcp"]),
     help="Cloud Service Provider",
 )
 @click.option(
     "--aws_region_type",
     default="regular",
-    type=click.Choice(
-        ["regular", "government", "china"]
-    ),
+    type=click.Choice(["regular", "government", "china"]),
     help="Scanning scope",
 )
 @click.option(
@@ -59,8 +55,8 @@ def host_auto_deploy_update(provider, aws_region_type, bucket_region, console_ho
     credentials = pc_api.get_endpoint("credentials?cloud=true")
     for credential in credentials:
         if credential["type"] == provider and credential["useAWSRole"] is False:
-            logging.info("API - Found Credential: %s", credential['_id'])
-            cloud_accounts.append(credential['_id'])
+            logging.info("API - Found Credential: %s", credential["_id"])
+            cloud_accounts.append(credential["_id"])
 
     body_params = []
     if cloud_accounts:
@@ -70,9 +66,9 @@ def host_auto_deploy_update(provider, aws_region_type, bucket_region, console_ho
         collections = pc_api.get_endpoint("collections")
         for collection in collections:
             if collection["name"] == collection_name:
-                del collection['system']
-                del collection['prisma']
-                del collection['modified']
+                del collection["system"]
+                del collection["prisma"]
+                del collection["modified"]
                 cloud_collection = collection
                 logging.info("API - Found collection: %s", cloud_collection)
 
@@ -101,9 +97,7 @@ def host_auto_deploy_update(provider, aws_region_type, bucket_region, console_ho
 @click.option(
     "--provider",
     default="aws",
-    type=click.Choice(
-        ["aws", "azure", "gcp"]
-    ),
+    type=click.Choice(["aws", "azure", "gcp"]),
     help="Cloud Service Provider",
 )
 @click.option(
@@ -117,9 +111,7 @@ def host_auto_deploy_update(provider, aws_region_type, bucket_region, console_ho
 @click.option(
     "--aws_region_type",
     default="regular",
-    type=click.Choice(
-        ["regular", "government", "china"]
-    ),
+    type=click.Choice(["regular", "government", "china"]),
     help="Scanning scope",
 )
 @click.option(
@@ -146,9 +138,9 @@ def host_auto_deploy_create(provider, name, credential_id, aws_region_type, buck
     collections = pc_api.get_endpoint("collections")
     for collection in collections:
         if collection["name"] == collection_name:
-            del collection['system']
-            del collection['prisma']
-            del collection['modified']
+            del collection["system"]
+            del collection["prisma"]
+            del collection["modified"]
             cloud_collection = collection
             logging.info("API - Found collection: %s", cloud_collection)
 

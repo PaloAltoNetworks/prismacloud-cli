@@ -20,5 +20,5 @@ def cli(ctx):
         except AttributeError:
             pass
     compute_version = pc_api.get_endpoint("version", api="cwpp")
-    version = {"cspm_tag":  version_tag, "cspm_sha": version_sha, "cwpp_version": compute_version}
+    version = {"cspm_tag": version_tag, "cspm_sha": version_sha, "cwpp_version": compute_version}
     cli_output(version)
