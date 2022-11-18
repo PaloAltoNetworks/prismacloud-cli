@@ -80,7 +80,6 @@ jobs:
           PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
           PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
         run: |
-          echo $PC_URL
           pc --config environment check
 
       - name: Check CWPP version  # (previously exit code 1, should pass now)
