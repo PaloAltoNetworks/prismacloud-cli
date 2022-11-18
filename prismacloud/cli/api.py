@@ -156,7 +156,7 @@ def get_cli_config():
             ),
         )
         settings["identity"] = settings.get("identity", settings.pop("access_key_id", settings.pop("username", "")))
-        settings["secret"] = settings.get("secret_key", settings.pop("secret_key", settings.pop("password", "")))
+        settings["secret"] = settings.get("secret", settings.pop("secret_key", settings.pop("password", "")))
         settings["verify"] = settings.get("verify", settings.pop("ca_bundle", False))
         # Normalize URL.
         settings["url"] = pc_util.normalize_api(settings["url"])
