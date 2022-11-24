@@ -43,3 +43,14 @@ merging.
 ```
 pylint pc_lib/*.py pc_lib/*/*.py scripts/*.py
 ```
+
+## Validate your code before submitting
+
+```
+python3 -m virtualenv venv && source venv/bin/activate
+pip install -r requirements.txt
+pip install flake8
+pip install black
+flake8 $(git ls-files '*.py')
+black $(git ls-files '*.py') --line-length=127
+```

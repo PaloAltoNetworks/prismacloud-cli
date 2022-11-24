@@ -317,7 +317,7 @@ def show_output(data_frame, params, data):
     try:
         if params["output"] == "text":
             # Drop all but first settings.max_columns columns from data_frame
-            data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
+            data_frame.drop(data_frame.columns[settings.max_columns :], axis=1, inplace=True)
             # Truncate all cells
             data_frame_truncated = data_frame.applymap(do_truncate, na_action="ignore")
             table_output = tabulate(data_frame_truncated, headers="keys", tablefmt="table", showindex=False)
