@@ -221,7 +221,8 @@ def process_data_frame(data):
     # If the size of our normalized data is 0, something went wrong but no exception was raised.
     if data_frame_normalized.size > 0:
         logging.debug("Using json_normalize() data")
-        data_frame = flatten_nested_json_df(data_frame_normalized)
+        # data_frame = flatten_nested_json_df(data_frame_normalized)
+        data_frame = data_frame_normalized
     else:
         try:
             data_frame = pd.DataFrame(data)
