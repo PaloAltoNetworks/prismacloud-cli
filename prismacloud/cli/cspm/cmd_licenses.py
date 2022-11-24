@@ -1,4 +1,4 @@
-import logging
+# import logging
 import click
 
 from prismacloud.cli import cli_output, pass_environment
@@ -35,7 +35,6 @@ def list_license(amount, unit):
             for group in account["groups"]:
                 accountId = account["accountId"]
                 if accountId == item["account"]["id"]:
-                    # logging.info("API - ===========> Type: %s - Name: %s - Total: %s", item['cloudType'], item['account']["name"], item['total'])
                     data = data + [
                         {
                             "accountId": accountId,
@@ -57,7 +56,6 @@ def list_license(amount, unit):
     for item in usage["items"]:
         accountId = item["account"]["id"]
         if accountId not in accountIds:
-            # logging.info("API - ===========> CODE Type: %s - Name: %s - Total: %s", item['cloudType'], item['account']["name"], item['total'])
             data = data + [
                 {
                     "accountId": accountId,
