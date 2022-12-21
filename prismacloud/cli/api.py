@@ -200,6 +200,16 @@ def map_cli_config_to_api_config():
         "identity": settings.get("identity", settings.get("access_key_id", settings.get("username", ""))),
         "secret": settings.get("secret", settings.get("secret_key", settings.get("password", ""))),
         "verify": settings.get("verify", settings.get("ca_bundle", False)),
+        "api": settings.get(
+            "url",
+            settings.get(
+                "api_endpoint", settings.get("api", settings.get("pcc_api_endpoint", settings.get("api_compute", "")))
+            ),
+        ),
+        "api_compute": settings.get("api_compute", ""),
+        "username": settings.get("identity", settings.get("access_key_id", settings.get("username", ""))),
+        "password": settings.get("secret", settings.get("secret_key", settings.get("password", ""))),
+        "ca_bundle": settings.get("verify", settings.get("ca_bundle", False))
     }
 
 
@@ -269,7 +279,6 @@ def get_endpoint(_self, endpoint, query_params=None, api="cwpp", request_type="G
 
 
 """ Instance of the Prisma Cloud API """
-
 pc_api.configure(map_cli_config_to_api_config())
 # Add the get_endpoint method to this instance.
 pc_api.get_endpoint = types.MethodType(get_endpoint, pc_api)
