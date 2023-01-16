@@ -313,16 +313,17 @@ def cli_output(data, sort_values=False):
     # Generate and show the output
     show_output(data_frame, params, data)
 
+
 def wrap_text(text):
     """Truncate a string to max_width characters"""
-
     try:
         wrapped_text = str(text)
-        wrapped_text = textwrap.fill(text=wrapped_text, width=settings.max_width, max_lines=5)
+        wrapped_text = textwrap.fill(text=wrapped_text, width=settings.max_width, max_lines=10)
         return wrapped_text
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error truncating: %s", _exc)
         return text
+
 
 def show_output(data_frame, params, data):
     try:
