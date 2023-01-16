@@ -13,6 +13,7 @@ import pandas as pd
 from click_help_colors import HelpColorsMultiCommand
 from pydantic import BaseSettings
 from tabulate import tabulate
+import textwrap
 from update_checker import UpdateChecker
 
 import prismacloud.cli.version as cli_version
@@ -312,15 +313,31 @@ def cli_output(data, sort_values=False):
     # Generate and show the output
     show_output(data_frame, params, data)
 
+def wrap_text(text):
+    """Truncate a string to max_width characters"""
+
+    try:
+        wrapped_text = str(text)
+        wrapped_text = textwrap.fill(text=wrapped_text, width=settings.max_width, max_lines=5)
+        return wrapped_text
+    except Exception as _exc:  # pylint:disable=broad-except
+        logging.debug("Error truncating: %s", _exc)
+        return text
 
 def show_output(data_frame, params, data):
     try:
         if params["output"] == "text":
             # Drop all but first settings.max_columns columns from data_frame
             data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
-            # Truncate all cells
-            data_frame_truncated = data_frame.applymap(do_truncate, na_action="ignore")
-            table_output = tabulate(data_frame_truncated, headers="keys", tablefmt="table", showindex=False)
+
+            # Wrap all cells
+            data_frame_truncated = data_frame.applymap(wrap_text, na_action="ignore")
+
+            # Wrap column names
+            data_frame_truncated.columns = list(map(wrap_text,data_frame_truncated.columns))
+
+            table_output = tabulate(
+                data_frame_truncated, headers="keys", tablefmt="fancy_grid", showindex=False)
             click.secho(table_output, fg="green")
         if params["output"] == "json":
             # Cannot use 'index=False' here, otherwise '.to_json' returns a hash instead of an array of hashes.
@@ -407,19 +424,6 @@ def flatten_nested_json_df(data_frame):
         temp_s = (data_frame[new_columns].applymap(type) == dict).all()
         dict_columns = temp_s[temp_s].index.tolist()
     return data_frame
-
-
-def do_truncate(truncate_this):
-    """Truncate a string to max_width characters"""
-
-    try:
-        truncate_this = str(truncate_this)
-        if len(truncate_this) > settings.max_width:
-            return truncate_this[: settings.max_width] + "..."
-        return truncate_this
-    except Exception as _exc:  # pylint:disable=broad-except
-        logging.debug("Error truncating: %s", _exc)
-        return truncate_this
 
 
 if __name__ == "__main__":
