@@ -317,9 +317,24 @@ def cli_output(data, sort_values=False):
 def wrap_text(text):
     """Truncate a string to max_width characters"""
     try:
-        wrapped_text = str(text)
-        wrapped_text = textwrap.fill(text=wrapped_text, width=settings.max_width, max_lines=10)
-        return wrapped_text
+        if isinstance(text, list):
+            wrapped_text = ''
+            for item in text:
+                wrapped_text += textwrap.fill(text=item, width=settings.max_width, max_lines=10) + '\n'
+            return wrapped_text
+
+        elif isinstance(text, dict):
+            if 'name' in text:
+                wrapped_text = ''
+                for item in text['name']:
+                    wrapped_text += item + '\n'
+                return wrapped_text
+            else:
+                wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=10)
+                return wrapped_text
+        else:
+            wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=10)
+            return wrapped_text
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error truncating: %s", _exc)
         return text
@@ -335,7 +350,7 @@ def show_output(data_frame, params, data):
             data_frame_truncated = data_frame.applymap(wrap_text, na_action="ignore")
 
             # Wrap column names
-            data_frame_truncated.columns = list(map(wrap_text,data_frame_truncated.columns))
+            data_frame_truncated.columns = list(map(wrap_text, data_frame_truncated.columns))
 
             table_output = tabulate(
                 data_frame_truncated, headers="keys", tablefmt="fancy_grid", showindex=False)
