@@ -61,6 +61,7 @@ class Settings(BaseSettings):  # pylint:disable=too-few-public-methods
     max_rows: int = 1000000
     max_width: int = 25
     max_levels: int = 2
+    max_lines: int = 10
 
     url: str = False
     identity: str = False
@@ -320,7 +321,7 @@ def wrap_text(text):
         if isinstance(text, list):
             wrapped_text = ''
             for item in text:
-                wrapped_text += textwrap.fill(text=item, width=settings.max_width, max_lines=10) + '\n'
+                wrapped_text += textwrap.fill(text=item, width=settings.max_width, max_lines=settings.max_lines) + '\n'
             return wrapped_text
 
         elif isinstance(text, dict):
@@ -330,10 +331,10 @@ def wrap_text(text):
                     wrapped_text += item + '\n'
                 return wrapped_text
             else:
-                wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=10)
+                wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=settings.max_lines)
                 return wrapped_text
         else:
-            wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=10)
+            wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=settings.max_lines)
             return wrapped_text
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error truncating: %s", _exc)
