@@ -124,7 +124,9 @@ pc --columns hostname,repoTag.repo,osDistro -o csv images -l 1
 
 ## Environment variables
 
-To overwrite the default output settings, use environment variables MAX_WIDTH (console output), MAX_ROWS and MAX_COLUMNS.
+To overwrite the default output settings, use environment variables MAX_WIDTH (console output), MAX_ROWS, MAX_COLUMNS and MAX_LINES. 
+
+- MAX_LINES is used to defined the maximum number of lines within a cell when wrapping the contents.
 
 ## Commands
 The cli has several commands to work with, see the screenshot below for an example, but use ```pc --help``` to see the latest list for your version.
