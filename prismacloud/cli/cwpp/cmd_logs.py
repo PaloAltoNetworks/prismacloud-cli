@@ -60,3 +60,4 @@ def agentless(filename=""):
 cli.add_command(console)
 cli.add_command(defender)
 cli.add_command(audit)
+cli.add_command(agentless)
