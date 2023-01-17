@@ -5,6 +5,7 @@ import os
 import sys
 import warnings
 import re
+import textwrap
 
 import click
 import click_completion
@@ -13,7 +14,6 @@ import pandas as pd
 from click_help_colors import HelpColorsMultiCommand
 from pydantic import BaseSettings
 from tabulate import tabulate
-import textwrap
 from update_checker import UpdateChecker
 
 import prismacloud.cli.version as cli_version
