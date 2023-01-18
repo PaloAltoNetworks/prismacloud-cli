@@ -52,9 +52,9 @@ def audit(type_="", hours=1):
 @click.option("--filename", help="Download filename (Default: /tmp/agentless_logs.tgz)", default="/tmp/agentless_logs.tgz")
 def agentless(filename=""):
     result = pc_api.agentless_logs_list_read()
-    with open(filename, 'wb') as download:
+    with open(filename, "wb") as download:
         download.write(result)
-    cli_output({'Download File Name': filename})
+    cli_output({"Download File Name": filename})
 
 
 cli.add_command(console)
