@@ -319,16 +319,16 @@ def wrap_text(text):
     """Truncate a string to max_width characters"""
     try:
         if isinstance(text, list):
-            wrapped_text = ''
+            wrapped_text = ""
             for item in text:
-                wrapped_text += textwrap.fill(text=item, width=settings.max_width, max_lines=settings.max_lines) + '\n'
+                wrapped_text += textwrap.fill(text=item, width=settings.max_width, max_lines=settings.max_lines) + "\n"
             return wrapped_text
 
         elif isinstance(text, dict):
-            if 'name' in text:
-                wrapped_text = ''
-                for item in text['name']:
-                    wrapped_text += item + '\n'
+            if "name" in text:
+                wrapped_text = ""
+                for item in text["name"]:
+                    wrapped_text += item + "\n"
                 return wrapped_text
             else:
                 wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=settings.max_lines)
@@ -353,8 +353,7 @@ def show_output(data_frame, params, data):
             # Wrap column names
             data_frame_truncated.columns = list(map(wrap_text, data_frame_truncated.columns))
 
-            table_output = tabulate(
-                data_frame_truncated, headers="keys", tablefmt="fancy_grid", showindex=False)
+            table_output = tabulate(data_frame_truncated, headers="keys", tablefmt="fancy_grid", showindex=False)
             click.secho(table_output, fg="green")
         if params["output"] == "json":
             # Cannot use 'index=False' here, otherwise '.to_json' returns a hash instead of an array of hashes.
