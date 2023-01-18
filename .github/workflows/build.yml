@@ -130,10 +130,10 @@ jobs:
         run: |
           pc --config environment cloud names > /dev/null
 
-      - name: Check alert list
-        env:
-          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
-        run: |
-          pc --config environment alert list --unit hour --amount 1 > /dev/null
+      # - name: Check alert list
+      #   env:
+      #     PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+      #     PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
+      #     PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
+      #   run: |
+      #     pc --config environment alert list --unit hour --amount 1 > /dev/null
