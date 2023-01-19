@@ -155,7 +155,8 @@ Prisma Cloud CLI (version: {0})
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
 @click.option("-vv", "--very_verbose", is_flag=True, help="Enables very verbose mode")
 @click.option("--filter", "query_filter", help="Add search filter")
-@click.option("-o", "--output", type=click.Choice(["text", "csv", "json", "html", "clipboard", "markdown", "columns"]), default="text")
+@click.option("-o", "--output",
+              type=click.Choice(["text", "csv", "json", "html", "clipboard", "markdown", "columns"]), default="text")
 @click.option(
     "-c",
     "--config",
@@ -362,9 +363,9 @@ def show_output(data_frame, params, data):
         if params["output"] == "csv":
             click.secho(data_frame.to_csv(index=False), fg="green")
         if params["output"] == "clipboard":
-            click.secho(data_frame.to_clipboard(index=False), fg="green")   
+            click.secho(data_frame.to_clipboard(index=False), fg="green")
         if params["output"] == "markdown":
-            click.secho(data_frame.to_markdown(index=False), fg="green")       
+            click.secho(data_frame.to_markdown(index=False), fg="green")
         if params["output"] == "html":
             # pre-table-html
             pre_table_html = """
