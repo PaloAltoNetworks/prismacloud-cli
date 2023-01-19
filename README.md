@@ -14,7 +14,7 @@ Unless explicitly tagged, all projects or work posted in our GitHub repository (
 ## v0.6.0
 Output options have been added: markdown and clipboard. Clipboard can be used to output data directly into your clipboard and paste e.g. into MS Excel or Google Docs.
 
-## Getting started
+# Getting started
 
 ### Requirements
  * Python >= 3.8
