@@ -9,6 +9,11 @@ This template/solution is released under an as-is, best effort, support policy. 
 
 Unless explicitly tagged, all projects or work posted in our GitHub repository (at https://github.com/PaloAltoNetworks) or sites other than our official Downloads page on https://support.paloaltonetworks.com are provided under the best effort policy.
 
+# Release Notes
+
+## v0.6.0
+Output options have been added: markdown and clipboard. Clipboard can be used to output data directly into your clipboard and paste e.g. into MS Excel or Google Docs.
+
 ## Getting started
 
 ### Requirements
@@ -108,7 +113,7 @@ The following global options are available
 Options:
   -v, --verbose                   Enables verbose mode.
   -vv, --very_verbose             Enables very verbose mode.
-  -o, --output [text|csv|json|html|columns]
+  -o, --output [text|csv|json|html|clipboard|markdown|columns]
   -c, --config TEXT               Select configuration
                                   ~/.prismacloud/[CONFIGURATION].json
   --columns TEXT                  Select columns for output
