@@ -365,7 +365,16 @@ def show_output(data_frame, params, data):
         if params["output"] == "clipboard":
             click.secho(data_frame.to_clipboard(index=False), fg="green")
         if params["output"] == "markdown":
-            click.secho(data_frame.to_markdown(index=False), fg="green")
+            # Drop all but first settings.max_columns columns from data_frame
+            data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
+
+            # Wrap all cells
+            data_frame_truncated = data_frame.applymap(wrap_text, na_action="ignore")
+
+            # Wrap column names
+            data_frame_truncated.columns = list(map(wrap_text, data_frame_truncated.columns))
+
+            click.secho(data_frame_truncated.to_markdown(index=False), fg="green")
         if params["output"] == "html":
             # pre-table-html
             pre_table_html = """
