@@ -65,6 +65,7 @@ def repository_update(integration_type, integration_id, repositories, separator)
 @click.command("search", short_help="Search across all repositories")
 @click.option(
     "--integration_type",
+    "-i",
     type=click.Choice(
         [
             "Github",
@@ -94,6 +95,7 @@ def repository_update(integration_type, integration_id, repositories, separator)
 )
 @click.option(
     "--categories",
+    "-c",
     type=click.Choice(
         [
             "IAM",
@@ -112,15 +114,36 @@ def repository_update(integration_type, integration_id, repositories, separator)
         ]
     ),
     multiple=True,
-    help="Category of teh findings.",
+    help="Category of the findings.",
 )
-def global_search(integration_type, categories):
+@click.option(
+    "--types",
+    "-t",
+    type=click.Choice(
+        [
+            "violation",
+            "dockerCve",
+            "packageCve",
+        ]
+    ),
+    multiple=True,
+    default=None,
+    help="Filter the result per type of finding",
+)
+@click.option(
+    "--max",
+    default=0,
+    help="Maximum repository to return",
+)
+@click.option("--details", is_flag=True, default=False, help="Get the details per alert")
+def global_search(integration_type, categories, details, types, max):
     """Search across all repositories"""
     data = []
     logging.info("API - Search across all repositories ...")
     repositories = pc_api.repositories_list_read(query_params={"errorsCount": "true"})
 
     impacted_files = []
+    i = 1
     for repository in repositories:
         if repository["source"] in integration_type:
             logging.info(
@@ -143,17 +166,86 @@ def global_search(integration_type, categories):
 
             for file in impacted_files["data"]:
                 logging.info("API - File impacted: %s", file["filePath"])
-                data = data + [
-                    {
-                        "repository": "%s/%s" % (repository["owner"], repository["repository"]),
-                        "repositoryId": repository["id"],
-                        "branch": repository["defaultBranch"],
-                        "categories": categories,
-                        "filePath": file["filePath"],
-                        "errorsCount": file["errorsCount"],
-                        "type": file["type"],
-                    }
-                ]
+                if details and file["type"] in types:
+                    logging.info("API - Imapcted file: %s", file)
+                    parameters = {}
+                    parameters["sourceTypes"] = [repository["source"]]
+                    parameters["filePath"] = file["filePath"]
+                    parameters["repository"] = "%s/%s" % (repository["owner"], repository["repository"])
+                    parameters["repositoryId"] = repository["id"]
+                    parameters["branch"] = repository["defaultBranch"]
+                    impacted_files_with_details = pc_api.errors_file_list(criteria=parameters)
+
+                    for details in impacted_files_with_details:
+                        if "cves" in details:
+                            for cve in details["cves"]:
+                                data = data + [
+                                    {
+                                        "repository": "%s/%s" % (repository["owner"], repository["repository"]),
+                                        "repositoryId": repository["id"],
+                                        "branch": repository["defaultBranch"],
+                                        "categories": list(categories),
+                                        "filePath": file["filePath"],
+                                        "errorsCount": file["errorsCount"],
+                                        "type": file["type"],
+                                        "author": details["author"],
+                                        "sourceType": details["sourceType"],
+                                        "scannerType": details["scannerType"],
+                                        "frameworkType": details["frameworkType"],
+                                        "error_category": details["category"],
+                                        "resourceId": details["resourceId"],
+                                        "resourceType": details["resourceType"],
+                                        "errorId": details["errorId"],
+                                        "fixedCode": details["fixedCode"],
+                                        "lines": details["lines"],
+                                        "cveId": cve["cveId"],
+                                        "cveLink": cve["link"],
+                                        "cveStatus": cve["cveStatus"],
+                                        "cveSeverity": cve["severity"],
+                                        "cvss": cve["cvss"],
+                                        "packageName": cve["packageName"],
+                                        "packageVersion": cve["packageVersion"],
+                                        "fixVersion": cve["fixVersion"],
+                                        "cveDescription": cve["description"],
+                                    }
+                                ]
+                        else:
+                            data = data + [
+                                {
+                                    "repository": "%s/%s" % (repository["owner"], repository["repository"]),
+                                    "repositoryId": repository["id"],
+                                    "branch": repository["defaultBranch"],
+                                    "categories": list(categories),
+                                    "filePath": file["filePath"],
+                                    "errorsCount": file["errorsCount"],
+                                    "type": file["type"],
+                                    "author": details["author"],
+                                    "sourceType": details["sourceType"],
+                                    "scannerType": details["scannerType"],
+                                    "frameworkType": details["frameworkType"],
+                                    "error_category": details["category"],
+                                    "resourceId": details["resourceId"],
+                                    "resourceType": details["resourceType"],
+                                    "errorId": details["errorId"],
+                                    "fixedCode": details["fixedCode"],
+                                    "lines": details["lines"],
+                                }
+                            ]
+                else:
+                    data = data + [
+                        {
+                            "repository": "%s/%s" % (repository["owner"], repository["repository"]),
+                            "repositoryId": repository["id"],
+                            "branch": repository["defaultBranch"],
+                            "categories": list(categories),
+                            "filePath": file["filePath"],
+                            "errorsCount": file["errorsCount"],
+                            "type": file["type"],
+                        }
+                    ]
+        if max > 0 and i == max:
+            break
+        i = i + 1
 
     cli_output(data)
 
