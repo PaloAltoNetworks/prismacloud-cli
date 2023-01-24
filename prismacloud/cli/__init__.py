@@ -7,6 +7,7 @@ import warnings
 import re
 import textwrap
 
+
 import click
 import click_completion
 import coloredlogs
@@ -319,22 +320,19 @@ def cli_output(data, sort_values=False):
 
 def wrap_text(text):
     """Truncate a string to max_width characters"""
+
     try:
-        if isinstance(text, list):
+        if isinstance(eval(text), list):
             wrapped_text = ""
-            for item in text:
+            for item in eval(text):
+                item = str(item)
+                print(item)
                 wrapped_text += textwrap.fill(text=item, width=settings.max_width, max_lines=settings.max_lines) + "\n"
             return wrapped_text
-
         elif isinstance(text, dict):
-            if "name" in text:
-                wrapped_text = ""
-                for item in text["name"]:
-                    wrapped_text += item + "\n"
-                return wrapped_text
-            else:
-                wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=settings.max_lines)
-                return wrapped_text
+            text = pretty_print_dict(text)
+            wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=settings.max_lines)
+            return wrapped_text
         else:
             wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=settings.max_lines)
             return wrapped_text
@@ -342,6 +340,18 @@ def wrap_text(text):
         logging.debug("Error truncating: %s", _exc)
         return text
 
+def pretty_print_dict(dictionary):
+    """
+    Pretty print a dictionary using newlines
+    """
+    output = ""
+    for key, value in dictionary.items():
+        output += f"{key}:\n"
+        if isinstance(value, dict):
+            output += pretty_print_dict(value)
+        else:
+            output += f"\t{value}\n"
+    return output
 
 def show_output(data_frame, params, data):
     try:
