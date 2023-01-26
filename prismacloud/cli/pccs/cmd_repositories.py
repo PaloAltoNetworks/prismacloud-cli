@@ -268,7 +268,7 @@ def global_search(integration_type, categories, details, types, max):
 
 
 
-@click.command("count-git-authors", short_help="Search across all repositories")
+@click.command("count-git-authors", short_help="Count number of unique git authors")
 @click.option(
     "--integration_type",
     "-i",
@@ -309,8 +309,8 @@ def global_search(integration_type, max):
     data = []
     total_git_authors = 0
     list_git_authors = []
-    logging.info("API - Search across all repositories ...")
-    repositories = pc_api.repositories_list_read(query_params={"errorsCount": "false"})
+    logging.info("API - Count number of unique git authors ...")
+    repositories = pc_api.repositories_list_read()
 
     i = 1
     for repository in repositories:
@@ -326,9 +326,6 @@ def global_search(integration_type, max):
             git_authors = pc_api.errors_list_last_authors(query_params=query_params)
             total_git_authors = total_git_authors + len(git_authors)
             list_git_authors.append(git_authors)
-            logging.info("GIT AUTHORS=%s, full list: %s ", total_git_authors, list_git_authors)
-
-
 
         if max > 0 and i == max:
             break
@@ -336,7 +333,6 @@ def global_search(integration_type, max):
 
     helper = MyHelper()
     flat_list = helper.flatten(list_git_authors)
-    logging.info("FLAT LIST=%s", flat_list)
     unique_developers = helper.unique(flat_list)
     data = data +    [
         {

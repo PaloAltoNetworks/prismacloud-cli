@@ -47,7 +47,7 @@ pip3 install prismacloud-cli
 
 Run the pc cli script. If you don't have a config file yet, it will help you to create one.
 
-```console
+```
 pc version
 ```
 
@@ -172,13 +172,43 @@ Then, open /tmp/results.html:
 
 ### Enable CSPM policies with Prisma Cloud CLI
 
-```console
+```
 pc policy set --help
 pc -vv policy set --status enable --compliance_standard 'CIS v1.4.0 (AWS)'
 ```
 
 ### Disable CSPM policies with Prisma Cloud CLI
 
-```console
+```
 pc -vv policy set --status disable --compliance_standard 'CIS v1.4.0 (AWS)'
+```
+
+### Code Security
+
+The below example are using Github as integration but it works as well with other integration: 
+- Bitbucket
+- Gitlab
+- AzureRepos
+- Github Enterprise
+- Gitlab Enterprise
+- Bitbucket Enterprise
+
+Count the number of unique git authors across all Github repositories:  
+```
+pc -ojson repositories count-git-authors -i Github | jq .
+```
+
+Get the details of all CVE across all Github repositories:  
+```
+ pc -ojson repositories search -i Github -c Vulnerabilities -t packageCve --details | jq .
+```
+
+Get all secrets across all Github repositories:  
+```
+pc -ojson repositories search -i Github -c Secrets -t violation  | jq .
+```
+
+Get all drift across all Github repositories: 
+```
+pc repositories search --integration_type Github --categories Drift
 ```
