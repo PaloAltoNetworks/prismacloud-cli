@@ -185,7 +185,7 @@ pc -vv policy set --status disable --compliance_standard 'CIS v1.4.0 (AWS)'
 
 ### Code Security
 
-The below example are using Github as integration but it works as well with other integration: 
+The below examples are using Github as integration but it works as well with other integration: 
 - Bitbucket
 - Gitlab
 - AzureRepos
