@@ -8,7 +8,6 @@ import re
 import textwrap
 import json
 import ast
-from treelib import Node, Tree
 
 
 import click
@@ -336,7 +335,7 @@ def json_parse(json_data, level=0):
         for key, value in json_obj.items():
             if isinstance(value, (dict, list)):
                 output_str += f"{indent}{key}:\n"
-                output_str += json_parse(value, level + 1) 
+                output_str += json_parse(value, level + 1)
             else:
                 output_str += f"{indent}{key}: {value}\n"
 
