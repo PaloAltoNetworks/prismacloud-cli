@@ -5,23 +5,25 @@ import click
 from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
 
-class MyHelper:    
+
+class MyHelper:
     def unique(self, list1):
-    
+
         # initialize a null list
         unique_list = []
-    
+
         # traverse for all elements
         for x in list1:
             # check if exists in unique_list or not
             if x not in unique_list:
                 unique_list.append(x)
-                
+
         return unique_list
-    
-    def flatten(self, l):
-        flat_list = [item for sublist in l for item in sublist]
+
+    def flatten(self, origin_list):
+        flat_list = [item for sublist in origin_list for item in sublist]
         return flat_list
+
 
 @click.group("repositories", short_help="[PCCS] Interact with repositories")
 @pass_environment
@@ -267,7 +269,6 @@ def global_search(integration_type, categories, details, types, max):
     cli_output(data)
 
 
-
 @click.command("count-git-authors", short_help="Count number of unique git authors")
 @click.option(
     "--integration_type",
@@ -304,7 +305,7 @@ def global_search(integration_type, categories, details, types, max):
     default=0,
     help="Maximum repository to return",
 )
-def global_search(integration_type, max):
+def count_git_authors(integration_type, max):
     """Search across all repositories"""
     data = []
     total_git_authors = 0
@@ -322,7 +323,10 @@ def global_search(integration_type, max):
                 repository["source"],
                 repository["defaultBranch"],
             )
-            query_params = {"fullRepoName": "%s/%s" % (repository["owner"], repository["repository"]), "sourceType": repository["source"] }
+            query_params = {
+                "fullRepoName": "%s/%s" % (repository["owner"], repository["repository"]),
+                "sourceType": repository["source"],
+            }
             git_authors = pc_api.errors_list_last_authors(query_params=query_params)
             total_git_authors = total_git_authors + len(git_authors)
             list_git_authors.append(git_authors)
@@ -334,7 +338,7 @@ def global_search(integration_type, max):
     helper = MyHelper()
     flat_list = helper.flatten(list_git_authors)
     unique_developers = helper.unique(flat_list)
-    data = data +    [
+    data = data + [
         {
             "unique_developer": len(unique_developers),
             "unique_git_authors": unique_developers,
@@ -348,3 +352,4 @@ def global_search(integration_type, max):
 cli.add_command(list_repositories)
 cli.add_command(repository_update)
 cli.add_command(global_search)
+cli.add_command(count_git_authors)
