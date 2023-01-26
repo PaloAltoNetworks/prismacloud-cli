@@ -6,6 +6,9 @@ import sys
 import warnings
 import re
 import textwrap
+import json
+import ast
+
 
 import click
 import click_completion
@@ -317,30 +320,46 @@ def cli_output(data, sort_values=False):
     show_output(data_frame, params, data)
 
 
+def json_parse(json_data, level=0):
+    if isinstance(json_data, (dict, list)):
+        json_obj = json.loads(json.dumps(json_data))
+    else:
+        json_obj = json.loads(json_data)
+
+    output_str = ""
+    indent = "  " * level
+    if isinstance(json_obj, list):
+        for item in json_obj:
+            output_str += json_parse(item, level)
+    elif isinstance(json_obj, dict):
+        for key, value in json_obj.items():
+            if isinstance(value, (dict, list)):
+                output_str += f"{indent}{key}:\n"
+                output_str += json_parse(value, level + 1)
+            else:
+                output_str += f"{indent}{key}: {value}\n"
+
+    return output_str + "\n"*(level == 0)
+
+
 def wrap_text(text):
     """Truncate a string to max_width characters"""
-    try:
-        if isinstance(text, list):
-            wrapped_text = ""
-            for item in text:
-                wrapped_text += textwrap.fill(text=item, width=settings.max_width, max_lines=settings.max_lines) + "\n"
-            return wrapped_text
 
-        elif isinstance(text, dict):
-            if "name" in text:
-                wrapped_text = ""
-                for item in text["name"]:
-                    wrapped_text += item + "\n"
-                return wrapped_text
-            else:
-                wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=settings.max_lines)
-                return wrapped_text
-        else:
-            wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=settings.max_lines)
-            return wrapped_text
-    except Exception as _exc:  # pylint:disable=broad-except
-        logging.debug("Error truncating: %s", _exc)
-        return text
+    try:
+        data = json.loads(text)
+        if isinstance(data, (list, dict)):
+            text = json_parse(data)
+    except json.decoder.JSONDecodeError:
+        pass
+
+    try:
+        data = ast.literal_eval(text)
+        if isinstance(data, (list, dict)):
+            text = json_parse(data)
+    except (SyntaxError, ValueError):
+        pass
+    wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=settings.max_lines, replace_whitespace=False)
+    return wrapped_text
 
 
 def show_output(data_frame, params, data):
