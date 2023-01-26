@@ -5,6 +5,23 @@ import click
 from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
 
+class MyHelper:    
+    def unique(self, list1):
+    
+        # initialize a null list
+        unique_list = []
+    
+        # traverse for all elements
+        for x in list1:
+            # check if exists in unique_list or not
+            if x not in unique_list:
+                unique_list.append(x)
+                
+        return unique_list
+    
+    def flatten(self, l):
+        flat_list = [item for sublist in l for item in sublist]
+        return flat_list
 
 @click.group("repositories", short_help="[PCCS] Interact with repositories")
 @pass_environment
@@ -246,6 +263,88 @@ def global_search(integration_type, categories, details, types, max):
         if max > 0 and i == max:
             break
         i = i + 1
+
+    cli_output(data)
+
+
+
+@click.command("count-git-authors", short_help="Search across all repositories")
+@click.option(
+    "--integration_type",
+    "-i",
+    type=click.Choice(
+        [
+            "Github",
+            "Bitbucket",
+            "Gitlab",
+            "AzureRepos",
+            "cli",
+            "AWS",
+            "Azure",
+            "GCP",
+            "Docker",
+            "githubEnterprise",
+            "gitlabEnterprise",
+            "bitbucketEnterprise",
+            "terraformCloud",
+            "githubActions",
+            "circleci",
+            "codebuild",
+            "jenkins",
+            "tfcRunTasks",
+            "admissionController",
+            "terraformEnterprise",
+        ]
+    ),
+    multiple=True,
+    help="Type of the integration to update",
+)
+@click.option(
+    "--max",
+    default=0,
+    help="Maximum repository to return",
+)
+def global_search(integration_type, max):
+    """Search across all repositories"""
+    data = []
+    total_git_authors = 0
+    list_git_authors = []
+    logging.info("API - Search across all repositories ...")
+    repositories = pc_api.repositories_list_read(query_params={"errorsCount": "false"})
+
+    i = 1
+    for repository in repositories:
+        if repository["source"] in integration_type:
+            logging.info(
+                "ID for the repository %s, Name of the Repository to scan: %s, Type=%s, default branch=%s",
+                repository["id"],
+                repository["repository"],
+                repository["source"],
+                repository["defaultBranch"],
+            )
+            query_params = {"fullRepoName": "%s/%s" % (repository["owner"], repository["repository"]), "sourceType": repository["source"] }
+            git_authors = pc_api.errors_list_last_authors(query_params=query_params)
+            total_git_authors = total_git_authors + len(git_authors)
+            list_git_authors.append(git_authors)
+            logging.info("GIT AUTHORS=%s, full list: %s ", total_git_authors, list_git_authors)
+
+
+
+        if max > 0 and i == max:
+            break
+        i = i + 1
+
+    helper = MyHelper()
+    flat_list = helper.flatten(list_git_authors)
+    logging.info("FLAT LIST=%s", flat_list)
+    unique_developers = helper.unique(flat_list)
+    data = data +    [
+        {
+            "unique_developer": len(unique_developers),
+            "unique_git_authors": unique_developers,
+            "number_of_repositories": len(repositories),
+        }
+    ]
 
     cli_output(data)
 
