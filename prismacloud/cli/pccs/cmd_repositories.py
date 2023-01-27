@@ -275,7 +275,7 @@ def global_search(integration_type, categories, details, types, max):
     "-i",
     type=click.Choice(
         [
-            "Github",
+            "Github",   
             "Bitbucket",
             "Gitlab",
             "AzureRepos",
@@ -327,6 +327,7 @@ def count_git_authors(integration_type, max):
                 "fullRepoName": "%s/%s" % (repository["owner"], repository["repository"]),
                 "sourceType": repository["source"],
             }
+            logging.info("query_params = %s",query_params)
             git_authors = pc_api.errors_list_last_authors(query_params=query_params)
             total_git_authors = total_git_authors + len(git_authors)
             list_git_authors.append(git_authors)
