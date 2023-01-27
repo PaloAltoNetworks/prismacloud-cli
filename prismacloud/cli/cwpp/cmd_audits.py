@@ -49,6 +49,28 @@ def firewall(limit=5):
     )
     cli_output(result)
 
+@click.command()
+@click.option("-l", "--limit", default=5, help="Number of documents to return")
+def incidents(limit=5):
+    last_hour_date_time = datetime.now() - timedelta(days=7)
+    from_field = last_hour_date_time.strftime("%Y-%m-%dT%H:%M:%S.%f%z")[:-3] + "Z"
+    to_field = "2030-01-01T00:00:00.000Z"
+    result = pc_api.get_endpoint(
+        "audits/incidents", {"from": from_field, "to": to_field, "sort": "time", "reverse": "true"}
+    )
+    cli_output(result)
+
+@click.command()
+@click.option("-l", "--limit", default=5, help="Number of documents to return")
+def incident(limit=5):
+    last_hour_date_time = datetime.now() - timedelta(days=7)
+    from_field = last_hour_date_time.strftime("%Y-%m-%dT%H:%M:%S.%f%z")[:-3] + "Z"
+    to_field = "2030-01-01T00:00:00.000Z"
+    result = pc_api.get_endpoint(
+        "audits/incidents", {"from": from_field, "to": to_field, "sort": "time", "reverse": "true"}
+    )
+    cli_output(result)
 
 cli.add_command(container)
 cli.add_command(firewall)
+cli.add_command(incidents)
