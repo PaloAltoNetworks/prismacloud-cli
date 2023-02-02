@@ -339,7 +339,7 @@ def json_parse(json_data, level=0):
             else:
                 output_str += f"{indent}{key}: {value}\n"
 
-    return output_str + "\n"*(level == 0)
+    return output_str + "\n" * (level == 0)
 
 
 def wrap_text(text):

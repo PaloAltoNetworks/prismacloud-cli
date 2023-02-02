@@ -57,9 +57,7 @@ def incidents(limit=5):
     last_hour_date_time = datetime.now() - timedelta(days=7)
     from_field = last_hour_date_time.strftime("%Y-%m-%dT%H:%M:%S.%f%z")[:-3] + "Z"
     to_field = "2030-01-01T00:00:00.000Z"
-    result = pc_api.get_endpoint(
-        "audits/incidents", {"from": from_field, "to": to_field, "sort": "time", "reverse": "true"}
-    )
+    result = pc_api.get_endpoint("audits/incidents", {"from": from_field, "to": to_field, "sort": "time", "reverse": "true"})
     cli_output(result)
 
 
@@ -69,19 +67,14 @@ def incidents(limit=5):
 def snapshot(id="", limit=5):
     # We have an incident ID that we want to get the snapshot for
     # First we need to find the profile ID
-    result = pc_api.get_endpoint(
-        "audits/incidents", {"id": id}
-    )
-    profileID = (result[0]['profileID'])
+    result = pc_api.get_endpoint("audits/incidents", {"id": id})
+    profileID = result[0]["profileID"]
 
     # Log profileID found for incident ID
     logging.debug("Profile ID found for incident ID: " + str(profileID))
 
     # Now get the forensic snapshot
-    result = pc_api.get_endpoint(
-       "profiles/container/" + profileID + "/forensic", {
-           "incidentID": id}
-    )
+    result = pc_api.get_endpoint("profiles/container/" + profileID + "/forensic", {"incidentID": id})
     cli_output(result)
 
 
