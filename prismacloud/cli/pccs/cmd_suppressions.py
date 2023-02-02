@@ -23,13 +23,13 @@ def list_justifications():
     """Get suppressions justifications for all policy id and accounts"""
     data = []
     suppressions = pc_api.suppressions_list_read()
-    for suppression in suppressions:        
+    for suppression in suppressions:
         logging.info("Get policy ID: %s", suppression["id"])
         if "resources" in suppression:
             accounts = []
             for account in suppression["resources"]:
-                accounts.append(account["accountId"]) 
-            
+                accounts.append(account["accountId"])
+
             query_params = {
                 "accounts": accounts,
             }
@@ -48,9 +48,8 @@ def list_justifications():
                             "id": justification["id"],
                         }
                     ]
-    
-    cli_output(data)
 
+    cli_output(data)
 
 
 cli.add_command(list_suppressions)
