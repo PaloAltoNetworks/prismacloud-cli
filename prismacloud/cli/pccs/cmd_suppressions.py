@@ -35,7 +35,7 @@ def list_justifications():
             }
             justifications = pc_api.suppressions_justifications_list_read(suppression["policyId"], query_params=query_params)
             for justification in justifications:
-                if "resources" in justification:
+                if "resources" in justification and "origin" in justification:
                     data = data + [
                         {
                             "accounts": accounts,
