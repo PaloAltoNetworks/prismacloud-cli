@@ -32,11 +32,16 @@ def cli(ctx, query, amount, unit, field=""):
     search_params["timeRange"]["value"] = {}
     search_params["timeRange"]["value"]["unit"] = unit
     search_params["timeRange"]["value"]["amount"] = amount
+
     search_params["withResourceJson"] = False
     search_params["query"] = query
 
     logging.debug("API - Getting the RQL results ...")
-    if query.startswith("config from"):
+    if query.startswith("config from iam"):
+        search_params["searchType"] = "iam"
+        search_params["timeRange"] = {"type": "to_now", "value": "epoch"}  # Latest results
+        result_list = pc_api.search_iam_read(search_params=search_params)
+    elif query.startswith("config from"):
         result_list = pc_api.search_config_read(search_params=search_params)
     elif query.startswith("network from"):
         result_list = pc_api.search_network_read(search_params=search_params)
