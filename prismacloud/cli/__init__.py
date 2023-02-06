@@ -159,7 +159,7 @@ Prisma Cloud CLI (version: {0})
 @click.option("-vv", "--very_verbose", is_flag=True, help="Enables very verbose mode")
 @click.option("--filter", "query_filter", help="Add search filter")
 @click.option(
-    "-o", "--output", type=click.Choice(["text", "csv", "json", "html", "clipboard", "markdown", "columns"]), default="text"
+    "-o", "--output", type=click.Choice(["text", "csv", "json", "html", "clipboard", "markdown", "columns", "count"]), default="text"
 )
 @click.option(
     "-c",
@@ -364,6 +364,9 @@ def wrap_text(text):
 
 def show_output(data_frame, params, data):
     try:
+        if params["output"] == "count":
+            count = data_frame.shape[0]
+            click.secho(data_frame.shape[0], fg="red")
         if params["output"] == "text":
             # Drop all but first settings.max_columns columns from data_frame
             data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
