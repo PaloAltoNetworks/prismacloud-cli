@@ -26,7 +26,7 @@ def cli(ctx, query, amount, unit, field=""):
     Event:   "event from cloud.audit_logs where operation IN ( 'AddUserToGroup', 'AttachGroupPolicy', 'AttachUserPolicy' , 'AttachRolePolicy' , 'CreateAccessKey', 'CreateKeyPair', 'DeleteKeyPair', 'DeleteLogGroup' )"
     """  # noqa
     search_params = {}
-    search_params["limit"] = 10000
+    search_params["limit"] = 1000
     search_params["timeRange"] = {}
     search_params["timeRange"]["type"] = "relative"
     search_params["timeRange"]["value"] = {}
