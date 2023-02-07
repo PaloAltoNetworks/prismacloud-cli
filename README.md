@@ -11,6 +11,37 @@ Unless explicitly tagged, all projects or work posted in our GitHub repository (
 
 # Release Notes
 
+## v0.6.10
+
+ * Added output count which just returns the number of results found.
+ * Added option to rql command --file, to define a yaml file with rql queries to run
+
+### Use Case
+
+The new --field parameter of the rql command can be used to parse a file with 
+RQL queries. This file needs to be in yaml format as the example below:
+
+`
+- name: Find all permissions granted to Users
+  query: config from iam where grantedby.cloud.entity.type = 'user'
+
+- name: Find all permissions granted to Roles
+  query: config from iam where grantedby.cloud.entity.type = 'role'
+
+- name: IAM identities that can delete DynamoDB tables
+  query: config from iam where action.name = 'dynamodb:DeleteTable'
+`
+
+Examples to use this:
+
+`pc -o count rql --file ~/.prismacloud/my-important-queries.yaml`
+
+
+
+`pc rql --file ~/.prismacloud/my-important-queries.yaml`
+
+
+
 ## v0.6.0
 Output options have been added: markdown and clipboard. Clipboard can be used to output data directly into your clipboard and paste e.g. into MS Excel or Google Docs.
 
