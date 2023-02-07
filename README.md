@@ -11,7 +11,7 @@ Unless explicitly tagged, all projects or work posted in our GitHub repository (
 
 # Release Notes
 
-## v0.6.10
+## v0.6.11
 
  * Added output count which just returns the number of results found.
  * Added option to rql command --file, to define a yaml file with rql queries to run
