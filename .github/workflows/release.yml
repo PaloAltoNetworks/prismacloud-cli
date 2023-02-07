@@ -1,47 +1,47 @@
-# name: Upload Python Package
+name: Upload Python Package
 
-# on: 
-#   release:
-#     types: [created]
+on: 
+  release:
+    types: [created]
 
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - uses: actions/checkout@v2
-#       - name: Set up Python
-#         uses: actions/setup-python@v2
-#         with:
-#           python-version: "3.8"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
 
-#       - name: Install dependencies
-#         run: |
-#           python -m pip install --upgrade pip
-#           pip install build
-#           pip install pylint
-#           pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+          pip install pylint
+          pip install -r requirements.txt
 
-#       - name: Analysing the code with pylint
-#         run: |
-#           pylint $(git ls-files '*.py')
+      - name: Analysing the code with pylint
+        run: |
+          pylint $(git ls-files '*.py')
       
-#       - name: Install flake8
-#         run: |
-#           pip install flake8
+      - name: Install flake8
+        run: |
+          pip install flake8
 
-#       - name: Analysing the code with flake8
-#         run: |
-#           # stop the build if there are Python syntax errors or undefined names
-#           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-#           # execute overall flake8 scan
-#           flake8 . --count --statistics
+      - name: Analysing the code with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # execute overall flake8 scan
+          flake8 . --count --statistics
 
-#       - name: Build package
-#         run: python -m build
+      - name: Build package
+        run: python -m build
 
-#       - name: Publish package
-#         uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-#         with:
-#           user: __token__
-#           password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
