@@ -1,9 +1,9 @@
 {
     "packages": {
         ".": {
-            "package-name": "primacloud-cli",
+            "package-name": "prismacloud-cli",
             "changelog-path": "CHANGELOG.md",
-            "release-type": "node",
+            "release-type": "python",
             "bump-minor-pre-major": false,
             "bump-patch-for-minor-pre-major": false,
             "draft": false,
