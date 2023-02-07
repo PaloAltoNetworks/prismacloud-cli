@@ -159,7 +159,8 @@ Prisma Cloud CLI (version: {0})
 @click.option("-vv", "--very_verbose", is_flag=True, help="Enables very verbose mode")
 @click.option("--filter", "query_filter", help="Add search filter")
 @click.option(
-    "-o", "--output", type=click.Choice(["text", "csv", "json", "html", "clipboard", "markdown", "columns", "count"]), default="text"
+    "-o", "--output",
+    type=click.Choice(["text", "csv", "json", "html", "clipboard", "markdown", "columns", "count"]), default="text"
 )
 @click.option(
     "-c",
