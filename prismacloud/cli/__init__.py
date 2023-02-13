@@ -304,9 +304,6 @@ def process_data_frame(data):
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error dropping duplicates: %s", _exc)
 
-    # Drop all rows after max_rows
-    data_frame = data_frame.head(settings.max_rows)
-
     return data_frame
 
 
@@ -371,9 +368,14 @@ def wrap_text(text):
 
 def show_output(data_frame, params, data):
     try:
+        if params["output"] == "count":
+            click.secho(data_frame.shape[0], fg="red")
         if params["output"] == "text":
+            # Drop all rows after max_rows
+            data_frame = data_frame.iloc[:settings.max_rows]
+
             # Drop all but first settings.max_columns columns from data_frame
-            data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
+            data_frame = data_frame.iloc[:, :settings.max_columns]
 
             # Wrap all cells
             data_frame_truncated = data_frame.applymap(wrap_text, na_action="ignore")
@@ -392,8 +394,11 @@ def show_output(data_frame, params, data):
         if params["output"] == "clipboard":
             click.secho(data_frame.to_clipboard(index=False), fg="green")
         if params["output"] == "markdown":
+            # Drop all rows after max_rows
+            data_frame = data_frame.iloc[:settings.max_rows]
+
             # Drop all but first settings.max_columns columns from data_frame
-            data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
+            data_frame = data_frame.iloc[:, :settings.max_columns]
 
             # Wrap all cells
             data_frame_truncated = data_frame.applymap(wrap_text, na_action="ignore")
