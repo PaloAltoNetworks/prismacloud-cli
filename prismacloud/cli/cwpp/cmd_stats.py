@@ -38,10 +38,12 @@ def license_stats():
 
 @click.command()
 @click.option("-cve", "--cve")
-def vulnerabilities(cve):
-
+@click.option("-collection", "--collection")
+def vulnerabilities(cve, collection):
     if not cve:
-        result = pc_api.get_endpoint("stats/vulnerabilities")
+        result = pc_api.get_endpoint("stats/vulnerabilities", {"collections": collection, "resourceType": "image"})
+        result = result[0]
+        cli_output(result)
         return
     cves = cve.split(",")
     logging.debug("CVEs to search for: {cves}")

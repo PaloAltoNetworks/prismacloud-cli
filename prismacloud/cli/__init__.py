@@ -159,8 +159,9 @@ Prisma Cloud CLI (version: {0})
 @click.option("-vv", "--very_verbose", is_flag=True, help="Enables very verbose mode")
 @click.option("--filter", "query_filter", help="Add search filter")
 @click.option(
-    "-o", "--output",
-    type=click.Choice(["text", "csv", "json", "html", "clipboard", "markdown", "columns", "count"]), default="text"
+    "-o", "--output", type=click.Choice(
+        ["text", "csv", "json", "html", "clipboard", "markdown", "columns", "raw"]),
+    default="text"
 )
 @click.option(
     "-c",
@@ -242,12 +243,12 @@ def process_data_frame(data):
         if column.lower() in ["time", "lastmodified", "availableasof"]:
             try:
                 data_frame[column] = pd.to_datetime(data_frame[column], unit="ms")
-            except Exception as _exc:  # pylint:disable=broad-except
-                logging.debug("Error converting column to milliseconds: %s", _exc)
+            except Exception as _exc2:  # pylint:disable=broad-except
+                logging.debug("Error converting column to milliseconds: %s", _exc2)
                 try:
                     data_frame[column] = pd.to_datetime(data_frame[column], unit="s")
-                except Exception as _exc:  # pylint:disable=broad-except
-                    logging.debug("Error converting column to seconds: %s", _exc)
+                except Exception as _exc3:  # pylint:disable=broad-except
+                    logging.debug("Error converting column to seconds: %s", _exc3)
 
     data_frame.fillna("", inplace=True)
 
@@ -307,9 +308,14 @@ def process_data_frame(data):
 
 
 def cli_output(data, sort_values=False):
-    """Parse data and format output"""
+    """Parse data and formay output, except if we"""
+    """want to see raw json."""
     params = get_parameters()[0]
     log_settings()  # Log settings in debug level
+
+    if (params["output"] == "raw"):
+        click.secho(json.dumps(data))
+        sys.exit(1)
 
     # Read data, convert to dataframe and process it
     data_frame = process_data_frame(data)
@@ -479,6 +485,7 @@ def flatten_nested_json_df(data_frame):
 
         temp_s = (data_frame[new_columns].applymap(type) == dict).all()
         dict_columns = temp_s[temp_s].index.tolist()
+
     return data_frame
 
 
