@@ -117,6 +117,7 @@ def repository_update(integration_type, integration_id, repositories, separator)
     "-c",
     type=click.Choice(
         [
+            "all-except-licenses",
             "IAM",
             "Compute",
             "Monitoring",
@@ -161,43 +162,93 @@ def global_search(integration_type, categories, details, types, max):
     logging.info("API - Search across all repositories ...")
     repositories = pc_api.repositories_list_read(query_params={"errorsCount": "true"})
 
+    # If categories contains all, automically add all categories available
+    if "all-except-licenses" in categories:
+        categories = [
+            # "Licenses",
+            "IAM",
+            "Compute",
+            "Monitoring",
+            "Networking",
+            "Kubernetes",
+            "General",
+            "Storage",
+            "Secrets",
+            "Public",
+            "Vulnerabilities",
+            "Drift",
+            "BuildIntegrity",
+        ]
+
     impacted_files = []
     i = 1
-    for repository in repositories:
-        if repository["source"] in integration_type:
-            logging.info(
-                "ID for the repository %s, Name of the Repository to scan: %s, Type=%s, default branch=%s",
-                repository["id"],
-                repository["repository"],
-                repository["source"],
-                repository["defaultBranch"],
-            )
+    with click.progressbar(repositories) as repositories_bar:
+        for repository in repositories_bar:
+            if repository["source"] in integration_type:
+                logging.info(
+                    "ID for the repository %s, Name of the Repository to scan: %s, Type=%s, default branch=%s",
+                    repository["id"],
+                    repository["repository"],
+                    repository["source"],
+                    repository["defaultBranch"],
+                )
 
-            parameters = {}
-            parameters["sourceTypes"] = [repository["source"]]
-            parameters["categories"] = categories
-            parameters["types"] = ["Errors"]
-            parameters["repository"] = "%s/%s" % (repository["owner"], repository["repository"])
-            parameters["repositoryId"] = repository["id"]
-            parameters["branch"] = repository["defaultBranch"]
+                parameters = {}
+                parameters["sourceTypes"] = [repository["source"]]
+                parameters["categories"] = categories
+                parameters["types"] = ["Errors"]
+                parameters["repository"] = "%s/%s" % (repository["owner"], repository["repository"])
+                parameters["repositoryId"] = repository["id"]
+                parameters["branch"] = repository["defaultBranch"]
 
-            impacted_files = pc_api.errors_files_list(criteria=parameters)
+                impacted_files = pc_api.errors_files_list(criteria=parameters)
 
-            for file in impacted_files["data"]:
-                logging.info("API - File impacted: %s", file["filePath"])
-                if details and file["type"] in types:
-                    logging.info("API - Imapcted file: %s", file)
-                    parameters = {}
-                    parameters["sourceTypes"] = [repository["source"]]
-                    parameters["filePath"] = file["filePath"]
-                    parameters["repository"] = "%s/%s" % (repository["owner"], repository["repository"])
-                    parameters["repositoryId"] = repository["id"]
-                    parameters["branch"] = repository["defaultBranch"]
-                    impacted_files_with_details = pc_api.errors_file_list(criteria=parameters)
+                for file in impacted_files["data"]:
+                    logging.info("API - File impacted: %s", file["filePath"])
+                    if details and file["type"] in types:
+                        logging.info("API - Imapcted file: %s", file)
+                        parameters = {}
+                        parameters["sourceTypes"] = [repository["source"]]
+                        parameters["filePath"] = file["filePath"]
+                        parameters["repository"] = "%s/%s" % (repository["owner"], repository["repository"])
+                        parameters["repositoryId"] = repository["id"]
+                        parameters["branch"] = repository["defaultBranch"]
+                        impacted_files_with_details = pc_api.errors_file_list(criteria=parameters)
 
-                    for details in impacted_files_with_details:
-                        if "cves" in details:
-                            for cve in details["cves"]:
+                        for details in impacted_files_with_details:
+                            if "cves" in details:
+                                for cve in details["cves"]:
+                                    data = data + [
+                                        {
+                                            "repository": "%s/%s" % (repository["owner"], repository["repository"]),
+                                            "repositoryId": repository["id"],
+                                            "branch": repository["defaultBranch"],
+                                            "categories": list(categories),
+                                            "filePath": file["filePath"],
+                                            "errorsCount": file["errorsCount"],
+                                            "type": file["type"],
+                                            "author": details["author"],
+                                            "sourceType": details["sourceType"],
+                                            "scannerType": details["scannerType"],
+                                            "frameworkType": details["frameworkType"],
+                                            "error_category": details["category"],
+                                            "resourceId": details["resourceId"],
+                                            "resourceType": details["resourceType"],
+                                            "errorId": details["errorId"],
+                                            "fixedCode": details["fixedCode"],
+                                            "lines": details["lines"],
+                                            "cveId": cve["cveId"],
+                                            "cveLink": cve["link"],
+                                            "cveStatus": cve["cveStatus"],
+                                            "cveSeverity": cve["severity"],
+                                            "cvss": cve["cvss"],
+                                            "packageName": cve["packageName"],
+                                            "packageVersion": cve["packageVersion"],
+                                            "fixVersion": cve["fixVersion"],
+                                            "cveDescription": cve["description"],
+                                        }
+                                    ]
+                            else:
                                 data = data + [
                                     {
                                         "repository": "%s/%s" % (repository["owner"], repository["repository"]),
@@ -217,54 +268,23 @@ def global_search(integration_type, categories, details, types, max):
                                         "errorId": details["errorId"],
                                         "fixedCode": details["fixedCode"],
                                         "lines": details["lines"],
-                                        "cveId": cve["cveId"],
-                                        "cveLink": cve["link"],
-                                        "cveStatus": cve["cveStatus"],
-                                        "cveSeverity": cve["severity"],
-                                        "cvss": cve["cvss"],
-                                        "packageName": cve["packageName"],
-                                        "packageVersion": cve["packageVersion"],
-                                        "fixVersion": cve["fixVersion"],
-                                        "cveDescription": cve["description"],
                                     }
                                 ]
-                        else:
-                            data = data + [
-                                {
-                                    "repository": "%s/%s" % (repository["owner"], repository["repository"]),
-                                    "repositoryId": repository["id"],
-                                    "branch": repository["defaultBranch"],
-                                    "categories": list(categories),
-                                    "filePath": file["filePath"],
-                                    "errorsCount": file["errorsCount"],
-                                    "type": file["type"],
-                                    "author": details["author"],
-                                    "sourceType": details["sourceType"],
-                                    "scannerType": details["scannerType"],
-                                    "frameworkType": details["frameworkType"],
-                                    "error_category": details["category"],
-                                    "resourceId": details["resourceId"],
-                                    "resourceType": details["resourceType"],
-                                    "errorId": details["errorId"],
-                                    "fixedCode": details["fixedCode"],
-                                    "lines": details["lines"],
-                                }
-                            ]
-                else:
-                    data = data + [
-                        {
-                            "repository": "%s/%s" % (repository["owner"], repository["repository"]),
-                            "repositoryId": repository["id"],
-                            "branch": repository["defaultBranch"],
-                            "categories": list(categories),
-                            "filePath": file["filePath"],
-                            "errorsCount": file["errorsCount"],
-                            "type": file["type"],
-                        }
-                    ]
-        if max > 0 and i == max:
-            break
-        i = i + 1
+                    else:
+                        data = data + [
+                            {
+                                "repository": "%s/%s" % (repository["owner"], repository["repository"]),
+                                "repositoryId": repository["id"],
+                                "branch": repository["defaultBranch"],
+                                "categories": list(categories),
+                                "filePath": file["filePath"],
+                                "errorsCount": file["errorsCount"],
+                                "type": file["type"],
+                            }
+                        ]
+            if max > 0 and i == max:
+                break
+            i = i + 1
 
     cli_output(data)
 
