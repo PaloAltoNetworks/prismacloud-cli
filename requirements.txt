@@ -12,3 +12,4 @@ pydantic
 requests
 tabulate
 update_checker
+pyyaml
