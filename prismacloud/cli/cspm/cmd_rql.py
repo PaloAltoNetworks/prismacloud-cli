@@ -1,7 +1,7 @@
 import logging
 
-import yaml
 import click
+import yaml
 
 from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
