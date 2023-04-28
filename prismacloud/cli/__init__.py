@@ -159,9 +159,10 @@ Prisma Cloud CLI (version: {0})
 @click.option("-vv", "--very_verbose", is_flag=True, help="Enables very verbose mode")
 @click.option("--filter", "query_filter", help="Add search filter")
 @click.option(
-    "-o", "--output", type=click.Choice(
-        ["text", "csv", "json", "html", "clipboard", "markdown", "columns", "raw"]),
-    default="text"
+    "-o",
+    "--output",
+    type=click.Choice(["text", "csv", "json", "html", "clipboard", "markdown", "columns", "raw"]),
+    default="text",
 )
 @click.option(
     "-c",
@@ -313,7 +314,7 @@ def cli_output(data, sort_values=False):
     params = get_parameters()[0]
     log_settings()  # Log settings in debug level
 
-    if (params["output"] == "raw"):
+    if params["output"] == "raw":
         click.secho(json.dumps(data))
         sys.exit(1)
 
@@ -372,10 +373,10 @@ def show_output(data_frame, params, data):
             click.secho(data_frame.shape[0], fg="red")
         if params["output"] == "text":
             # Drop all rows after max_rows
-            data_frame = data_frame.iloc[:settings.max_rows]
+            data_frame = data_frame.iloc[: settings.max_rows]
 
             # Drop all but first settings.max_columns columns from data_frame
-            data_frame = data_frame.iloc[:, :settings.max_columns]
+            data_frame = data_frame.iloc[:, : settings.max_columns]
 
             # Wrap all cells
             data_frame_truncated = data_frame.applymap(wrap_text, na_action="ignore")
@@ -395,10 +396,10 @@ def show_output(data_frame, params, data):
             click.secho(data_frame.to_clipboard(index=False), fg="green")
         if params["output"] == "markdown":
             # Drop all rows after max_rows
-            data_frame = data_frame.iloc[:settings.max_rows]
+            data_frame = data_frame.iloc[: settings.max_rows]
 
             # Drop all but first settings.max_columns columns from data_frame
-            data_frame = data_frame.iloc[:, :settings.max_columns]
+            data_frame = data_frame.iloc[:, : settings.max_columns]
 
             # Wrap all cells
             data_frame_truncated = data_frame.applymap(wrap_text, na_action="ignore")

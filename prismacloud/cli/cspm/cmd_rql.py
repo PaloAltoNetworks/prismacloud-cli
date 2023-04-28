@@ -48,8 +48,8 @@ def cli(ctx, query, amount, unit, field="", file=False):
                 items = yaml.safe_load(file)
 
             for item in items:
-                name = item['name']
-                query = item['query']
+                name = item["name"]
+                query = item["query"]
                 search_params["query"] = query
                 click.secho("\nRQL Query name: " + name, fg="green")
                 click.secho("RQL Query: " + query, fg="green")
