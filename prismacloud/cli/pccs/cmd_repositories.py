@@ -552,7 +552,7 @@ def fix_automatic_cves(integration_type, types, severity, fix, max):
                 f"API - Create a PR on the Repository: {repository} with {resource_list} and the response is {response}"
             )
 
-        logging.info(f"API - All done !")
+        logging.info("API - All done !")
 
     cli_output(data)
 
