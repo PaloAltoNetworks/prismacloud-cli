@@ -401,13 +401,19 @@ def count_git_authors(integration_type, max):
     help="Filter the vulnerable package per severity",
     multiple=True,
 )
+@click.option(
+    "-r",
+    "--repository-list",
+    help="Enter the name of the repository, eg: owner/reponame",
+    multiple=True,
+)
 @click.option("--fix", is_flag=True, default=False, help="Enable or disable all Policies.")
 @click.option(
     "--max",
     default=0,
     help="Maximum repository to return",
 )
-def fix_automatic_cves(integration_type, types, severity, fix, max):
+def fix_automatic_cves(integration_type, types, severity, repository_list, fix, max):
     """Search across all repositories"""
     data = []
     logging.info("API - Search across all repositories ...")
@@ -415,14 +421,14 @@ def fix_automatic_cves(integration_type, types, severity, fix, max):
 
     i = 1
     with click.progressbar(repositories) as repositories_bar:
-        for repository in repositories_bar:
-            # if repository["source"] in integration_type and repository["owner"].startswith("smelotte"):
-            if repository["source"] in integration_type:
+        for repository in repositories_bar:  
+            # Create the variable to store the concatenated string
+            repo_full_name = f'{repository["owner"]}/{repository["repository"]}'
+            if repository["source"] in integration_type and repo_full_name in repository_list:
                 logging.info(
-                    "ID for the repository %s, Name of the Repository to scan: %s/%s, Type=%s, default branch=%s",
+                    "ID for the repository %s, Name of the Repository to scan: %s, Type=%s, default branch=%s",
                     repository["id"],
-                    repository["owner"],
-                    repository["repository"],
+                    repo_full_name,
                     repository["source"],
                     repository["defaultBranch"],
                 )
