@@ -421,7 +421,7 @@ def global_search(integration_type, types, severity, fix, max):
     i = 1    
     with click.progressbar(repositories) as repositories_bar:
         for repository in repositories_bar:
-            if repository["source"] in integration_type:
+            if repository["source"] in integration_type and repository["owner"].startswith('smelotte'):
                 logging.info(
                     "ID for the repository %s, Name of the Repository to scan: %s/%s, Type=%s, default branch=%s",
                     repository["id"],
@@ -485,7 +485,7 @@ def global_search(integration_type, types, severity, fix, max):
                                 resource_uuid=resource['resourceUuid'], query_params=None)
 
                             risk_factors = issue["riskFactors"]
-                            formatted_risk_factors = " | ".join(risk_factors)
+                            formatted_risk_factors = ", ".join(risk_factors)
                             dataTmp = [
                                 {
                                     "repository": "%s/%s" % (repository["owner"], repository["repository"]),
@@ -534,13 +534,13 @@ def global_search(integration_type, types, severity, fix, max):
 
         for repository, resource_list in resourcesToFix.items():
             criteria = {"resourcesToFix": resource_list}
-            print(f"Triggering fix for repository: {repository}")
-            print(f"Criteria: {criteria}")
+            logging.info(f"Triggering fix for repository: {repository}")
+            logging.info(f"Criteria: {criteria}")
             response = pc_api.fixed_resource(criteria)
             logging.info(
                 f"API - Create a PR on the Repository: {repository} with {resource_list} and the response is {response}")
 
-        logging.info(f"==============================> API - All done !")
+        logging.info(f"==============================> API - All done ! Data is {data}")
 
     cli_output(data)
 
