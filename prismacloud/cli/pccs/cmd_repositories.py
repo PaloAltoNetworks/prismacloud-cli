@@ -416,7 +416,8 @@ def fix_automatic_cves(integration_type, types, severity, fix, max):
     i = 1
     with click.progressbar(repositories) as repositories_bar:
         for repository in repositories_bar:
-            if repository["source"] in integration_type and repository["owner"].startswith("smelotte"):
+            # if repository["source"] in integration_type and repository["owner"].startswith("smelotte"):
+            if repository["source"] in integration_type:
                 logging.info(
                     "ID for the repository %s, Name of the Repository to scan: %s/%s, Type=%s, default branch=%s",
                     repository["id"],
