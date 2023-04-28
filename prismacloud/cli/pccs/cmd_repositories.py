@@ -1,6 +1,8 @@
 import logging
 
 import click
+import json
+import requests
 
 from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
@@ -213,11 +215,14 @@ def global_search(integration_type, categories, details, types, max):
                         parameters["repository"] = "%s/%s" % (repository["owner"], repository["repository"])
                         parameters["repositoryId"] = repository["id"]
                         parameters["branch"] = repository["defaultBranch"]
-                        impacted_files_with_details = pc_api.errors_file_list(criteria=parameters)
+                        impacted_files_with_details = pc_api.errors_file_list(criteria=parameters)              
 
-                        for details in impacted_files_with_details:
+                        for details in impacted_files_with_details:      
+                            logging.info(
+                                "======= details  %s", details
+                            )   
                             if "cves" in details:
-                                for cve in details["cves"]:
+                                for cve in details["cves"]:             
                                     data = data + [
                                         {
                                             "repository": "%s/%s" % (repository["owner"], repository["repository"]),
@@ -368,6 +373,176 @@ def count_git_authors(integration_type, max):
 
     cli_output(data)
 
+
+
+@click.command("resources", short_help="Get impacted resources")
+@click.option(
+    "--integration_type",
+    "-i",
+    type=click.Choice(
+        [
+            "Github",
+            "Bitbucket",
+            "Gitlab",
+            "AzureRepos",
+        ]
+    ),
+    multiple=True,
+    help="Type of the integration to search",
+)
+@click.option(
+    "-t",
+    "--types",
+    type=click.Choice(["Vulnerabilities"]),
+    multiple=True,
+    default=["Vulnerabilities"],
+    help="Filter the result per type of finding",
+)
+@click.option(
+    "-s",
+    "--severity",
+    default=["critical"],
+    type=click.Choice(["low", "medium", "high", "critical"]),
+    help="Filter the vulnerable package per severity",
+    multiple=True,
+)
+@click.option("--fix", is_flag=True, default=False, help="Enable or disable all Policies.")
+@click.option(
+    "--max",
+    default=0,
+    help="Maximum repository to return",
+)
+def global_search(integration_type, types, severity, fix, max):
+    """Search across all repositories"""
+    data = []
+    logging.info("API - Search across all repositories ...")
+    repositories = pc_api.repositories_list_read(query_params={"errorsCount": "true"})
+
+    i = 1    
+    with click.progressbar(repositories) as repositories_bar:
+        for repository in repositories_bar:
+            if repository["source"] in integration_type:
+                logging.info(
+                    "ID for the repository %s, Name of the Repository to scan: %s/%s, Type=%s, default branch=%s",
+                    repository["id"],
+                    repository["owner"],
+                    repository["repository"],
+                    repository["source"],
+                    repository["defaultBranch"]
+                )
+
+                parameters = {}
+                parameters["filters"] = {
+                    "repositories": [repository["id"]],
+                    "branch": repository["defaultBranch"],
+                    "checkStatus": "Error",
+                    "codeCategories": types,
+                    "severities": [level.upper() for level in severity],
+                    "vulnerabilityRiskFactors": [
+                        "HasFix"
+                    ]
+                }
+                parameters["offset"] = 0
+                parameters["limit"] = 50
+                parameters["search"] = {"scopes": [], "term": ""}
+
+                resources = pc_api.resources_list(body_params=parameters)
+
+                for resource in resources["data"]:
+                    logging.info(
+                        f"API - Resource impacted: {resource['repository']} - {resource['resourceUuid']} - frameworkType={resource['frameworkType']} resourceName={resource['resourceName']} filePath={resource['filePath']} [level.upper() for level in severity]={resource['severity']}")
+
+                    parameters = {}
+                    parameters["filters"] = {
+                        "repositories": [repository["id"]],
+                        "branch": repository["defaultBranch"],
+                        "checkStatus": "Error",
+                        "codeCategories": types,
+                        "vulnerabilityRiskFactors": [
+                            "HasFix"
+                        ],
+                        "severities": [level.upper() for level in severity]
+                    }
+                    parameters["codeCategory"] = "Vulnerabilities"
+                    parameters["offset"] = 00
+                    parameters["limit"] = 100
+                    parameters["sortBy"] = [
+                        {
+                            "key": "cvss",
+                            "direction": "DESC"
+                        }
+                    ]
+                    parameters["search"] = {"scopes": [], "term": ""}
+
+                    dataTmp = []
+                    issues = pc_api.policies_list(resource_uuid=resource['resourceUuid'], body_params=parameters)                    
+                    for issue in issues['data']:
+                        logging.info(
+                            f"API - ISSUE impacted: {issue['repository']} - firstDetected={issue['firstDetected']} policy={issue['policy']} fixVersion={issue['fixVersion']} severity={issue['severity']} cvss={issue['cvss']}")
+
+                        if issue["affectedCvesCounter"] == resource["fixableIssuesCount"]:
+                            vulnerabilities = pc_api.vulnerabilities_list(
+                                resource_uuid=resource['resourceUuid'], query_params=None)
+
+                            risk_factors = issue["riskFactors"]
+                            formatted_risk_factors = " | ".join(risk_factors)
+                            dataTmp = [
+                                {
+                                    "repository": "%s/%s" % (repository["owner"], repository["repository"]),
+                                    "repositoryId": repository["id"],
+                                    "branch": repository["defaultBranch"],
+                                    "sourceType": resource["sourceType"],
+                                    "frameworkType": resource["frameworkType"],
+                                    "filePath": resource["filePath"],
+                                    "resourceName": resource["resourceName"],
+                                    "severity": resource["severity"],
+                                    "fixableIssuesCount": resource["fixableIssuesCount"],
+                                    "resourceUuid": resource["resourceUuid"],
+                                    "firstDetected": issue["firstDetected"],
+                                    "cve": issue["policy"],
+                                    "cvss": issue["cvss"],
+                                    "causePackageName": issue["causePackageName"],
+                                    "packageName": issue["causePackageName"].split()[0],
+                                    "violationId": issue["violationId"],
+                                    "packageVersion": vulnerabilities["summary"]["packageVersion"],
+                                    "fixVersion": vulnerabilities["summary"]["fixVersion"],
+                                    "isPrivateRegistry": vulnerabilities["summary"]["isPrivateRegistry"],
+                                    "isPrivateRegistryFix": vulnerabilities["summary"]["isPrivateRegistryFix"],
+                                    "affectedCvesCounter": issue["affectedCvesCounter"],
+                                    "riskFactors": formatted_risk_factors
+                                }
+                            ]
+                        
+                    data = data + dataTmp
+
+            if max > 0 and i == max:
+                break
+            i = i + 1
+
+
+        resourcesToFix = {}
+        for package in data:
+            if fix:
+                cves = pc_api.list_cves_per_package(package['resourceUuid'])
+                for cve in cves['data']:
+                    if cve['cveId'] == package['cve']:
+                        logging.info(
+                            f"API - Create a package on the Repository: {package['violationId']} - packageName={cve['packageName']} packageVersion={package['fixVersion']} id={cve['uuid']} shouldBeFixed={fix}")
+                        if package["repository"] not in resourcesToFix:
+                            resourcesToFix[package["repository"]] = []
+                        resourcesToFix[package["repository"]].append({"id": cve['uuid'], "violationId": package['violationId'], "packageName": cve['packageName'], "packageVersion": package['fixVersion']})
+
+        for repository, resource_list in resourcesToFix.items():
+            criteria = {"resourcesToFix": resource_list}
+            print(f"Triggering fix for repository: {repository}")
+            print(f"Criteria: {criteria}")
+            response = pc_api.fixed_resource(criteria)
+            logging.info(
+                f"API - Create a PR on the Repository: {repository} with {resource_list} and the response is {response}")
+
+        logging.info(f"==============================> API - All done !")
+
+    cli_output(data)
 
 cli.add_command(list_repositories)
 cli.add_command(repository_update)
