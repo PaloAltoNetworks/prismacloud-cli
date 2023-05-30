@@ -3,11 +3,13 @@ import logging
 from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
 
+
 @click.group("incidents", short_help="Retrieves a list of incidents that are not acknowledged.")
 @pass_environment
 def cli(ctx):
     """Main command for interacting with incidents."""
     pass
+
 
 @click.command(name="list")
 @click.option('--offset', type=int, default=0, help="Offset for the report count.")
@@ -24,7 +26,9 @@ def cli(ctx):
 @click.option('--provider', type=str, help="Provider for the incidents.")
 @click.option('--from', 'from_date', type=str, help="Starting date for the incidents.")
 @click.option('--to', 'to_date', type=str, help="Ending date for the incidents.")
-def list_incidents(offset, limit, search, sort, reverse, archived, host, cluster, type, category, collection, provider, from_date, to_date):
+def list_incidents(
+        offset, limit, search, sort, reverse, archived, host,
+        cluster, type, category, collection, provider, from_date, to_date):
     """List incidents based on the provided filters."""
     logging.debug("Preparing to retrieve incidents")
     query_params = {
@@ -47,6 +51,7 @@ def list_incidents(offset, limit, search, sort, reverse, archived, host, cluster
     logging.debug(f"Retrieved {len(result)} incidents")
     cli_output(result)
 
+
 def handle_incidents(id, category, type, operation, all_flag):
     """
     Function to handle incidents based on the provided arguments.
@@ -60,7 +65,9 @@ def handle_incidents(id, category, type, operation, all_flag):
     logging.debug(f"{operation.capitalize()} incidents...")
     changed_incidents = []
     if id:
-        pc_api.execute_compute('PATCH', f"api/v1/audits/incidents/acknowledge/{id}", body_params={"acknowledged": operation == 'archive'})
+        pc_api.execute_compute(
+            'PATCH', f"api/v1/audits/incidents/acknowledge/{id}",
+            body_params={"acknowledged": operation == 'archive'})
     else:
         # Get all incidents
         incidents = pc_api.get_endpoint("audits/incidents")
@@ -73,11 +80,14 @@ def handle_incidents(id, category, type, operation, all_flag):
                 if (operation == 'archive' and incident['archived']) or (operation == 'restore' and not incident['archived']):
                     continue
             logging.debug(f"{operation.capitalize()} incident: {incident['_id']}")
-            pc_api.execute_compute('PATCH', f"api/v1/audits/incidents/acknowledge/{incident['_id']}", body_params={"acknowledged": operation == 'archive'})
+            pc_api.execute_compute(
+                'PATCH', f"api/v1/audits/incidents/acknowledge/{incident['_id']}",
+                body_params={"acknowledged": operation == 'archive'})
             changed_incidents.append(incident)
 
     result = changed_incidents
     cli_output(result)
+
 
 @click.command(name="archive")
 @click.option('--id', type=str, help="ID of the incident to archive.")
@@ -90,6 +100,7 @@ def archive_incidents(id, category, type, all_flag):
         logging.error("Please provide an option or use --all to archive all incidents.")
         return
     handle_incidents(id, category, type, 'archive', all_flag)
+
 
 @click.command(name="restore")
 @click.option('--id', type=str, help="ID of the incident to restore.")
@@ -107,4 +118,3 @@ def restore_incidents(id, category, type, all_flag):
 cli.add_command(list_incidents)
 cli.add_command(archive_incidents)
 cli.add_command(restore_incidents)
-
