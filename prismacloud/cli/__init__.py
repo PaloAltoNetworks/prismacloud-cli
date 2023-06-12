@@ -161,7 +161,7 @@ Prisma Cloud CLI (version: {0})
 @click.option(
     "-o",
     "--output",
-    type=click.Choice(["text", "csv", "json", "html", "clipboard", "markdown", "columns", "raw"]),
+    type=click.Choice(["text", "csv", "json", "html", "clipboard", "markdown", "columns", "raw", "count"]),
     default="text",
 )
 @click.option(
