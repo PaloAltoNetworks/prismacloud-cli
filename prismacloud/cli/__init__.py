@@ -5,6 +5,10 @@ import os
 import sys
 import warnings
 import re
+import textwrap
+import json
+import ast
+
 
 import click
 import click_completion
@@ -60,6 +64,7 @@ class Settings(BaseSettings):  # pylint:disable=too-few-public-methods
     max_rows: int = 1000000
     max_width: int = 25
     max_levels: int = 2
+    max_lines: int = 10
 
     url: str = False
     identity: str = False
@@ -153,7 +158,12 @@ Prisma Cloud CLI (version: {0})
 @click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
 @click.option("-vv", "--very_verbose", is_flag=True, help="Enables very verbose mode")
 @click.option("--filter", "query_filter", help="Add search filter")
-@click.option("-o", "--output", type=click.Choice(["text", "csv", "json", "html", "columns"]), default="text")
+@click.option(
+    "-o",
+    "--output",
+    type=click.Choice(["text", "csv", "json", "html", "clipboard", "markdown", "columns", "raw", "count"]),
+    default="text",
+)
 @click.option(
     "-c",
     "--config",
@@ -235,12 +245,12 @@ def process_data_frame(data):
         if column.lower() in ["time", "lastmodified", "availableasof"]:
             try:
                 data_frame[column] = pd.to_datetime(data_frame[column], unit="ms")
-            except Exception as _exc:  # pylint:disable=broad-except
-                logging.debug("Error converting column to milliseconds: %s", _exc)
+            except Exception as _exc2:  # pylint:disable=broad-except
+                logging.debug("Error converting column to milliseconds: %s", _exc2)
                 try:
                     data_frame[column] = pd.to_datetime(data_frame[column], unit="s")
-                except Exception as _exc:  # pylint:disable=broad-except
-                    logging.debug("Error converting column to seconds: %s", _exc)
+                except Exception as _exc3:  # pylint:disable=broad-except
+                    logging.debug("Error converting column to seconds: %s", _exc3)
 
     data_frame.fillna("", inplace=True)
 
@@ -296,16 +306,18 @@ def process_data_frame(data):
     except Exception as _exc:  # pylint:disable=broad-except
         logging.debug("Error dropping duplicates: %s", _exc)
 
-    # Drop all rows after max_rows
-    data_frame = data_frame.head(settings.max_rows)
-
     return data_frame
 
 
 def cli_output(data, sort_values=False):
-    """Parse data and format output"""
+    """Parse data and formay output, except if we"""
+    """want to see raw json."""
     params = get_parameters()[0]
     log_settings()  # Log settings in debug level
+
+    if params["output"] == "raw":
+        click.secho(json.dumps(data))
+        sys.exit(1)
 
     # Read data, convert to dataframe and process it
     data_frame = process_data_frame(data)
@@ -314,14 +326,66 @@ def cli_output(data, sort_values=False):
     show_output(data_frame, params, data)
 
 
+def json_parse(json_data, level=0):
+    if isinstance(json_data, (dict, list)):
+        json_obj = json.loads(json.dumps(json_data))
+    else:
+        json_obj = json.loads(json_data)
+
+    output_str = ""
+    indent = "  " * level
+    if isinstance(json_obj, list):
+        for item in json_obj:
+            output_str += json_parse(item, level)
+    elif isinstance(json_obj, dict):
+        for key, value in json_obj.items():
+            if isinstance(value, (dict, list)):
+                output_str += f"{indent}{key}:\n"
+                output_str += json_parse(value, level + 1)
+            else:
+                output_str += f"{indent}{key}: {value}\n"
+
+    return output_str + "\n" * (level == 0)
+
+
+def wrap_text(text):
+    """Truncate a string to max_width characters"""
+
+    try:
+        data = json.loads(text)
+        if isinstance(data, (list, dict)):
+            text = json_parse(data)
+    except json.decoder.JSONDecodeError:
+        pass
+
+    try:
+        data = ast.literal_eval(text)
+        if isinstance(data, (list, dict)):
+            text = json_parse(data)
+    except (SyntaxError, ValueError):
+        pass
+    wrapped_text = textwrap.fill(text=text, width=settings.max_width, max_lines=settings.max_lines, replace_whitespace=False)
+    return wrapped_text
+
+
 def show_output(data_frame, params, data):
     try:
+        if params["output"] == "count":
+            click.secho(data_frame.shape[0], fg="red")
         if params["output"] == "text":
+            # Drop all rows after max_rows
+            data_frame = data_frame.iloc[: settings.max_rows]
+
             # Drop all but first settings.max_columns columns from data_frame
-            data_frame.drop(data_frame.columns[settings.max_columns:], axis=1, inplace=True)
-            # Truncate all cells
-            data_frame_truncated = data_frame.applymap(do_truncate, na_action="ignore")
-            table_output = tabulate(data_frame_truncated, headers="keys", tablefmt="table", showindex=False)
+            data_frame = data_frame.iloc[:, : settings.max_columns]
+
+            # Wrap all cells
+            data_frame_truncated = data_frame.applymap(wrap_text, na_action="ignore")
+
+            # Wrap column names
+            data_frame_truncated.columns = list(map(wrap_text, data_frame_truncated.columns))
+
+            table_output = tabulate(data_frame_truncated, headers="keys", tablefmt="fancy_grid", showindex=False)
             click.secho(table_output, fg="green")
         if params["output"] == "json":
             # Cannot use 'index=False' here, otherwise '.to_json' returns a hash instead of an array of hashes.
@@ -329,6 +393,22 @@ def show_output(data_frame, params, data):
             click.secho(data_frame.to_json(orient="records"), fg="green")
         if params["output"] == "csv":
             click.secho(data_frame.to_csv(index=False), fg="green")
+        if params["output"] == "clipboard":
+            click.secho(data_frame.to_clipboard(index=False), fg="green")
+        if params["output"] == "markdown":
+            # Drop all rows after max_rows
+            data_frame = data_frame.iloc[: settings.max_rows]
+
+            # Drop all but first settings.max_columns columns from data_frame
+            data_frame = data_frame.iloc[:, : settings.max_columns]
+
+            # Wrap all cells
+            data_frame_truncated = data_frame.applymap(wrap_text, na_action="ignore")
+
+            # Wrap column names
+            data_frame_truncated.columns = list(map(wrap_text, data_frame_truncated.columns))
+
+            click.secho(data_frame_truncated.to_markdown(index=False), fg="green")
         if params["output"] == "html":
             # pre-table-html
             pre_table_html = """
@@ -367,19 +447,6 @@ def show_output(data_frame, params, data):
         # We have shown normal data through this exception.
         # Exit with code 0 instead of 1.
         sys.exit(0)
-
-
-def do_truncate(truncate_this):
-    """Truncate a string to max_width characters"""
-
-    try:
-        truncate_this = str(truncate_this)
-        if len(truncate_this) > settings.max_width:
-            return truncate_this[: settings.max_width] + "..."
-        return truncate_this
-    except Exception as _exc:  # pylint:disable=broad-except
-        logging.debug("Error truncating: %s", _exc)
-        return truncate_this
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ This template/solution is released under an as-is, best effort, support policy. 
 
 Unless explicitly tagged, all projects or work posted in our GitHub repository (at https://github.com/PaloAltoNetworks) or sites other than our official Downloads page on https://support.paloaltonetworks.com are provided under the best effort policy.
 
-## Getting started
+# Getting started
 
 ### Requirements
  * Python >= 3.8
@@ -42,7 +42,7 @@ pip3 install prismacloud-cli
 
 Run the pc cli script. If you don't have a config file yet, it will help you to create one.
 
-```console
+```
 pc version
 ```
 
@@ -108,7 +108,7 @@ The following global options are available
 Options:
   -v, --verbose                   Enables verbose mode.
   -vv, --very_verbose             Enables very verbose mode.
-  -o, --output [text|csv|json|html|columns]
+  -o, --output [text|csv|json|html|clipboard|markdown|columns]
   -c, --config TEXT               Select configuration
                                   ~/.prismacloud/[CONFIGURATION].json
   --columns TEXT                  Select columns for output
@@ -124,7 +124,9 @@ pc --columns hostname,repoTag.repo,osDistro -o csv images -l 1
 
 ## Environment variables
 
-To overwrite the default output settings, use environment variables MAX_WIDTH (console output), MAX_ROWS and MAX_COLUMNS.
+To overwrite the default output settings, use environment variables MAX_WIDTH (console output), MAX_ROWS, MAX_COLUMNS and MAX_LINES. 
+
+- MAX_LINES is used to defined the maximum number of lines within a cell when wrapping the contents.
 
 ## Commands
 The cli has several commands to work with, see the screenshot below for an example, but use ```pc --help``` to see the latest list for your version.
@@ -165,13 +167,43 @@ Then, open /tmp/results.html:
 
 ### Enable CSPM policies with Prisma Cloud CLI
 
-```console
+```
 pc policy set --help
 pc -vv policy set --status enable --compliance_standard 'CIS v1.4.0 (AWS)'
 ```
 
 ### Disable CSPM policies with Prisma Cloud CLI
 
-```console
+```
 pc -vv policy set --status disable --compliance_standard 'CIS v1.4.0 (AWS)'
+```
+
+### Code Security
+
+The below examples are using Github as integration but it works as well with other integration: 
+- Bitbucket
+- Gitlab
+- AzureRepos
+- Github Enterprise
+- Gitlab Enterprise
+- Bitbucket Enterprise
+
+Count the number of unique git authors across all Github repositories:  
+```
+pc -ojson repositories count-git-authors -i Github | jq .
+```
+
+Get the details of all CVE across all Github repositories:  
+```
+ pc -ojson repositories search -i Github -c Vulnerabilities -t packageCve --details | jq .
+```
+
+Get all secrets across all Github repositories:  
+```
+pc -ojson repositories search -i Github -c Secrets -t violation  | jq .
+```
+
+Get all drift across all Github repositories: 
+```
+pc repositories search --integration_type Github --categories Drift
 ```
