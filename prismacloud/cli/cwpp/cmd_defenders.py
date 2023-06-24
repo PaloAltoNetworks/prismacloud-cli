@@ -12,7 +12,8 @@ def cli(ctx):
 
 @click.command(name="list")
 def list_defenders():
-    result = pc_api.get_endpoint("defenders")
+    query_params = {}
+    result = pc_api.defenders_list_read(query_params=query_params)
     cli_output(result)
 
 
