@@ -28,7 +28,7 @@ def names():
 
 
 @click.command()
-def summary(connected):
+def summary():
     result = pc_api.get_endpoint("defenders/summary")
     cli_output(result)
 
