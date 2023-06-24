@@ -11,9 +11,13 @@ def cli(ctx):
 
 
 @click.command(name="list")
-def list_defenders():
-    query_params = {}
-    result = pc_api.defenders_list_read(query_params=query_params)
+@click.option('--connected', is_flag=True, help="Print Summary of Connected defenders only")
+def list_defenders(connected):
+    query_param = ""
+    if connected is True:
+        query_param = {"connected":"true"}
+    result = pc_api.defenders_list_read(query_param)
+
     cli_output(result)
 
 
@@ -24,7 +28,7 @@ def names():
 
 
 @click.command()
-def summary():
+def summary(connected):
     result = pc_api.get_endpoint("defenders/summary")
     cli_output(result)
 

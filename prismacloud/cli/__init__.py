@@ -224,6 +224,7 @@ def process_data_frame(data):
     #         normalize = True
     try:
         data_frame_normalized = pd.json_normalize(data)
+        logging.debug("Data Frame 1: %s",data_frame_normalized.shape)
     except Exception as _exc:  # pylint:disable=broad-except
         logging.error("Error converting data via json_normalize(): %s", _exc)
         sys.exit(1)
@@ -239,6 +240,8 @@ def process_data_frame(data):
         except Exception as _exc:  # pylint:disable=broad-except
             logging.error("Error converting data via DataFrame(): %s", _exc)
             sys.exit(1)
+
+
 
     # If a column contains time, try convert it to datetime
     for column in str(data_frame.columns):
@@ -321,6 +324,7 @@ def cli_output(data, sort_values=False):
 
     # Read data, convert to dataframe and process it
     data_frame = process_data_frame(data)
+    #click.echo(data_frame["hostname"])
 
     # Generate and show the output
     show_output(data_frame, params, data)
@@ -371,6 +375,8 @@ def wrap_text(text):
 def show_output(data_frame, params, data):
     try:
         if params["output"] == "count":
+            #click.echo(data_frame["hostname"])
+
             click.secho(data_frame.shape[0], fg="red")
         if params["output"] == "text":
             # Drop all rows after max_rows
