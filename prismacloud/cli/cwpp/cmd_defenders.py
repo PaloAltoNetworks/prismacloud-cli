@@ -11,11 +11,11 @@ def cli(ctx):
 
 
 @click.command(name="list")
-@click.option('--connected', is_flag=True, help="Print Summary of Connected defenders only")
+@click.option("--connected", is_flag=True, help="Print Summary of Connected defenders only")
 def list_defenders(connected):
     query_param = ""
     if connected is True:
-        query_param = {"connected":"true"}
+        query_param = {"connected": "true"}
     result = pc_api.defenders_list_read(query_param)
 
     cli_output(result)
