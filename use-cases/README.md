@@ -1,4 +1,4 @@
-# Adcanced Use-Cases for Prisma cloud CLI
+# Advanced Use-Cases for Prisma cloud CLI
 
 [Use RQL with Prisma Cloud CI](./use-rql.md) - Webinar on the 29th of June 16:00-17:00 CET (10:00-11:00 EST)
 
