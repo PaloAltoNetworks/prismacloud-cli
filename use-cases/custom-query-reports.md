@@ -19,12 +19,14 @@ Options:
 ```
 We will utilize several variations of the current options in the examples to provide different results.  Explore more on your own.
 
-### For the below examples, we will typically want to do 2 things:
+## Getting Started - For all the below examples, we will typically want to do 2 things:
 1. Determine the query you need and export as an environment variable.  Suggest to run and confirm a valid query in Prisma Cloud console first.  
+> Example
 ```
 export RQL="config from iam where grantedby.cloud.policy.name = 'AdministratorAccess'"
 ```
 2. Determine what fields you would like to filter on to narrow down your output.  You can fetch all the available fields with this simple command:
+> Example
 ```
 pc -o columns rql --query $RQL
 ```
@@ -69,7 +71,7 @@ pc --columns sourceResourceName,grantedByCloudEntityType rql --query $RQL_S3Full
 ```
 
 
-### Roles with permissions to assume:role* or passrole:* to any resource without a conditional
+### AWS Roles with permissions to assume:role* or passrole:* to any resource without a conditional
 ```
 export RQL_AssumePassRole="config from iam where dest.cloud.type = 'AWS' and dest.cloud.resource.name = '*'and grantedby.cloud.policy.type != 'Resource-based Policy' and source.cloud.resource.name!='*' and action.name in ( 'sts:AssumeRole', 'iam:PassRole' )"
 ```
@@ -220,3 +222,50 @@ To display same results to your clipboard
 pc -o clipboard --columns sourceResourceName,grantedByCloudEntityType,grantedByCloudPolicyName,destResourceName  rql --query $RQL_AZ_SQL_DELETE
 ```
 - After above command executes, you can open up a spreadsheet tool like MS Excel or Google Sheets and simply paste the results.
+    
+    
+### Find all GCP VM instances with permissions to impersonate a service account
+
+```
+export RQL_GCP="config from iam where dest.cloud.type = 'GCP' AND source.cloud.type = 'GCP' AND source.cloud.service.name = 'compute' and source.cloud.resource.type = 'Instances' AND action.name IN ('iam.serviceAccounts.getAccessToken', 'iam.serviceAccounts.signBlob', 'iam.serviceAccounts.signJwt', 'iam.serviceAccounts.implicitDelegation', 'iam.serviceAccounts.getOpenIdToken', 'iam.serviceAccounts.actAs') and grantedby.cloud.policy.type != 'Resource-based Policy'"
+```
+To display results via columns
+```
+pc --columns sourceResourceName,grantedByCloudEntityType rql --query $RQL_GCP
+```
+> Example Output:
+```
+╒═══════════════════════════╤════════════════════════════╕
+│ sourceResourceName        │ grantedByCloudEntityType   │
+╞═══════════════════════════╪════════════════════════════╡
+│ user111111@examplecompany │ user                       │
+│ .com                      │                            │
+├───────────────────────────┼────────────────────────────┤
+│ user222222@examplecompany │ user                       │
+│ .com                      │                            │
+├───────────────────────────┼────────────────────────────┤
+│ user333333@examplecompany │ user                       │
+│ .com                      │                            │
+╘═══════════════════════════╧════════════════════════════╛
+```
+
+To make the output print nicer, you can also play around with seetings such as `MAX_COLUMNS` & `MAX_WIDTH`.  Using the example above, let's widen the columns
+```
+export MAX_WIDTH="40"
+```
+And re-run the cli command:
+```
+pc --columns sourceResourceName,grantedByCloudEntityType rql --query $RQL_GCP
+```
+> Example Output:
+```
+╒════════════════════════════════╤════════════════════════════╕
+│ sourceResourceName             │ grantedByCloudEntityType   │
+╞════════════════════════════════╪════════════════════════════╡
+│ user111111@examplecompany.com  │ user                       │
+├────────────────────────────────┼────────────────────────────┤
+│ user222222@examplecompany.com  │ user                       │
+├────────────────────────────────┼────────────────────────────┤
+│ user333333@examplecompany.com  │ user                       │
+╘════════════════════════════════╧════════════════════════════╛
+```
