@@ -8,8 +8,7 @@ datetime
 jsondiff
 pandas
 prismacloud-api==5.2.2
-pydantic
-pydantic-settings
+pydantic~=1.10.0
 requests
 tabulate
 update_checker
