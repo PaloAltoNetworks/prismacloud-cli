@@ -16,7 +16,6 @@ jobs:
       
       - name: Create GitHub Release
         run: |
-          gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
           gh release create ${{ github.ref }} \
             --title "Release ${{ github.ref_name }}" \
             --notes "Release notes for ${{ github.ref_name }}" \
