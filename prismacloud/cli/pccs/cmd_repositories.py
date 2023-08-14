@@ -8,7 +8,6 @@ from prismacloud.cli.api import pc_api
 
 class MyHelper:
     def unique(self, list1):
-
         # initialize a null list
         unique_list = []
 
