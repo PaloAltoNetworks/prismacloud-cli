@@ -1,8 +1,17 @@
 FROM python:3.10-alpine
 
-RUN apk add --update py-pip
-RUN apk add py3-setuptools
-RUN apk add --no-cache git util-linux bash openssl curl
-RUN apk add --no-cache --virtual .build_deps build-base libffi-dev
-RUN pip3 install --extra-index-url https://test.pypi.org/simple/ prismacloud-cli==0.1.1
-RUN apk del .build_deps
+ENV RUN_IN_DOCKER=True
+
+# Metadata as described above
+LABEL maintainer="Simon Melotte <smelotte@paloaltonetworks.com>" \
+      description="Docker image for prismacloud-cli"
+
+RUN apk --no-cache add build-base git curl jq bash
+RUN pip3 install --no-cache-dir -U prismacloud-cli
+
+# Copy your entrypoint script
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Default command when container runs
+ENTRYPOINT ["/entrypoint.sh"]

@@ -37,7 +37,7 @@ setup(
         "pydantic==1.10.11",
         "datetime",
         "pyyaml",
-        "prismacloud-api==5.2.2",
+        "prismacloud-api==5.2.5",
     ],
     name="prismacloud-cli",
     version=version,
