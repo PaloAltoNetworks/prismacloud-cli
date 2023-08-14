@@ -1,6 +1,6 @@
 
 ---
-name: Release new version on DockerHub
+name: Release new version on PyPI and DockerHub
 on:
   push:
     tags:

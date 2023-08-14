@@ -1,9 +1,6 @@
-import logging
-
 import click
 import json
 import yaml
-import os
 
 from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
@@ -13,6 +10,7 @@ from prismacloud.cli.api import pc_api
 @pass_environment
 def cli(ctx):
     pass
+
 
 @click.option(
     "-a",
@@ -63,8 +61,8 @@ def cli(ctx):
     default="import.tf",
 )
 @click.command("list", short_help="[CSPM] Returns detailed information for the resource with the given rrn.")
-def list_resource(region, service, type, status, account, resource_type, tag, tf_file):     
-       
+def list_resource(region, service, type, status, account, resource_type, tag, tf_file):
+
     base_filters = [
         {
             "name": "includeEventForeignEntities",
@@ -77,7 +75,7 @@ def list_resource(region, service, type, status, account, resource_type, tag, tf
             "value": False
         }
     ]
-    
+
     region_filters = [{"name": "cloud.region", "operator": "=", "value": r} for r in region]
     service_filters = [{"name": "cloud.service", "operator": "=", "value": s} for s in service]
     type_filters = [{"name": "cloud.type", "operator": "=", "value": t} for t in type]
@@ -90,7 +88,7 @@ def list_resource(region, service, type, status, account, resource_type, tag, tf
         tag_filters.append({"name": "resource.tagv2", "operator": "=", "value": json.dumps({"key": key, "value": value})})
 
     payload = {
-        "filters": base_filters + region_filters + service_filters + type_filters + status_filters + account_filters + resource_type_filters + tag_filters,
+        "filters": base_filters + region_filters + service_filters + type_filters + status_filters + account_filters + resource_type_filters + tag_filters,  # noqa: E501
         "limit": 100,
         "timeRange": {
             "type": "to_now",
@@ -98,10 +96,10 @@ def list_resource(region, service, type, status, account, resource_type, tag, tf
         }
     }
     result = pc_api.resource_scan_info_read(body_params=payload)
-    
+
     if tf_file:
         generate_tf_file(result, tf_file, 'mapping.yaml')
-    
+
     cli_output(result)
 
 
