@@ -44,6 +44,8 @@ def compliances():
 
             data.append({
                 "hostname": host['hostname'],
+                "account_id": host['cloudMetadata']['accountID'],
+                "collections": host['collections'],
                 "scanTime": host['scanTime'],
                 "complianceIssuesCount": host['complianceIssuesCount'],
                 "complianceRiskScore": host['complianceRiskScore'],
@@ -72,6 +74,8 @@ def vulnerabilities():
         for issue in host['vulnerabilities']:
             data.append({
                 "hostname": host['hostname'],
+                "account_id": host['cloudMetadata']['accountID'],
+                "collections": host['collections'],
                 "scanTime": host['scanTime'],
                 "vulnerabilitiesCount": host['vulnerabilitiesCount'],
                 "vulnerabilityRiskScore": host['vulnerabilityRiskScore'],
