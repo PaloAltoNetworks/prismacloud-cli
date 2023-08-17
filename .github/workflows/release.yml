@@ -16,7 +16,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Extract version from prismacloud/cli/version.py
-        run: echo "PRISMA_CLOUD_CLI_VERSION=$(python -c 'from prismacloud.cli.version import version; print(version)')" >> $GITHUB_ENV
+        run: |
+          version=$(grep 'version = ' prismacloud/cli/version.py | sed -E "s/version = \"([^\"]+)\"/\1/")
+          echo "PRISMA_CLOUD_CLI_VERSION=$version" >> $GITHUB_ENV
 
       - name: Create GitHub Release
         run: |
