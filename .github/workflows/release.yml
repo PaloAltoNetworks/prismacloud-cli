@@ -2,21 +2,25 @@
 ---
 name: Release new version on PyPI and DockerHub
 on:
-  push:
-    tags:
-      - v*
+  pull_request:
+    types:
+      - closed
 
-jobs:  
-  create-github-release:    
+jobs:
+  create-github-release:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
       - name: Check out code
         uses: actions/checkout@v3
-      
+
+      - name: Extract version from prismacloud/cli/version.py
+        run: echo "PRISMA_CLOUD_CLI_VERSION=$(python -c 'from prismacloud.cli.version import version; print(version)')" >> $GITHUB_ENV
+
       - name: Create GitHub Release
         run: |
-          gh release create ${{ github.ref_name }} --generate-notes --latest
+          gh release create ${{ env.PRISMA_CLOUD_CLI_VERSION }} --generate-notes --latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -77,7 +81,7 @@ jobs:
           name: simonpanw/prismacloud-cli
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          tags: "latest,${{ github.ref_name }}"
+          tags: "latest,${{ env.PRISMA_CLOUD_CLI_VERSION }}"
       - name: Update Docker Hub README
         uses: peter-evans/dockerhub-description@dc67fad7001ef9e8e3c124cb7a64e16d0a63d864 # v3.4.2
         with:
