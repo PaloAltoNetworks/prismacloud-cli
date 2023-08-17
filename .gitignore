@@ -42,3 +42,4 @@ error.log
 
 .DS_Store
 output.html
+output.json
