@@ -38,6 +38,8 @@ setup(
         "datetime",
         "pyyaml",
         "prismacloud-api==5.2.5",
+        "pytest",
+        "pytest-benchmark",
     ],
     name="prismacloud-cli",
     version=version,

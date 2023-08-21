@@ -74,66 +74,12 @@ jobs:
           mkdir ~/.prismacloud
           touch ~/.prismacloud/.community_supported_accepted
 
-      - name: Check connectivity
-        env:
-          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
-        run: |
-          pc --config environment check
-
-      - name: Check CWPP version  # (previously exit code 1, should pass now)
-        env:
-          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
-        run: |
-          pc --config environment check
-
-      - name: Check usage
-        env:
-          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
-        run: |
-          pc --config environment usage > /dev/null
-
-      - name: Check defenders summary
-        env:
-          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
-        run: |
-          pc --config environment defenders summary > /dev/null
-
-      - name: Check login events
-        env:
-          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
-        run: |
-          pc --config environment logs audit --type login > /dev/null
-
-      - name: Check tags
-        env:
-          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
-        run: |
-          pc --config environment tags > /dev/null
-
-      - name: Check cloud names
-        env:
-          PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-          PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
-          PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
-        run: |
-          pc --config environment cloud names > /dev/null
-
-      # - name: Check alert list
-      #   env:
-      #     PC_URL: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-      #     PC_IDENTITY: ${{ secrets.PC_ACCESS_KEY }}
-      #     PC_SECRET: ${{ secrets.PC_SECRET_KEY }}
-      #   run: |
-      #     pc --config environment alert list --unit hour --amount 1 > /dev/null
+          - name: Run tests
+          run: pytest -v tests
+  
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: .pytest_cache
