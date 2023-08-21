@@ -1,6 +1,8 @@
 import subprocess
 import os
 import pytest
+from pathlib import Path
+
 
 commands = [
     ["-o", "csv", "policy"],
@@ -14,13 +16,16 @@ commands = [
     ["--columns", "defendersSummary.host", "stats", "dashboard"]
 ]
 
-
-@pytest.mark.check_env_vars
-def test_env_vars():
+@pytest.mark.check_env_vars_or_credentials_file
+def test_env_vars_or_credentials_file():
     required_env_vars = ["PC_ACCESS_KEY", "PC_COMPUTE_API_ENDPOINT", "PC_SAAS_API_ENDPOINT", "PC_SECRET_KEY"]
-    for env_var in required_env_vars:
-        if not os.environ.get(env_var):
-            pytest.fail(f"Environment variable {env_var} is not set")
+    env_vars_set = all(os.environ.get(env_var) for env_var in required_env_vars)
+    
+    credentials_file = Path("~/.prismacloud/credentials.json").expanduser()
+    file_exists = credentials_file.is_file()
+    
+    if not env_vars_set and not file_exists:
+        pytest.fail("Environment variables are not set, and ~/.prismacloud/credentials.json does not exist")
 
 
 @pytest.mark.parametrize("command", commands, ids=[str(command) for command in commands])
