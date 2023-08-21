@@ -36,7 +36,11 @@ def test_cli_commands(command, benchmark):
 
     def run_command():
         try:
-            result = subprocess.run(["python3", "bin/pc", "--config", "env"] + command, capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                ["python3", "bin/pc", "--config", "env"] + command,
+                capture_output=True,
+                text=True,
+                check=True)
             assert result.returncode == 0
         except subprocess.CalledProcessError as test_error:
             pytest.fail(
