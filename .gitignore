@@ -31,7 +31,7 @@ prismacloud_cli.egg-info/
 *.spec
 
 # Test Output
-
+test-results.*
 error.log
 
 # Configuration Files
