@@ -54,7 +54,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.11"
+      
+      - name: Check for required environment variables
+        run: |
+          required_env_vars=("PC_ACCESS_KEY" "PC_COMPUTE_API_ENDPOINT" "PC_SAAS_API_ENDPOINT" "PC_SECRET_KEY")
+          for env_var in "${required_env_vars[@]}"; do
+            if [[ -z "${!env_var}" ]]; then
+              echo "Error: $env_var is not set"
+              exit 1
+            fi
+          done
 
       - name: Install dependencies
         run: |
@@ -79,7 +89,7 @@ jobs:
   
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: test-results
           path: .pytest_cache
