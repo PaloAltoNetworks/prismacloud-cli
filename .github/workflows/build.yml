@@ -9,9 +9,8 @@ on:
 jobs:
   qa:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+    with:
+      python-version: "3.11"
 
     steps:
     - uses: actions/checkout@v3
@@ -48,6 +47,9 @@ jobs:
   test:
     needs: qa
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
     env:
       PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
       PC_COMPUTE_API_ENDPOINT: ${{ secrets.PC_COMPUTE_API_ENDPOINT }}
