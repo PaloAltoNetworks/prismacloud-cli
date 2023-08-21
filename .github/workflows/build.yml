@@ -88,8 +88,6 @@ jobs:
         run: |
           mkdir ~/.prismacloud
           touch ~/.prismacloud/.community_supported_accepted
-          env
-          ls ~/.prismacloud
 
       - name: Run tests
         run: SKIP_BENCHMARK=1 pytest tests
