@@ -21,6 +21,7 @@ def test_env_vars():
     for env_var in required_env_vars:
         if not os.environ.get(env_var):
             pytest.fail(f"Environment variable {env_var} is not set")
+            
 
 @pytest.mark.parametrize("command", commands, ids=[str(command) for command in commands])
 def test_cli_commands(command, benchmark):
