@@ -16,6 +16,7 @@ commands = [
     ["--columns", "defendersSummary.host", "stats", "dashboard"]
 ]
 
+
 @pytest.fixture(scope="session", autouse=True)
 def check_env_vars_or_credentials_file():
     required_env_vars = ["PC_ACCESS_KEY", "PC_COMPUTE_API_ENDPOINT", "PC_SAAS_API_ENDPOINT", "PC_SECRET_KEY"]
@@ -25,7 +26,8 @@ def check_env_vars_or_credentials_file():
     file_exists = credentials_file.is_file()
 
     if not env_vars_set and not file_exists:
-        pytest.exit("Environment variables are not set, and ~/.prismacloud/credentials.json does not exist. Stopping the test suite.")
+        r = "Environment variables are not set, and ~/.prismacloud/credentials.json does not exist. Stopping the test suite."
+        pytest.exit(r)
 
 
 @pytest.mark.parametrize("command", commands, ids=[str(command) for command in commands])
