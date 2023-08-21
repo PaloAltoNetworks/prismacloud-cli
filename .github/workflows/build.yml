@@ -9,16 +9,14 @@ on:
 jobs:
   qa:
     runs-on: ubuntu-latest
-    with:
-      python-version: "3.11"
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: "3.11"
 
     - name: Install dependencies
       run: |
@@ -61,7 +59,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
       
       - name: Check for required environment variables
         run: |
