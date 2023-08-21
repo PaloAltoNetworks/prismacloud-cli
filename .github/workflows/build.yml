@@ -89,8 +89,8 @@ jobs:
           mkdir ~/.prismacloud
           touch ~/.prismacloud/.community_supported_accepted
 
-          - name: Run tests
-          run: pytest -v tests
+      - name: Run tests
+        run: pytest -v tests
   
       - name: Upload test results
         if: always()
