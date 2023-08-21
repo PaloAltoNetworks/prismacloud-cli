@@ -15,6 +15,13 @@ commands = [
 ]
 
 
+@pytest.mark.check_env_vars
+def test_env_vars():
+    required_env_vars = ["PC_ACCESS_KEY", "PC_COMPUTE_API_ENDPOINT", "PC_SAAS_API_ENDPOINT", "PC_SECRET_KEY"]
+    for env_var in required_env_vars:
+        if not os.environ.get(env_var):
+            pytest.fail(f"Environment variable {env_var} is not set")
+
 @pytest.mark.parametrize("command", commands, ids=[str(command) for command in commands])
 def test_cli_commands(command, benchmark):
     """Test various CLI commands and check if they run successfully."""

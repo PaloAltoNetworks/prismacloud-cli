@@ -90,7 +90,7 @@ jobs:
           touch ~/.prismacloud/.community_supported_accepted
 
       - name: Run tests
-        run: SKIP_BENCHMARK=1 pytest -v tests
+        run: SKIP_BENCHMARK=1 pytest -v -x --markers check_env_vars tests
   
       - name: Upload test results
         if: always()
