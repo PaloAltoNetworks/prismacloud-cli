@@ -24,16 +24,7 @@ jobs:
 
     - name: Analysing the code with pylint
       run: |
-        pylint --sarif $(git ls-files '*.py')
-
-    - name: Import sarif results
-      run: |
-        import sarif_results
-
-        results = sarif_results.parse("my_code.sarif")
-
-        for issue in results.issues:
-          print(issue.ruleId, issue.message)
+        pylint $(git ls-files '*.py')
 
     - name: Install flake8
       run: |
