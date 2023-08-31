@@ -1,21 +1,21 @@
 name: Prisma Cloud CLI run
 
 on:
-  workflow_dispatch: # This workflow is triggered manually
+  workflow_dispatch:
 
 jobs:
   prismacloud-cli:
     runs-on: ubuntu-latest
-    env: # Define environment variables for Prisma Cloud CLI
-      PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }} # Access key stored in GitHub secrets
-      PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }} # Prisma Cloud API endpoint
-      PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }} # Secret key stored in GitHub secrets
+    env:
+      PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+      PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+      PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
 
     steps:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11" # Set up Python version 3.11
+          python-version: "3.11"
 
       - name: Check for required environment variables
         run: |
@@ -35,12 +35,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      - name: Install or Upgrade pip
+        run: |
+          if [[ ! -d "~/.cache/pip" ]]; then
+            python -m pip install --upgrade pip
+          fi
+
       - name: Environment Setup
         run: |
-          python -m pip install --upgrade pip
-          sudo pip3 install prismacloud-cli -U
-          mkdir ~/.prismacloud
-          touch ~/.prismacloud/.community_supported_accepted
+          if [[ ! -d "~/.cache/pip" ]]; then
+            sudo pip3 install prismacloud-cli -U
+            mkdir ~/.prismacloud
+            touch ~/.prismacloud/.community_supported_accepted
+          fi
 
       - name: Run command
         run: pc --config environment version
