@@ -22,22 +22,25 @@ jobs:
           required_env_vars=("PC_ACCESS_KEY" "PC_SAAS_API_ENDPOINT" "PC_SECRET_KEY")
           for env_var in "${required_env_vars[@]}"; do
             if [[ -z "${!env_var}" ]]; then
-              echo "Error: $env_var is not set" # Check if required env variables are set
+              echo "Error: $env_var is not set"
               exit 1
             fi
           done
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip # Upgrade pip
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-      - name: Install package
-        run: sudo pip3 install prismacloud-cli -U # Install prismacloud-cli package
-
-      - name: Accept Support Message
+      - name: Environment Setup
         run: |
+          python -m pip install --upgrade pip
+          sudo pip3 install prismacloud-cli -U
           mkdir ~/.prismacloud
-          touch ~/.prismacloud/.community_supported_accepted # Accept community support message
+          touch ~/.prismacloud/.community_supported_accepted
 
       - name: Run command
-        run: pc --config environment version # Run Prisma Cloud CLI command to get version
+        run: pc --config environment version
