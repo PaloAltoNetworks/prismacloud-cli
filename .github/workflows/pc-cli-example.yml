@@ -39,14 +39,5 @@ jobs:
           mkdir ~/.prismacloud
           touch ~/.prismacloud/.community_supported_accepted # Accept community support message
 
-      - name: Run command and capture output
-        id: run-command
-        run: |
-          output=$(pc --config environment version)
-          echo "$output" >> $GITHUB_STATE/pc_version
-
-      - name: Display Prisma Cloud version
-        run: |
-          version=$(cat $GITHUB_STATE/pc_version)
-          echo "Prisma Cloud Version: $version"
-
+      - name: Run command
+        run: pc --config environment version # Run Prisma Cloud CLI command to get version
