@@ -81,14 +81,18 @@ pc --config demo -o csv policy
 By setting the environment variables:
 
 ```
-PC_URL
-PC_IDENTITY
-PC_SECRET
+PC_ACCESS_KEY
+PC_SAAS_API_ENDPOINT
+PC_SECRET_KEY
 ```
 
 And then run pc referring to a configuration called environment:
 
 `pc --config environment <command>`
+
+
+## How to use the Prisma Cloud CLI in pipelines (e.g. Github Actions)
+See [Prisma Cloud CLI in GitHub Actions](docs/how-to-use-in-pipelines.md)
 
 ## Examples
 ```
@@ -195,12 +199,12 @@ pc -ojson repositories count-git-authors -i Github | jq .
 
 Get the details of all CVE across all Github repositories:  
 ```
- pc -ojson repositories search -i Github -c Vulnerabilities -t packageCve --details | jq .
+ pc -o json repositories search -i Github -c Vulnerabilities -t packageCve --details | jq .
 ```
 
 Get all secrets across all Github repositories:  
 ```
-pc -ojson repositories search -i Github -c Secrets -t violation  | jq .
+pc -o json repositories search -i Github -c Secrets -t violation  | jq .
 ```
 
 Get all drift across all Github repositories: 

@@ -19,7 +19,7 @@ commands = [
 
 @pytest.fixture(scope="session", autouse=True)
 def check_env_vars_or_credentials_file():
-    required_env_vars = ["PC_ACCESS_KEY", "PC_COMPUTE_API_ENDPOINT", "PC_SAAS_API_ENDPOINT", "PC_SECRET_KEY"]
+    required_env_vars = ["PC_ACCESS_KEY", "PC_SAAS_API_ENDPOINT", "PC_SECRET_KEY"]
     env_vars_set = all(os.environ.get(env_var) for env_var in required_env_vars)
 
     credentials_file = Path("~/.prismacloud/credentials.json").expanduser()
