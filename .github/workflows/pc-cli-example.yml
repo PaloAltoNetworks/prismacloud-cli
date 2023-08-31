@@ -1,0 +1,43 @@
+name: Prisma Cloud CLI run
+
+on:
+  workflow_dispatch: # This workflow is triggered manually
+
+jobs:
+  prismacloud-cli:
+    runs-on: ubuntu-latest
+    env: # Define environment variables for Prisma Cloud CLI
+      PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }} # Access key stored in GitHub secrets
+      PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }} # Prisma Cloud API endpoint
+      PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }} # Secret key stored in GitHub secrets
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11" # Set up Python version 3.11
+
+      - name: Check for required environment variables
+        run: |
+          required_env_vars=("PC_ACCESS_KEY" "PC_SAAS_API_ENDPOINT" "PC_SECRET_KEY")
+          for env_var in "${required_env_vars[@]}"; do
+            if [[ -z "${!env_var}" ]]; then
+              echo "Error: $env_var is not set" # Check if required env variables are set
+              exit 1
+            fi
+          done
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip # Upgrade pip
+
+      - name: Install package
+        run: sudo pip3 install prismacloud-cli -U # Install prismacloud-cli package
+
+      - name: Accept Support Message
+        run: |
+          mkdir ~/.prismacloud
+          touch ~/.prismacloud/.community_supported_accepted # Accept community support message
+
+      - name: Run command
+        run: pc --config environment version # Run Prisma Cloud CLI command to get version
