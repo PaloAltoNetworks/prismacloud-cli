@@ -43,9 +43,10 @@ jobs:
         id: run-command
         run: |
           output=$(pc --config environment version)
-          echo "::set-output name=pc_version::$output"
+          echo "$output" >> $GITHUB_STATE/pc_version
 
       - name: Display Prisma Cloud version
         run: |
-          echo "Prisma Cloud Version: ${{ steps.run-command.outputs.pc_version }}"
+          version=$(cat $GITHUB_STATE/pc_version)
+          echo "Prisma Cloud Version: $version"
 
