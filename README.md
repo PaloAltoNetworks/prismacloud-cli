@@ -92,7 +92,7 @@ And then run pc referring to a configuration called environment:
 
 
 ## How to use the Prisma Cloud CLI in pipelines (e.g. Github Actions)
-See [Prisma Cloud CLI in GitHub Actions](./docs/how-to-use-in-pipelines.md)
+See [Prisma Cloud CLI in GitHub Actions](docs/how-to-use-in-pipelines.md)
 
 ## Examples
 ```
