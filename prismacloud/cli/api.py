@@ -27,6 +27,9 @@ import prismacloud.cli.version as cli_version
 
 """ CLI Configuration """
 
+# Set the User Agent for accessing the APIs
+pc_api.user_agent = f"PrismaCloudCLI/{cli_version.version}"  # Dynamically set default User-Agent
+
 
 def community_supported():
     """If the community supported message has not been accepted yet,
@@ -188,6 +191,7 @@ def map_cli_config_to_api_config():
     except Exception as exc:  # pylint:disable=broad-except
         logging.debug("Error getting current context: %s", exc)
     settings = get_cli_config()
+
     return {
         # API Key      Current CLI Key          Deprecated CLI Key(s)
         "name": settings.get("name", ""),
