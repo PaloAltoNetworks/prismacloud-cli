@@ -83,8 +83,6 @@ def enable_or_disable_policies(
     changes_true_to_false = 0
     changes_false_to_true = 0
 
-
-
     # Ensure that the --dry-run flag is only used in conjunction with the --csv option.
     if dry_run and not csv_file:
         logging.error("The --dry-run option is only valid when --csv is provided.")
@@ -124,8 +122,10 @@ def enable_or_disable_policies(
                     else:
                         try:
                             pc_api.policy_status_update(policy_id, required_status.lower())
-                        except:
-                            logging.error(f"Unable to update Policy ID: {policy_id}. It may have been changed in the past 4 hours.")
+                        except Exception as exc:  # pylint:disable=broad-except
+                            logging.error(
+                                f"Unable to update Policy ID: {policy_id}. It may have been changed in the past 4 hours.")
+                            logging.info("Error:: %s", exc)
                 else:
                     if dry_run:
                         policies_no_change += 1  # Increment if no change is needed
@@ -140,7 +140,13 @@ def enable_or_disable_policies(
             logging.info(f"{Fore.MAGENTA}=== DRY-RUN COMPLETE ==={Style.RESET_ALL}")
             logging.info(f"{Fore.CYAN}Total Policies Fetched: {total_fetched_policies}{Style.RESET_ALL}")
             logging.info(f"{Fore.CYAN}Policies in CSV: {total_policies_csv}{Style.RESET_ALL}")
-            logging.info(f"{Fore.LIGHTGREEN_EX}To Update: {policies_to_update} ({Fore.LIGHTRED_EX}Disabling: {changes_true_to_false}, {Fore.LIGHTGREEN_EX}Enabling: {changes_false_to_true}){Style.RESET_ALL}")
+            logging.info(
+                f"{Fore.LIGHTGREEN_EX}To Update: {policies_to_update} "
+                f"({Fore.LIGHTRED_EX}Disabling: {changes_true_to_false}, "
+                f"{Fore.LIGHTGREEN_EX}Enabling: {changes_false_to_true})"
+                f"{Style.RESET_ALL}"
+            )
+
             logging.info(f"{Fore.LIGHTYELLOW_EX}No Changes: {policies_no_change}{Style.RESET_ALL}")
         else:
             logging.info("API - All policies from CSV have been updated.")
