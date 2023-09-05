@@ -94,6 +94,11 @@ And then run pc referring to a configuration called environment:
 ## How to use the Prisma Cloud CLI in pipelines (e.g. Github Actions)
 See [Prisma Cloud CLI in GitHub Actions](docs/how-to-use-in-pipelines.md)
 
+## How to enable or disable policies at scale via CSV
+See [How to enable or disable policies at scale via CSV](docs/how-to-enable-or-disable-policies-at-scale-via-csv.md)
+
+
+
 ## Examples
 ```
 pc -o csv policy
