@@ -2,7 +2,7 @@
 
 ## How to Use
 1. **Setup GitHub Secrets** for `PC_ACCESS_KEY`, `PC_SAAS_API_ENDPOINT`, and `PC_SECRET_KEY`.
-2. Add the [pc-cli-example.yml](.github/workflows/pc-cli-example.yml) to your `.github/workflows` directory, or see the example below.
+2. Add the [pc-cli-example.yml](/.github/workflows/pc-cli-example.yml) to your `.github/workflows` directory, or see the example below.
 3. Trigger the workflow manually or automatically.
 
 **Make sure to run the pc command with ```--config environment```**
