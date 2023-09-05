@@ -6,6 +6,11 @@ on:
     branches:
       - main
 
+env:
+      PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+      PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
+      PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+
 jobs:
   qa:
     runs-on: ubuntu-latest
@@ -46,10 +51,6 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
-    env:
-      PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
-      PC_SAAS_API_ENDPOINT: ${{ secrets.PC_SAAS_API_ENDPOINT }}
-      PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
 
     steps:
       - uses: actions/checkout@v3
