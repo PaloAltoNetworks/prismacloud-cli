@@ -17,36 +17,47 @@ def list_discovery():
 
 
 @click.command(name="vms")
+
 @click.option(
     "-a",
     "--account",
     help="Cloud Account",
     multiple=True,
+    is_flag=False
 )
 @click.option(
     "-t",
     "--type",
     help="Cloud Type",
     multiple=True,
+    is_flag=False
 )
 @click.option(
     "-r",
     "--region",
     help="Cloud Region",
     multiple=True,
+    is_flag=False
 )
 def vms_discovery(type, region, account):  
 
-    region_string = ",".join(r for r in region)
-    region_filters = f"region={region_string}"
+    query_param = ""
+    if region:
+        region_string = ",".join(r for r in region)
+        region_filters = f"&region={region_string}"
+        query_param += region_filters
 
-    provider_string = ",".join(t for t in type)
-    type_filters = f"provider={provider_string}"
+    if type:
+        provider_string = ",".join(t for t in type)
+        type_filters = f"&provider={provider_string}"
+        query_param += type_filters
 
-    account_string = ",".join(a for a in account)
-    account_filters = f"accountIDs={account_string}"
+    if account:
+        account_string = ",".join(a for a in account)
+        account_filters = f"&accountIDs={account_string}"
+        query_param += account_filters
 
-    query_param = f"{type_filters}&{region_filters}&{account_filters}"
+    #query_param = f"{type_filters}&{region_filters}&{account_filters}"
 
     logging.info("API - Query Params: %s", query_param)
 
