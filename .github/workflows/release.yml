@@ -2,7 +2,6 @@
 ---
 name: Release new version on PyPI and DockerHub
 on:
-  workflow_dispatch:
   pull_request:
     types:
       - closed
