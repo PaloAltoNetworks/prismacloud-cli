@@ -11,13 +11,12 @@ def cli(ctx):
 
 
 @click.command(name="list")
-def list_discovery(): 
+def list_discovery():
     result = pc_api.cloud_discovery_read()
     cli_output(result)
 
 
 @click.command(name="vms")
-
 @click.option(
     "-a",
     "--account",
@@ -39,7 +38,7 @@ def list_discovery():
     multiple=True,
     is_flag=False
 )
-def vms_discovery(type, region, account):  
+def vms_discovery(type, region, account):
 
     query_param = ""
     if region:
@@ -56,8 +55,6 @@ def vms_discovery(type, region, account):
         account_string = ",".join(a for a in account)
         account_filters = f"&accountIDs={account_string}"
         query_param += account_filters
-
-    #query_param = f"{type_filters}&{region_filters}&{account_filters}"
 
     logging.info("API - Query Params: %s", query_param)
 
