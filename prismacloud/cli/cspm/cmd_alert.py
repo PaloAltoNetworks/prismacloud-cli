@@ -35,18 +35,17 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
         "detailed": detailed,
         "limit": "10000",
         "policy.complianceStandard": compliance_standard,
-        
         "timeAmount": amount,
         "timeType": "relative",
         "timeUnit": unit,
     }
-    
+
     if policy_id:
         data["policy.id"] = policy_id
-    
+
     if cloud_account:
         data["cloud.account"] = cloud_account
-    
+
     if account_group:
         data["account.group"] = account_group
 
@@ -66,7 +65,6 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
 
     # Iterate through alerts and add the policy description
     logging.debug("Iterating through alerts and adding policy information")
-    
     for alert in alerts:
         for policy in policies:
             if policy["policyId"] == alert["policyId"]:
