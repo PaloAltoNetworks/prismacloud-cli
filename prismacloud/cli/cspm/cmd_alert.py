@@ -17,6 +17,8 @@ def cli(ctx):
 @click.option("--compliance-standard", help="Compliance standard, e.g.: 'CIS v1.4.0 (AWS)'")
 @click.option("--policy-id", help="Policy ID, e.g.: '6c561dd0-e24b-4afe-b1fd-78808a45956d'")
 @click.option("--alert-rule", help="Alert rule name, e.g.: 'alertrule-1'")
+@click.option("--cloud-account", help="Cloud Account Name, e.g.: 'MyCloudAccount'")
+@click.option("--account-group", help="Account Group ID, e.g.: 'MyAccountGroup'")
 @click.option("--amount", default="1", help="Number of units selected with --unit")
 @click.option(
     "--unit", default="day", type=click.Choice(["minute", "hour", "day", "week", "month", "year"], case_sensitive=False)
@@ -25,7 +27,7 @@ def cli(ctx):
     "--status", default="open", type=click.Choice(["open", "resolved", "snoozed", "dismissed"], case_sensitive=False)
 )
 @click.option("--detailed/--no-detailed", default=False)
-def list_alerts(compliance_standard, amount, unit, status, detailed, policy_id, alert_rule):
+def list_alerts(compliance_standard, cloud_account, account_group, amount, unit, status, detailed, policy_id, alert_rule):
     """Returns a list of alerts from the Prisma Cloud platform"""
     data = {
         "alert.status": status,
@@ -33,11 +35,19 @@ def list_alerts(compliance_standard, amount, unit, status, detailed, policy_id, 
         "detailed": detailed,
         "limit": "10000",
         "policy.complianceStandard": compliance_standard,
-        "policy.id": policy_id,
         "timeAmount": amount,
         "timeType": "relative",
         "timeUnit": unit,
     }
+
+    if policy_id:
+        data["policy.id"] = policy_id
+
+    if cloud_account:
+        data["cloud.account"] = cloud_account
+
+    if account_group:
+        data["account.group"] = account_group
 
     # Fetch the alerts
     alerts = pc_api.get_endpoint("alert", query_params=data, api="cspm")
