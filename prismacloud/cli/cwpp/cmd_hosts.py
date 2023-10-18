@@ -31,31 +31,33 @@ def compliances():
     data = []
 
     for host in hosts:
-        if not host['complianceIssues']:
+        if not host["complianceIssues"]:
             continue
-        for issue in host['complianceIssues']:
+        for issue in host["complianceIssues"]:
 
             # Extract compliance framework from title
-            match = re.search(r'\(([^)]+)\)', issue['title'])
+            match = re.search(r"\(([^)]+)\)", issue["title"])
             if match:
                 compliance_framework = match.group(1)
             else:
                 continue  # Skip this issue if no compliance framework found
 
-            data.append({
-                "hostname": host['hostname'],
-                "account_id": host['cloudMetadata']['accountID'],
-                "collections": host['collections'],
-                "scanTime": host['scanTime'],
-                "complianceIssuesCount": host['complianceIssuesCount'],
-                "complianceRiskScore": host['complianceRiskScore'],
-                "compliance_framework": compliance_framework,
-                "id": issue['id'],
-                "severity": issue['severity'],
-                "cause": issue['cause'],
-                "description": issue['description'],
-                "title": issue['title'],
-            })
+            data.append(
+                {
+                    "hostname": host["hostname"],
+                    "account_id": host["cloudMetadata"]["accountID"],
+                    "collections": host["collections"],
+                    "scanTime": host["scanTime"],
+                    "complianceIssuesCount": host["complianceIssuesCount"],
+                    "complianceRiskScore": host["complianceRiskScore"],
+                    "compliance_framework": compliance_framework,
+                    "id": issue["id"],
+                    "severity": issue["severity"],
+                    "cause": issue["cause"],
+                    "description": issue["description"],
+                    "title": issue["title"],
+                }
+            )
 
     cli_output(data)
 
@@ -69,23 +71,25 @@ def vulnerabilities():
     data = []
 
     for host in hosts:
-        if not host['vulnerabilities']:
+        if not host["vulnerabilities"]:
             continue
-        for issue in host['vulnerabilities']:
-            data.append({
-                "hostname": host['hostname'],
-                "account_id": host['cloudMetadata']['accountID'],
-                "collections": host['collections'],
-                "scanTime": host['scanTime'],
-                "vulnerabilitiesCount": host['vulnerabilitiesCount'],
-                "vulnerabilityRiskScore": host['vulnerabilityRiskScore'],
-                "cve": issue['cve'],
-                "severity": issue['severity'],
-                "cvss": issue['cvss'],
-                "packageName": issue['packageName'],
-                "packageVersion": issue['packageVersion'],
-                "status": issue['status'],
-            })
+        for issue in host["vulnerabilities"]:
+            data.append(
+                {
+                    "hostname": host["hostname"],
+                    "account_id": host["cloudMetadata"]["accountID"],
+                    "collections": host["collections"],
+                    "scanTime": host["scanTime"],
+                    "vulnerabilitiesCount": host["vulnerabilitiesCount"],
+                    "vulnerabilityRiskScore": host["vulnerabilityRiskScore"],
+                    "cve": issue["cve"],
+                    "severity": issue["severity"],
+                    "cvss": issue["cvss"],
+                    "packageName": issue["packageName"],
+                    "packageVersion": issue["packageVersion"],
+                    "status": issue["status"],
+                }
+            )
 
     cli_output(data)
 

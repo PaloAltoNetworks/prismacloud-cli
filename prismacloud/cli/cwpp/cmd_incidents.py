@@ -12,40 +12,40 @@ def cli(ctx):
 
 
 @click.command(name="list")
-@click.option('--offset', type=int, default=0, help="Offset for the report count.")
-@click.option('--limit', type=int, default=50, help="Number of reports to retrieve.")
-@click.option('--search', type=str, help="Search term for the results.")
-@click.option('--sort', type=str, help="Sort key for the results.")
-@click.option('--reverse', is_flag=True, help="Flag to sort the results in reverse order.")
-@click.option('--archived', is_flag=True, help="Flag to list archived incidents.")
-@click.option('--host', type=str, help="Host for the incidents.")
-@click.option('--cluster', type=str, help="Cluster for the incidents.")
-@click.option('--type', type=str, help="Type of the incidents.")
-@click.option('--category', type=str, help="Category of the incidents.")
-@click.option('--collection', type=str, help="Collection for the incidents.")
-@click.option('--provider', type=str, help="Provider for the incidents.")
-@click.option('--from', 'from_date', type=str, help="Starting date for the incidents.")
-@click.option('--to', 'to_date', type=str, help="Ending date for the incidents.")
+@click.option("--offset", type=int, default=0, help="Offset for the report count.")
+@click.option("--limit", type=int, default=50, help="Number of reports to retrieve.")
+@click.option("--search", type=str, help="Search term for the results.")
+@click.option("--sort", type=str, help="Sort key for the results.")
+@click.option("--reverse", is_flag=True, help="Flag to sort the results in reverse order.")
+@click.option("--archived", is_flag=True, help="Flag to list archived incidents.")
+@click.option("--host", type=str, help="Host for the incidents.")
+@click.option("--cluster", type=str, help="Cluster for the incidents.")
+@click.option("--type", type=str, help="Type of the incidents.")
+@click.option("--category", type=str, help="Category of the incidents.")
+@click.option("--collection", type=str, help="Collection for the incidents.")
+@click.option("--provider", type=str, help="Provider for the incidents.")
+@click.option("--from", "from_date", type=str, help="Starting date for the incidents.")
+@click.option("--to", "to_date", type=str, help="Ending date for the incidents.")
 def list_incidents(
-        offset, limit, search, sort, reverse, archived, host,
-        cluster, type, category, collection, provider, from_date, to_date):
+    offset, limit, search, sort, reverse, archived, host, cluster, type, category, collection, provider, from_date, to_date
+):
     """List incidents based on the provided filters."""
     logging.debug("Preparing to retrieve incidents")
     query_params = {
-        'offset': offset,
-        'limit': limit,
-        'search': search,
-        'sort': sort,
-        'reverse': reverse,
-        'archived': archived,
-        'host': host,
-        'cluster': cluster,
-        'type': type,
-        'category': category,
-        'collection': collection,
-        'provider': provider,
-        'from': from_date,
-        'to': to_date
+        "offset": offset,
+        "limit": limit,
+        "search": search,
+        "sort": sort,
+        "reverse": reverse,
+        "archived": archived,
+        "host": host,
+        "cluster": cluster,
+        "type": type,
+        "category": category,
+        "collection": collection,
+        "provider": provider,
+        "from": from_date,
+        "to": to_date,
     }
     result = pc_api.get_endpoint("audits/incidents", query_params=query_params)
     logging.debug(f"Retrieved {len(result)} incidents")
@@ -66,23 +66,25 @@ def handle_incidents(id, category, type, operation, all_flag):
     changed_incidents = []
     if id:
         pc_api.execute_compute(
-            'PATCH', f"api/v1/audits/incidents/acknowledge/{id}",
-            body_params={"acknowledged": operation == 'archive'})
+            "PATCH", f"api/v1/audits/incidents/acknowledge/{id}", body_params={"acknowledged": operation == "archive"}
+        )
     else:
         # Get all incidents
         incidents = pc_api.get_endpoint("audits/incidents")
         for incident in incidents:
-            if category and incident.get('category') != category:
+            if category and incident.get("category") != category:
                 continue
-            if type and incident.get('type') != type:
+            if type and incident.get("type") != type:
                 continue
-            if 'archived' in incident:
-                if (operation == 'archive' and incident['archived']) or (operation == 'restore' and not incident['archived']):
+            if "archived" in incident:
+                if (operation == "archive" and incident["archived"]) or (operation == "restore" and not incident["archived"]):
                     continue
             logging.debug(f"{operation.capitalize()} incident: {incident['_id']}")
             pc_api.execute_compute(
-                'PATCH', f"api/v1/audits/incidents/acknowledge/{incident['_id']}",
-                body_params={"acknowledged": operation == 'archive'})
+                "PATCH",
+                f"api/v1/audits/incidents/acknowledge/{incident['_id']}",
+                body_params={"acknowledged": operation == "archive"},
+            )
             changed_incidents.append(incident)
 
     result = changed_incidents
@@ -90,29 +92,29 @@ def handle_incidents(id, category, type, operation, all_flag):
 
 
 @click.command(name="archive")
-@click.option('--id', type=str, help="ID of the incident to archive.")
-@click.option('--category', type=str, help="Category of the incidents to archive.")
-@click.option('--type', type=str, help="Type of the incidents to archive.")
-@click.option('--all', 'all_flag', is_flag=True, help="Flag to archive all incidents.")
+@click.option("--id", type=str, help="ID of the incident to archive.")
+@click.option("--category", type=str, help="Category of the incidents to archive.")
+@click.option("--type", type=str, help="Type of the incidents to archive.")
+@click.option("--all", "all_flag", is_flag=True, help="Flag to archive all incidents.")
 def archive_incidents(id, category, type, all_flag):
     """Archive incidents based on the provided arguments."""
     if not any([id, category, type, all_flag]):
         logging.error("Please provide an option or use --all to archive all incidents.")
         return
-    handle_incidents(id, category, type, 'archive', all_flag)
+    handle_incidents(id, category, type, "archive", all_flag)
 
 
 @click.command(name="restore")
-@click.option('--id', type=str, help="ID of the incident to restore.")
-@click.option('--category', type=str, help="Category of the incidents to restore.")
-@click.option('--type', type=str, help="Type of the incidents to restore.")
-@click.option('--all', 'all_flag', is_flag=True, help="Flag to restore all incidents.")
+@click.option("--id", type=str, help="ID of the incident to restore.")
+@click.option("--category", type=str, help="Category of the incidents to restore.")
+@click.option("--type", type=str, help="Type of the incidents to restore.")
+@click.option("--all", "all_flag", is_flag=True, help="Flag to restore all incidents.")
 def restore_incidents(id, category, type, all_flag):
     """Restore incidents based on the provided arguments."""
     if not any([id, category, type, all_flag]):
         logging.error("Please provide an option or use --all to restore all incidents.")
         return
-    handle_incidents(id, category, type, 'restore', all_flag)
+    handle_incidents(id, category, type, "restore", all_flag)
 
 
 cli.add_command(list_incidents)

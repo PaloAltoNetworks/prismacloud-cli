@@ -18,27 +18,9 @@ def list_discovery():
 
 
 @click.command(name="vms")
-@click.option(
-    "-a",
-    "--account",
-    help="Cloud Account",
-    multiple=True,
-    is_flag=False
-)
-@click.option(
-    "-t",
-    "--type",
-    help="Cloud Type",
-    multiple=True,
-    is_flag=False
-)
-@click.option(
-    "-r",
-    "--region",
-    help="Cloud Region",
-    multiple=True,
-    is_flag=False
-)
+@click.option("-a", "--account", help="Cloud Account", multiple=True, is_flag=False)
+@click.option("-t", "--type", help="Cloud Type", multiple=True, is_flag=False)
+@click.option("-r", "--region", help="Cloud Region", multiple=True, is_flag=False)
 def vms_discovery(type, region, account):
 
     query_param = ""
