@@ -19,23 +19,49 @@ def list_(limit=50):
 
 
 @click.command(name="packages")
-@click.option("-l", "--limit")
-def packages_(limit=50):
-    """Show deployed images package information"""
-    result = pc_api.images_list_read(query_params={"limit": limit})
+@click.option("-p", "--package", default=None, help="Specify a package to filter on.")
+@click.option("-i", "--image-name", default=None, help="Specify an image name to filter on.")
+@click.option("-c", "--cluster", default=None, help="Specify a cluster to filter on.")
+@click.option("-l", "--limit", default=50, help="Limit the number of images to process. Default limit is 50")
+def packages_(package, image_name, cluster, limit):
+    """Show deployed images package information."""
+    query_params = {"limit": limit}
+    if image_name:
+        query_params["image_name"] = image_name
+    if cluster:
+        query_params["cluster"] = cluster
 
-    # Build a list of packages, the images they're in and their licenses
+    images = pc_api.images_list_read(query_params=query_params)
+
     package_list = []
 
     # Go through images
-    for i in result:
+    for image in images:
         # Go through packages
-        for package in i["packages"]:
+        for pkg_group in image["packages"]:
             # Go through list of packages
-            for p_in_image in package["pkgs"]:
-                p_in_image["image_id"] = i["id"]
-                p_in_image["image_tag"] = i["repoTag"]["registry"] + "/" + i["repoTag"]["repo"] + ":" + i["repoTag"]["tag"]
-                package_list.append(p_in_image)
+            for pkg in pkg_group["pkgs"]:
+                # Check if a specific package is specified and filter on that
+                if package is None or package.lower() in pkg["name"].lower():
+
+                    image_tag = "Unknown"
+                    if image["repoTag"] is not None:  # Check if repoTag is not None
+                        image_tag = (
+                            image["repoTag"]["registry"] + "/" + image["repoTag"]["repo"] + ":" + image["repoTag"]["tag"]
+                        )
+
+                    pkg_info = {
+                        "image_name": image["instances"][0]["image"] if image["instances"] else "Unknown",
+                        "image_id": image["id"],
+                        "image_tag": image_tag,
+                        "namespace": image.get("namespaces", "Unknown"),
+                        "os_distro": image.get("installedProducts", {}).get("osDistro", "Unknown"),
+                        "package_name": pkg["name"],
+                        "package_version": pkg["version"],
+                        "package_license": pkg["license"],
+                        "package_cve_count": pkg["cveCount"],
+                    }
+                    package_list.append(pkg_info)
 
     cli_output(package_list)
 

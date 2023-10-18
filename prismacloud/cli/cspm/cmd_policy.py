@@ -11,7 +11,7 @@ from prismacloud.cli.api import pc_api
 
 def validate_csv(ctx, param, value):
     if value:
-        if not value.name.endswith('.csv'):
+        if not value.name.endswith(".csv"):
             raise click.BadParameter("CSV file extension must be '.csv'")
         return value
 
@@ -32,15 +32,11 @@ def list_policies():
 @click.option(
     "--csv",
     "csv_file",  # Add this line to map the option to the parameter
-    type=click.File('r'),
+    type=click.File("r"),
     callback=validate_csv,
-    help="CSV file containing policyId and enabled columns."
+    help="CSV file containing policyId and enabled columns.",
 )
-@click.option(
-    "--dry-run",
-    is_flag=True,
-    help="Preview changes without actually making them."
-)
+@click.option("--dry-run", is_flag=True, help="Preview changes without actually making them.")
 @click.option(
     "--policy_severity",
     default="high",
@@ -65,9 +61,7 @@ def list_policies():
 )
 @click.option("--status", type=click.Choice(["enable", "disable"]), help="Policy status to set (enable or disable).")
 def enable_or_disable_policies(
-    policy_severity, all_policies, cloud_type,
-    policy_type, status, compliance_standard,
-    csv_file, dry_run
+    policy_severity, all_policies, cloud_type, policy_type, status, compliance_standard, csv_file, dry_run
 ):
     """Enable or Disable policies"""
 
@@ -124,7 +118,8 @@ def enable_or_disable_policies(
                             pc_api.policy_status_update(policy_id, required_status.lower())
                         except Exception as exc:  # pylint:disable=broad-except
                             logging.error(
-                                f"Unable to update Policy ID: {policy_id}. It may have been changed in the past 4 hours.")
+                                f"Unable to update Policy ID: {policy_id}. It may have been changed in the past 4 hours."
+                            )
                             logging.info("Error:: %s", exc)
                 else:
                     if dry_run:

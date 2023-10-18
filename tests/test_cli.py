@@ -13,7 +13,7 @@ commands = [
     ["-o", "json", "stats", "dashboard"],
     ["cloud", "names"],
     ["cloud", "type"],
-    ["--columns", "defendersSummary.host", "stats", "dashboard"]
+    ["--columns", "defendersSummary.host", "stats", "dashboard"],
 ]
 
 
@@ -37,10 +37,8 @@ def test_cli_commands(command, benchmark):
     def run_command():
         try:
             result = subprocess.run(
-                ["python3", "bin/pc", "--config", "env"] + command,
-                capture_output=True,
-                text=True,
-                check=True)
+                ["python3", "bin/pc", "--config", "env"] + command, capture_output=True, text=True, check=True
+            )
             assert result.returncode == 0
         except subprocess.CalledProcessError as test_error:
             pytest.fail(
