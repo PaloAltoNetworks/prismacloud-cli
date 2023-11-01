@@ -45,7 +45,7 @@ def list_incidents(
         "from": from_date,
         "to": to_date,
     }
-    
+
     result = pc_api.execute_compute("GET", "api/v1/audits/incidents", query_params=query_params, paginated=True)
 
     logging.debug(f"Retrieved {len(result)} incidents")
@@ -65,19 +65,32 @@ def handle_incidents(id, category, type, operation, all_flag):
     logging.debug(f"{operation.capitalize()} incidents...")
     changed_incidents = []
     if id:
+        logging.debug(f"Handling single incident with ID: {id}")
         pc_api.execute_compute(
             "PATCH", f"api/v1/audits/incidents/acknowledge/{id}", body_params={"acknowledged": operation == "archive"}
         )
     else:
         # Get all incidents
-        incidents = pc_api.get_endpoint("audits/incidents")
+        logging.debug("Retrieving all incidents...")
+        incidents = pc_api.execute_compute("GET", "api/v1/audits/incidents", paginated=True)
+        logging.debug(f"Retrieved {len(incidents)} incidents")
+
+        unchanged_incidents_count = 0
+
         for incident in incidents:
+            logging.debug(f"Inspecting incident with ID: {incident['_id']}")
             if category and incident.get("category") != category:
+                logging.debug(f"Skipping incident {incident['_id']} due to category mismatch.")
+                unchanged_incidents_count += 1
                 continue
             if type and incident.get("type") != type:
+                logging.debug(f"Skipping incident {incident['_id']} due to type mismatch.")
+                unchanged_incidents_count += 1
                 continue
             if "archived" in incident:
                 if (operation == "archive" and incident["archived"]) or (operation == "restore" and not incident["archived"]):
+                    logging.debug(f"Skipping incident {incident['_id']} due to archived status.")
+                    unchanged_incidents_count += 1
                     continue
             logging.debug(f"{operation.capitalize()} incident: {incident['_id']}")
             pc_api.execute_compute(
@@ -86,6 +99,11 @@ def handle_incidents(id, category, type, operation, all_flag):
                 body_params={"acknowledged": operation == "archive"},
             )
             changed_incidents.append(incident)
+
+        logging.debug(f"Number of changed incidents: {len(changed_incidents)}")
+        logging.debug(f"Number of unchanged incidents: {unchanged_incidents_count}")
+
+    logging.debug(f"Finished {operation} incidents.")
 
     result = changed_incidents
     cli_output(result)
