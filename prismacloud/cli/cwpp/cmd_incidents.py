@@ -12,7 +12,6 @@ def cli(ctx):
 
 
 @click.command(name="list")
-@click.option("--offset", type=int, default=0, help="Offset for the report count.")
 @click.option("--limit", type=int, default=50, help="Number of reports to retrieve.")
 @click.option("--search", type=str, help="Search term for the results.")
 @click.option("--sort", type=str, help="Sort key for the results.")
@@ -27,12 +26,11 @@ def cli(ctx):
 @click.option("--from", "from_date", type=str, help="Starting date for the incidents.")
 @click.option("--to", "to_date", type=str, help="Ending date for the incidents.")
 def list_incidents(
-    offset, limit, search, sort, reverse, archived, host, cluster, type, category, collection, provider, from_date, to_date
+    limit, search, sort, reverse, archived, host, cluster, type, category, collection, provider, from_date, to_date
 ):
     """List incidents based on the provided filters."""
     logging.debug("Preparing to retrieve incidents")
     query_params = {
-        "offset": offset,
         "limit": limit,
         "search": search,
         "sort": sort,
@@ -47,7 +45,9 @@ def list_incidents(
         "from": from_date,
         "to": to_date,
     }
-    result = pc_api.get_endpoint("audits/incidents", query_params=query_params)
+    
+    result = pc_api.execute_compute("GET", "api/v1/audits/incidents", query_params=query_params, paginated=True)
+
     logging.debug(f"Retrieved {len(result)} incidents")
     cli_output(result)
 
