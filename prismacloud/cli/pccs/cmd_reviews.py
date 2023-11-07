@@ -4,7 +4,7 @@ from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
 
 
-@click.group("reviews", short_help="Get Code review runs data")
+@click.group("reviews", short_help="[APPSEC] Get Code review runs data")
 @pass_environment
 def cli(ctx):
     pass

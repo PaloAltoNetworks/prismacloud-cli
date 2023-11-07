@@ -24,7 +24,7 @@ class MyHelper:
         return flat_list
 
 
-@click.group("repositories", short_help="[PCCS] Interact with repositories")
+@click.group("repositories", short_help="[APPSEC] Interact with repositories")
 @pass_environment
 def cli(ctx):
     pass
