@@ -55,7 +55,7 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
 
     # Try to add a new column with a url to the alert investigate page
     base_url = f"https://{pc_api.api.replace('api', 'app')}/alerts/overview?viewId=default"
-    
+
     for alert in alerts:
         try:
             alert_id = alert['id']
