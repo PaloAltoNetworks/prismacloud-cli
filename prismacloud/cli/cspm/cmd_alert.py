@@ -58,12 +58,11 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
 
     for alert in alerts:
         try:
-            alert_id = alert['id']
+            alert_id = alert["id"]
             alert_url = f"{base_url}{additional_params}%22{alert_id}%22%5D%7D"
             alert["alert.resource.url"] = alert_url
         except Exception:  # pylint:disable=broad-except
             pass
-
 
     # We want to get the related policy information so fetch the policies
     policies = pc_api.policy_list_read()
