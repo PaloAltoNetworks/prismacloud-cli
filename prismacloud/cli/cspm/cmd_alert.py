@@ -3,6 +3,7 @@ import click
 
 from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
+from urllib.parse import quote
 
 
 @click.group(
@@ -53,10 +54,23 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
     alerts = pc_api.get_endpoint("alert", query_params=data, api="cspm")
 
     # Try to add a new column with a url to the alert investigate page
-    url = "https://app.eu.prismacloud.io/investigate/details?resourceId="
+    base_url = f"https://{pc_api.api.replace('api', 'app')}/alerts/overview?viewId=default"
+
     for alert in alerts:
         try:
-            alert["alert.resource.url"] = f"{url}{alert['resource']['rrn']}"
+            alert_id = alert['id']
+            # Correctly using double braces for literal curly braces in f-string
+            filters = (
+                f'{{"timeRange":{{"type":"to_now","value":"epoch"}},'
+                f'"timeRange.type":"ALERT_OPENED","alert.status":["open"],'
+                f'"alert.id":["{alert_id}"]}}'
+            )
+            # Encoding the filters part
+            encoded_filters = quote(filters)
+
+            # Constructing the full URL
+            alert_url = f'{base_url}&filters={encoded_filters}'
+            alert["alert.resource.url"] = alert_url
         except Exception:  # pylint:disable=broad-except
             pass
 
@@ -69,6 +83,7 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
         for policy in policies:
             if policy["policyId"] == alert["policyId"]:
                 alert["policy.name"] = policy["name"]
+                alert["policy.severity"] = policy["severity"]
                 alert["policy.description"] = policy["description"]
     logging.debug("Done iterating through alerts and adding policy information")
 
