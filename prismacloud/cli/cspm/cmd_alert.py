@@ -54,16 +54,20 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
 
     # Try to add a new column with a url to the alert investigate page
     base_url = f"https://{pc_api.api.replace('api', 'app')}/alerts/overview?viewId=default"
-    additional_params = "&filters=%7B%22timeRange%22%3A%7B%22type%22%3A%22to_now%22%2C%22value%22%3A%22epoch%22%7D%2C%22timeRange.type%22%3A%22ALERT_OPENED%22%2C%22alert.status%22%3A%5B%22open%22%5D%2C%22alert.id%22%3A%5B"
 
     for alert in alerts:
         try:
-            alert_id = alert["id"]
-            alert_url = f"{base_url}{additional_params}%22{alert_id}%22%5D%7D"
+            alert_id = alert['id']
+            # Breaking the long line into multiple shorter lines
+            additional_params = (
+                '&filters={"timeRange":{"type":"to_now","value":"epoch"},'
+                '"timeRange.type":"ALERT_OPENED","alert.status":["open"],'
+                f'"alert.id":["{alert_id}"]}}'
+            )
+            alert_url = f'{base_url}{additional_params}'
             alert["alert.resource.url"] = alert_url
         except Exception:  # pylint:disable=broad-except
             pass
-
     # We want to get the related policy information so fetch the policies
     policies = pc_api.policy_list_read()
 
