@@ -1,12 +1,6 @@
 import logging
 
 import click
-import yaml
-
-from prismacloud.cli import cli_output, pass_environment
-from prismacloud.cli.api import pc_api
-
-import click
 
 from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
@@ -25,10 +19,10 @@ def cli(ctx):
 )
 @click.command(name="azure-guest")
 def azure_guest(details, amount, unit):
-    """List Azure guest accounts with wildcard permissions """
+    """List Azure guest accounts with wildcard permissions"""
     data = []
-    
-    query = "config from cloud.resource where cloud.type = 'azure' AND api.name = 'azure-active-directory-user' AND json.rule = userType equals \"Guest\""
+
+    query = "config from cloud.resource where cloud.type = 'azure' AND api.name = 'azure-active-directory-user' AND json.rule = userType equals \"Guest\""  # noqa: E501
     search_params = {}
     search_params["limit"] = 1000
     search_params["timeRange"] = {}
@@ -41,10 +35,10 @@ def azure_guest(details, amount, unit):
     search_params["heuristicSearch"] = True
     search_params["query"] = query
 
-    config_result_list = pc_api.search_config_read(search_params=search_params)    
-    
+    config_result_list = pc_api.search_config_read(search_params=search_params)
+
     for result in config_result_list:
-        asset_id = result['assetId']
+        asset_id = result["assetId"]
         query = f"config from iam where source.cloud.resource.uai = '{asset_id}'"
         logging.debug(f"API - IAM RQL: {query}")
         search_params = {}
@@ -55,16 +49,16 @@ def azure_guest(details, amount, unit):
         for permission in user_permissions:
             if permission["destCloudResourceName"] == "*":
                 data_entry = {
-                    "name": result['name'],
-                    "accountId": result['accountId'],
-                    "accountName": result['accountName'],
-                    "service": result['service'],
+                    "name": result["name"],
+                    "accountId": result["accountId"],
+                    "accountName": result["accountName"],
+                    "service": result["service"],
                     "grantedByEntityType": permission["grantedByEntityType"],
                     "grantedByEntityName": permission["grantedByEntityName"],
                     "destCloudResourceName": permission["destCloudResourceName"],
                 }
                 if details:
-                    data_entry["destCloudServiceName"] = permission.get('destCloudServiceName')
+                    data_entry["destCloudServiceName"] = permission.get("destCloudServiceName")
 
                 data += [data_entry]
 
