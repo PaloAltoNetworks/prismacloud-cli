@@ -58,7 +58,7 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
 
     for alert in alerts:
         try:
-            alert_id = alert['id']
+            alert_id = alert["id"]
             # Correctly using double braces for literal curly braces in f-string
             filters = (
                 f'{{"timeRange":{{"type":"to_now","value":"epoch"}},'
@@ -69,7 +69,7 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
             encoded_filters = quote(filters)
 
             # Constructing the full URL
-            alert_url = f'{base_url}&filters={encoded_filters}'
+            alert_url = f"{base_url}&filters={encoded_filters}"
             alert["alert.resource.url"] = alert_url
         except Exception:  # pylint:disable=broad-except
             pass
