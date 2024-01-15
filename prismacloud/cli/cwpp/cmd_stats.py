@@ -42,7 +42,7 @@ def license_stats():
 @click.option(
     "--cvss",
     default="9.0",
-    help="CVSSThreshold is the minimum CVSS score indicating that all retrieved CVEs CVSS scores are greater than or equal to the threshold. Default: 9.0",
+    help="CVSS Threshold is the minimum CVSS score. Default: 9.0",
 )
 def vulnerabilities(cve, collection, cvss):
     if not cve and not cvss:
@@ -50,7 +50,7 @@ def vulnerabilities(cve, collection, cvss):
         result = result[0]
         cli_output(result)
         return
-    elif not cve:                
+    elif not cve:
         logging.debug("CVSS to search for: {cvss}")
         results = pc_api.stats_vulnerabilities_read({"cvssThreshold": cvss})
         image_data = []
@@ -58,11 +58,16 @@ def vulnerabilities(cve, collection, cvss):
             # Check if 'images', 'hosts', 'containers', 'functions' keys exist
             for key in ['images', 'hosts', 'containers', 'functions']:
                 if key in result:
-                    # Check if 'vulnerabilities' key exists in the specific category                    
+                    # Check if 'vulnerabilities' key exists in the specific category
                     if 'vulnerabilities' in result[key]:
                         for vulnerability in result[key]['vulnerabilities']:
-                            logging.info(f"Found this CVE: {vulnerability['cve']} in {key}")      
-                            resources = pc_api.stats_vulnerabilities_impacted_resoures_read({"cve": vulnerability['cve'], "resourceType": vulnerability["impactedResourceType"]})
+                            logging.info(f"Found this CVE: {vulnerability['cve']} in {key}")
+                            resources = pc_api.stats_vulnerabilities_impacted_resoures_read(
+                                {
+                                    "cve": vulnerability['cve'],
+                                    "resourceType": vulnerability["impactedResourceType"]
+                                }
+                            )
 
                             # Check and loop through images if they exist
                             if 'images' in resources:
@@ -85,7 +90,7 @@ def vulnerabilities(cve, collection, cvss):
                                         image_info = {
                                             'type': "image",
                                             'cve': vulnerability['cve'],
-                                            'resourceID': image['resourceID'],                                                
+                                            'resourceID': image['resourceID'],
                                             'image': container['image'],
                                             'imageID': container['imageID'],
                                             'container': container['container'],
@@ -99,7 +104,6 @@ def vulnerabilities(cve, collection, cvss):
                                         }
                                         logging.debug(f"Image info: {image_info}")
                                         image_data.append(image_info)
-
 
                             # Assuming resources is the API response dictionary
                             if 'hosts' in resources:
@@ -133,7 +137,7 @@ def vulnerabilities(cve, collection, cvss):
 
         return cli_output(image_data)
         # return cli_output(result)
-    
+
     cves = cve.split(",")
     logging.debug("CVEs to search for: {cves}")
 
