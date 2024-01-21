@@ -34,7 +34,7 @@ setup(
         "tabulate",
         "colorama",
         "update_checker",
-        "pydantic==1.10.11",
+        "pydantic-settings",
         "datetime",
         "pyyaml",
         "prismacloud-api==5.2.10",
