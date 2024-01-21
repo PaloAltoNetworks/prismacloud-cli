@@ -40,114 +40,141 @@ def license_stats():
 @click.option("-cve", "--cve")
 @click.option("-collection", "--collection")
 @click.option(
-    "--cvss",
-    default="9.0",
-    help="CVSS Threshold is the minimum CVSS score. Default: 9.0",
+    "--severity",
+    "-s",
+    type=click.Choice(
+        [
+            "low",
+            "medium",
+            "high",
+            "critical",
+        ]
+    ),
+    help="Retrieves a list of vulnerabilities (CVEs) that matches the specified value of the severity threshold or higher.",
 )
-def vulnerabilities(cve, collection, cvss):
-    if not cve and not cvss:
+@click.option(
+    "--cvss",
+    help="CVSS Threshold is the minimum CVSS score.",
+)
+def vulnerabilities(cve, collection, severity, cvss):
+    if not cve and not (cvss or severity):
         result = pc_api.stats_vulnerabilities_read({"collections": collection})
         result = result[0]
-        cli_output(result)
-        return
-    elif not cve:
+        return cli_output(result)
+
+    elif not cve and (cvss and severity):
+        logging.debug("CVSS to search for: {cvss}")
+        results = pc_api.stats_vulnerabilities_read({"severityThreshold": severity, "cvssThreshold": cvss})
+        return cli_output(process_vulnerability_results(results))
+
+    elif not cve and cvss:
         logging.debug("CVSS to search for: {cvss}")
         results = pc_api.stats_vulnerabilities_read({"cvssThreshold": cvss})
-        image_data = []
-        for result in results:
-            # Check if 'images', 'hosts', 'containers', 'functions' keys exist
-            for key in ['images', 'hosts', 'containers', 'functions']:
-                if key in result:
-                    # Check if 'vulnerabilities' key exists in the specific category
-                    if 'vulnerabilities' in result[key]:
-                        for vulnerability in result[key]['vulnerabilities']:
-                            logging.info(f"Found this CVE: {vulnerability['cve']} in {key}")
-                            resources = pc_api.stats_vulnerabilities_impacted_resoures_read(
-                                {
-                                    "cve": vulnerability['cve'],
-                                    "resourceType": vulnerability["impactedResourceType"]
-                                }
-                            )
+        return cli_output(process_vulnerability_results(results))
 
-                            # Check and loop through images if they exist
-                            if 'images' in resources:
-                                logging.debug("Some interesting images here")
-                                for image in resources['images']:
-                                    packages_info = []
+    elif not cve and severity:
+        logging.debug("CVSS to search for: {cvss}")
+        results = pc_api.stats_vulnerabilities_read({"severityThreshold": severity})
+        return cli_output(process_vulnerability_results(results))
 
-                                    # Check if 'packages' key exists and is a list
-                                    if 'packages' in image and isinstance(image['packages'], list):
-                                        for package in image['packages']:
-                                            package_info = {
-                                                'package': package.get('package', 'Unknown'),
-                                                'severity': package.get('severity', 'Unknown'),
-                                                'cvss': package.get('cvss', 'Unknown')
-                                            }
-                                            packages_info.append(package_info)
+    elif cve:
+        logging.debug("CVE to search for: {cve}")
+        results = pc_api.stats_vulnerabilities_read({"cve": cve})
+        return cli_output(process_vulnerability_results(results))
 
-                                    # Iterate through each container in the image
-                                    for container in image['containers']:
-                                        image_info = {
-                                            'type': "image",
-                                            'cve': vulnerability['cve'],
-                                            'resourceID': image['resourceID'],
-                                            'image': container['image'],
-                                            'imageID': container['imageID'],
-                                            'container': container['container'],
-                                            'host': container['host'],
-                                            'namespace': container['namespace'],
-                                            'factors': container['factors'],
-                                            'packages': image['packages'],
-                                            'risk_score': vulnerability['riskScore'],
-                                            'impacted_packages': vulnerability['impactedPkgs'],
-                                            'cve_description': vulnerability['description']
-                                        }
-                                        logging.debug(f"Image info: {image_info}")
-                                        image_data.append(image_info)
 
-                            # Assuming resources is the API response dictionary
-                            if 'hosts' in resources:
-                                logging.info("Some interesting hosts here")
-                                for host in resources['hosts']:
-                                    packages_info = []
+def process_vulnerability_results(results):
+    image_data = []
+    for result in results:
+        for key in ["images", "hosts", "registryImages", "containers", "functions"]:
+            if key in result and "vulnerabilities" in result[key]:
+                for vulnerability in result[key]["vulnerabilities"]:
+                    logging.info(f"Found this CVE: {vulnerability['cve']} in {key}")
+                    image_data = search_impacted_resource_per_cve(vulnerability, image_data)
+    return image_data
 
-                                    # Check if 'packages' key exists and is a list
-                                    if 'packages' in host and isinstance(host['packages'], list):
-                                        for package in image['packages']:
-                                            package_info = {
-                                                'package': package.get('package', 'Unknown'),
-                                                'severity': package.get('severity', 'Unknown'),
-                                                'cvss': package.get('cvss', 'Unknown')
-                                            }
-                                            packages_info.append(package_info)
 
-                                    # Process each host
-                                    # Example: Extracting host information
-                                    host_info = {
-                                        'type': "host",
-                                        'cve': vulnerability['cve'],
-                                        'resourceID': host['resourceID'],
-                                        'packages': image['packages'],
-                                        'risk_score': vulnerability['riskScore'],
-                                        'impacted_packages': vulnerability['impactedPkgs'],
-                                        'cve_description': vulnerability['description']
-                                    }
-                                    logging.info(f"Host info: {host_info}")
-                                    image_data.append(host_info)
+def search_impacted_resource_per_cve(vulnerability, image_data):
+    resources = pc_api.stats_vulnerabilities_impacted_resoures_read(
+        {"cve": vulnerability["cve"], "resourceType": vulnerability["impactedResourceType"]}
+    )
 
-        return cli_output(image_data)
-        # return cli_output(result)
+    # Check and loop through images if they exist
+    if "registryImages" in resources:
+        logging.debug("Some interesting container images here")
+        for image in resources["registryImages"]:
 
-    cves = cve.split(",")
-    logging.debug("CVEs to search for: {cves}")
+            image_info = {
+                "type": "registry_image",
+                "cve": vulnerability["cve"],
+                "resourceID": image["resourceID"],
+                "packages": image["packages"],
+                "risk_score": vulnerability["riskScore"],
+                "impacted_packages": vulnerability["impactedPkgs"],
+                "cve_description": vulnerability["description"],
+            }
+            logging.debug(f"Image info: {image_info}")
+            image_data.append(image_info)
 
-    # Get impacted resources for each cve in cves
-    result_tree = {}
-    for cve_to_check in cves:
-        result = pc_api.stats_vulnerabilities_impacted_resoures_read({"cve": cve_to_check})
-        result_tree[cve_to_check] = result
+    # Check and loop through registryImages if they exist
+    if "images" in resources:
+        logging.debug("Some interesting images here")
+        for image in resources["images"]:
+            # Iterate through each container in the image
+            for container in image["containers"]:
 
-    cli_output(result_tree)
+                image_info = {
+                    "type": "deployed_image",
+                    "cve": vulnerability["cve"],
+                    "resourceID": image["resourceID"],
+                    "image": container["image"],
+                    "imageID": container["imageID"],
+                    "container": container.get("container", "na"),
+                    "host": container.get("host", "na"),
+                    "namespace": container.get("namespace", "na"),
+                    "factors": container["factors"],
+                    "packages": image["packages"],
+                    "risk_score": vulnerability["riskScore"],
+                    "impacted_packages": vulnerability["impactedPkgs"],
+                    "cve_description": vulnerability["description"],
+                }
+                logging.debug(f"Image info: {image_info}")
+                image_data.append(image_info)
+
+    # Assuming resource is the API response dictionary
+    if "hosts" in resources:
+        logging.info("Some interesting hosts here")
+        for host in resources["hosts"]:
+
+            host_info = {
+                "type": "host",
+                "cve": vulnerability["cve"],
+                "resourceID": host["resourceID"],
+                "packages": host["packages"],
+                "risk_score": vulnerability["riskScore"],
+                "impacted_packages": vulnerability["impactedPkgs"],
+                "cve_description": vulnerability["description"],
+            }
+            image_data.append(host_info)
+
+    # Assuming resource is the API response dictionary
+    if "functions" in resources:
+        logging.info("Some interesting functions here")
+        for function in resources["functions"]:
+
+            function_info = {
+                "type": "function",
+                "cve": vulnerability["cve"],
+                "resourceID": function["resourceID"],
+                "function_details": function["functionDetails"],
+                "packages": function["packages"],
+                "risk_score": vulnerability["riskScore"],
+                "impacted_packages": vulnerability["impactedPkgs"],
+                "cve_description": vulnerability["description"],
+            }
+            image_data.append(function_info)
+
+    return image_data
 
 
 cli.add_command(daily)
