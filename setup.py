@@ -35,6 +35,7 @@ setup(
         "colorama",
         "update_checker",
         "pydantic-settings",
+        "pydantic",
         "datetime",
         "pyyaml",
         "prismacloud-api==5.2.10",
