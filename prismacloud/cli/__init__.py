@@ -15,7 +15,8 @@ import click_completion
 import coloredlogs
 import pandas as pd
 from click_help_colors import HelpColorsMultiCommand
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+from typing import Optional
 from tabulate import tabulate
 from update_checker import UpdateChecker
 
@@ -66,9 +67,9 @@ class Settings(BaseSettings):  # pylint:disable=too-few-public-methods
     max_levels: int = 2
     max_lines: int = 10
 
-    url: str = False
-    identity: str = False
-    secret: str = False
+    url: Optional[str] = None
+    identity: Optional[str] = None
+    secret: Optional[str] = None
 
 
 settings = Settings()
