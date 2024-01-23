@@ -17,6 +17,12 @@ def list_discovery():
     cli_output(result)
 
 
+@click.command(name="entities")
+def list_entities():
+    result = pc_api.cloud_discovery_entities()
+    cli_output(result)
+
+
 @click.command(name="vms")
 @click.option("-a", "--account", help="Cloud Account", multiple=True, is_flag=False)
 @click.option("-t", "--type", help="Cloud Type", multiple=True, is_flag=False)
@@ -47,4 +53,5 @@ def vms_discovery(type, region, account):
 
 
 cli.add_command(list_discovery)
+cli.add_command(list_entities)
 cli.add_command(vms_discovery)

@@ -7,7 +7,7 @@ coloredlogs
 datetime
 jsondiff
 pandas
-prismacloud-api==5.2.10
+prismacloud-api==5.2.11
 pydantic-settings
 pydantic
 requests
