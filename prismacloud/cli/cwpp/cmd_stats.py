@@ -89,7 +89,9 @@ def process_vulnerability_results(results):
         for key in ["images", "hosts", "registryImages", "containers", "functions"]:
             if key in result and "vulnerabilities" in result[key]:
                 for vulnerability in result[key]["vulnerabilities"]:
-                    logging.info(f"Found this CVE: {vulnerability['cve']} in {key}")
+                    logging.info(
+                        f"Found this CVE: {vulnerability['cve']} from {vulnerability['impactedResourceType']} in {key}"
+                    )
                     image_data = search_impacted_resource_per_cve(vulnerability, image_data)
     return image_data
 
@@ -101,7 +103,6 @@ def search_impacted_resource_per_cve(vulnerability, image_data):
 
     # Check and loop through images if they exist
     if "registryImages" in resources:
-        logging.debug("Some interesting container images here")
         for image in resources["registryImages"]:
 
             image_info = {
@@ -118,17 +119,15 @@ def search_impacted_resource_per_cve(vulnerability, image_data):
 
     # Check and loop through registryImages if they exist
     if "images" in resources:
-        logging.debug("Some interesting images here")
         for image in resources["images"]:
             # Iterate through each container in the image
             for container in image["containers"]:
-
                 image_info = {
                     "type": "deployed_image",
                     "cve": vulnerability["cve"],
                     "resourceID": image["resourceID"],
-                    "image": container["image"],
-                    "imageID": container["imageID"],
+                    "image": container.get("image", "na"),
+                    "imageID": container.get("imageID", "na"),
                     "container": container.get("container", "na"),
                     "host": container.get("host", "na"),
                     "namespace": container.get("namespace", "na"),
@@ -138,12 +137,11 @@ def search_impacted_resource_per_cve(vulnerability, image_data):
                     "impacted_packages": vulnerability["impactedPkgs"],
                     "cve_description": vulnerability["description"],
                 }
-                logging.debug(f"Image info: {image_info}")
+                logging.debug(f"Image info: {image_info} -- Container: {container}")
                 image_data.append(image_info)
 
     # Assuming resource is the API response dictionary
     if "hosts" in resources:
-        logging.info("Some interesting hosts here")
         for host in resources["hosts"]:
 
             host_info = {
@@ -159,7 +157,6 @@ def search_impacted_resource_per_cve(vulnerability, image_data):
 
     # Assuming resource is the API response dictionary
     if "functions" in resources:
-        logging.info("Some interesting functions here")
         for function in resources["functions"]:
 
             function_info = {
