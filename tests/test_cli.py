@@ -1,8 +1,8 @@
 import subprocess
 import os
-import pytest
+import json
 from pathlib import Path
-
+import pytest
 
 commands = [
     ["-o", "csv", "policy"],
@@ -19,13 +19,27 @@ commands = [
 
 @pytest.fixture(scope="session", autouse=True)
 def check_env_vars_or_credentials_file():
-    required_env_vars = ["PC_ACCESS_KEY", "PC_SAAS_API_ENDPOINT", "PC_SECRET_KEY"]
+    required_env_vars = {
+        "PC_ACCESS_KEY": "access_key_id",
+        "PC_SAAS_API_ENDPOINT": "api_endpoint",
+        "PC_SECRET_KEY": "secret_key"
+    }
+    
     env_vars_set = all(os.environ.get(env_var) for env_var in required_env_vars)
 
     credentials_file = Path("~/.prismacloud/credentials.json").expanduser()
-    file_exists = credentials_file.is_file()
 
-    if not env_vars_set and not file_exists:
+    if not env_vars_set:
+        if credentials_file.is_file():
+            with open(credentials_file, "r") as json_file:
+                data = json.load(json_file)
+                for env_var, alternative_key in required_env_vars.items():
+                    value = data.get(env_var) or data.get(alternative_key)
+                    if value is not None:
+                        os.environ[env_var] = value
+
+    env_vars_set = all(os.environ.get(env_var) for env_var in required_env_vars)
+    if not env_vars_set:
         r = "Environment variables are not set, and ~/.prismacloud/credentials.json does not exist. Stopping the test suite."
         pytest.exit(r)
 
