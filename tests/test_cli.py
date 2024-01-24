@@ -24,7 +24,7 @@ def check_env_vars_or_credentials_file():
         "PC_SAAS_API_ENDPOINT": "api_endpoint",
         "PC_SECRET_KEY": "secret_key"
     }
-    
+
     env_vars_set = all(os.environ.get(env_var) for env_var in required_env_vars)
 
     credentials_file = Path("~/.prismacloud/credentials.json").expanduser()
