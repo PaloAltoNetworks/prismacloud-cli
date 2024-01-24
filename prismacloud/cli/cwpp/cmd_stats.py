@@ -95,6 +95,7 @@ def vulnerabilities(cve, collection, severity, cvss, resource_type, limit):
     elif not cve and cvss:
         logging.debug("CVSS to search for: {cvss}")
         results = pc_api.stats_vulnerabilities_read({"limit": limit, "offset": 0, "cvssThreshold": cvss})
+        
         return cli_output(process_vulnerability_results(results, resource_type))
 
     elif not cve and severity:
@@ -111,21 +112,33 @@ def vulnerabilities(cve, collection, severity, cvss, resource_type, limit):
 def process_vulnerability_results(results, resource_type):
     image_data = []
 
+    tags = pc_api.tags_list_read()
     for result in results:
         for key in resource_type:
             if key in result and "vulnerabilities" in result[key]:
                 vulnerabilities = result[key]["vulnerabilities"]
                 with click.progressbar(vulnerabilities) as vulnerabilities_bar:
                     for vulnerability in vulnerabilities_bar:
-                        logging.info(f"Found CVE {vulnerability['cve']} from {vulnerability['impactedResourceType']} in {key}")
-                        image_data = search_impacted_resource_per_cve(vulnerability, image_data)
+                        logging.info(f"Found CVE {vulnerability['cve']} from {vulnerability['impactedResourceType']}")                        
+                        image_data = search_impacted_resource_per_cve(vulnerability, tags, image_data)
     return image_data
 
 
-def search_impacted_resource_per_cve(vulnerability, image_data):
+def search_impacted_resource_per_cve(vulnerability, tags, image_data):
     resources = pc_api.stats_vulnerabilities_impacted_resoures_read(
         {"cve": vulnerability["cve"], "resourceType": vulnerability["impactedResourceType"]}
     )
+
+    tag_found_match = False
+    for tag in tags:    
+        if 'vulns' in tag and tag['vulns']:
+            # Iterate through each vulnerability in the tag's 'vulns' list
+            for tag_vuln in tag['vulns']:
+                # Compare the CVE IDs
+                logging.info(f"==> CVE {tag_vuln.get('id')} has a tag named {tag_vuln.get('resourceType')} and CVE {vulnerability['cve']} with {vulnerability['impactedResourceType']} ")
+                if (vulnerability['cve'] == tag_vuln.get('id') and vulnerability['impactedResourceType'] == tag_vuln.get('resourceType')):
+                    logging.info(f"=================> CVE {vulnerability['cve']} has a tag named {tag['name']}")
+                    tag_found_match = True
 
     # Check and loop through images if they exist
     if "registryImages" in resources:
