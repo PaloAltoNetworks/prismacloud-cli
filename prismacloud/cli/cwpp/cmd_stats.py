@@ -95,7 +95,7 @@ def vulnerabilities(cve, collection, severity, cvss, resource_type, limit):
     elif not cve and cvss:
         logging.debug("CVSS to search for: {cvss}")
         results = pc_api.stats_vulnerabilities_read({"limit": limit, "offset": 0, "cvssThreshold": cvss})
-        
+
         return cli_output(process_vulnerability_results(results, resource_type))
 
     elif not cve and severity:
@@ -118,7 +118,7 @@ def process_vulnerability_results(results, resource_type):
                 vulnerabilities = result[key]["vulnerabilities"]
                 with click.progressbar(vulnerabilities) as vulnerabilities_bar:
                     for vulnerability in vulnerabilities_bar:
-                        logging.debug(f"Found CVE {vulnerability['cve']} from {vulnerability['impactedResourceType']}")                        
+                        logging.debug(f"Found CVE {vulnerability['cve']} from {vulnerability['impactedResourceType']}")
                         image_data = search_impacted_resource_per_cve(vulnerability, tags, image_data)
     return image_data
 
@@ -129,82 +129,97 @@ def search_impacted_resource_per_cve(vulnerability, tags, image_data):
     )
 
     # Function to create image_info with optional tag name
-    def add_prisma_cloud_tags(base_info, tags):        
-        for tag in tags:    
-            if 'vulns' in tag and tag['vulns']:
-                for tag_vuln in tag['vulns']:
-                    # logging.info(f"==> CVE {tag_vuln.get('id')} has a tag named {tag_vuln.get('resourceType')} and CVE {vulnerability['cve']} with {vulnerability['impactedResourceType']} ")
-                    if (vulnerability['cve'] == tag_vuln.get('id') and 'resourceType' not in tag_vuln):                    
-                        logging.debug(f"=================> CVE {vulnerability['cve']} has a tag named {tag['name']} for all resourceType")
-                        base_info["prima_cloud_tag"] = tag['name']
-                        base_info["prima_cloud_tag_comment"] = tag_vuln.get('comment')
-                    elif (vulnerability['cve'] == tag_vuln.get('id') and vulnerability['impactedResourceType'] == tag_vuln.get('resourceType')):
-                        logging.debug(f"=================> CVE {vulnerability['cve']} has a tag named {tag['name']}")        
-                        base_info["prima_cloud_tag"] = tag['name']
-                        base_info["prima_cloud_tag_comment"] = tag_vuln.get('comment')
+    def add_prisma_cloud_tags(base_info, tags):
+        for tag in tags:
+            if "vulns" in tag and tag["vulns"]:
+                for tag_vuln in tag["vulns"]:
+                    if vulnerability["cve"] == tag_vuln.get("id") and "resourceType" not in tag_vuln:
+                        logging.debug(
+                            f"=================> CVE {vulnerability['cve']} has a tag named {tag['name']} for all resourceType"
+                        )
+                        base_info["prima_cloud_tag"] = tag["name"]
+                        base_info["prima_cloud_tag_comment"] = tag_vuln.get("comment")
+                    elif vulnerability["cve"] == tag_vuln.get("id") and vulnerability["impactedResourceType"] == tag_vuln.get(
+                        "resourceType"
+                    ):
+                        logging.debug(f"=================> CVE {vulnerability['cve']} has a tag named {tag['name']}")
+                        base_info["prima_cloud_tag"] = tag["name"]
+                        base_info["prima_cloud_tag_comment"] = tag_vuln.get("comment")
 
         return base_info
 
     if "registryImages" in resources:
         for image in resources["registryImages"]:
-            image_info = add_prisma_cloud_tags({
-                "type": "registry_image",
-                "cve": vulnerability["cve"],
-                "resourceID": image["resourceID"],
-                "packages": image["packages"],
-                "risk_score": vulnerability["riskScore"],
-                "impacted_packages": vulnerability["impactedPkgs"],
-                "cve_description": vulnerability["description"],
-            }, tags)
+            image_info = add_prisma_cloud_tags(
+                {
+                    "type": "registry_image",
+                    "cve": vulnerability["cve"],
+                    "resourceID": image["resourceID"],
+                    "packages": image["packages"],
+                    "risk_score": vulnerability["riskScore"],
+                    "impacted_packages": vulnerability["impactedPkgs"],
+                    "cve_description": vulnerability["description"],
+                },
+                tags,
+            )
             logging.debug(f"Image info: {image_info}")
             image_data.append(image_info)
 
     if "images" in resources:
         for image in resources["images"]:
             for container in image["containers"]:
-                image_info = add_prisma_cloud_tags({
-                    "type": "deployed_image",
-                    "cve": vulnerability["cve"],
-                    "resourceID": image["resourceID"],
-                    "image": container.get("image", "na"),
-                    "imageID": container.get("imageID", "na"),
-                    "container": container.get("container", "na"),
-                    "host": container.get("host", "na"),
-                    "namespace": container.get("namespace", "na"),
-                    "factors": container["factors"],
-                    "packages": image["packages"],
-                    "risk_score": vulnerability["riskScore"],
-                    "impacted_packages": vulnerability["impactedPkgs"],
-                    "cve_description": vulnerability["description"],
-                }, tags)
+                image_info = add_prisma_cloud_tags(
+                    {
+                        "type": "deployed_image",
+                        "cve": vulnerability["cve"],
+                        "resourceID": image["resourceID"],
+                        "image": container.get("image", "na"),
+                        "imageID": container.get("imageID", "na"),
+                        "container": container.get("container", "na"),
+                        "host": container.get("host", "na"),
+                        "namespace": container.get("namespace", "na"),
+                        "factors": container["factors"],
+                        "packages": image["packages"],
+                        "risk_score": vulnerability["riskScore"],
+                        "impacted_packages": vulnerability["impactedPkgs"],
+                        "cve_description": vulnerability["description"],
+                    },
+                    tags,
+                )
                 logging.debug(f"Image info: {image_info} -- Container: {container}")
                 image_data.append(image_info)
 
     if "hosts" in resources:
         for host in resources["hosts"]:
-            host_info = add_prisma_cloud_tags({
-                "type": "host",
-                "cve": vulnerability["cve"],
-                "resourceID": host["resourceID"],
-                "packages": host["packages"],
-                "risk_score": vulnerability["riskScore"],
-                "impacted_packages": vulnerability["impactedPkgs"],
-                "cve_description": vulnerability["description"],
-            }, tags)
+            host_info = add_prisma_cloud_tags(
+                {
+                    "type": "host",
+                    "cve": vulnerability["cve"],
+                    "resourceID": host["resourceID"],
+                    "packages": host["packages"],
+                    "risk_score": vulnerability["riskScore"],
+                    "impacted_packages": vulnerability["impactedPkgs"],
+                    "cve_description": vulnerability["description"],
+                },
+                tags,
+            )
             image_data.append(host_info)
 
     if "functions" in resources:
         for function in resources["functions"]:
-            function_info = add_prisma_cloud_tags({
-                "type": "function",
-                "cve": vulnerability["cve"],
-                "resourceID": function["resourceID"],
-                "function_details": function["functionDetails"],
-                "packages": function["packages"],
-                "risk_score": vulnerability["riskScore"],
-                "impacted_packages": vulnerability["impactedPkgs"],
-                "cve_description": vulnerability["description"],
-            }, tags)
+            function_info = add_prisma_cloud_tags(
+                {
+                    "type": "function",
+                    "cve": vulnerability["cve"],
+                    "resourceID": function["resourceID"],
+                    "function_details": function["functionDetails"],
+                    "packages": function["packages"],
+                    "risk_score": vulnerability["riskScore"],
+                    "impacted_packages": vulnerability["impactedPkgs"],
+                    "cve_description": vulnerability["description"],
+                },
+                tags,
+            )
             image_data.append(function_info)
 
     return image_data
