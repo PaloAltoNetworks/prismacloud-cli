@@ -118,7 +118,7 @@ def process_vulnerability_results(results, resource_type):
                 vulnerabilities = result[key]["vulnerabilities"]
                 with click.progressbar(vulnerabilities) as vulnerabilities_bar:
                     for vulnerability in vulnerabilities_bar:
-                        logging.info(f"Found CVE {vulnerability['cve']} from {vulnerability['impactedResourceType']}")                        
+                        logging.debug(f"Found CVE {vulnerability['cve']} from {vulnerability['impactedResourceType']}")                        
                         image_data = search_impacted_resource_per_cve(vulnerability, tags, image_data)
     return image_data
 
@@ -135,11 +135,11 @@ def search_impacted_resource_per_cve(vulnerability, tags, image_data):
                 for tag_vuln in tag['vulns']:
                     # logging.info(f"==> CVE {tag_vuln.get('id')} has a tag named {tag_vuln.get('resourceType')} and CVE {vulnerability['cve']} with {vulnerability['impactedResourceType']} ")
                     if (vulnerability['cve'] == tag_vuln.get('id') and 'resourceType' not in tag_vuln):                    
-                        logging.info(f"=================> CVE {vulnerability['cve']} has a tag named {tag['name']} for all resourceType")
+                        logging.debug(f"=================> CVE {vulnerability['cve']} has a tag named {tag['name']} for all resourceType")
                         base_info["prima_cloud_tag"] = tag['name']
                         base_info["prima_cloud_tag_comment"] = tag_vuln.get('comment')
                     elif (vulnerability['cve'] == tag_vuln.get('id') and vulnerability['impactedResourceType'] == tag_vuln.get('resourceType')):
-                        logging.info(f"=================> CVE {vulnerability['cve']} has a tag named {tag['name']}")        
+                        logging.debug(f"=================> CVE {vulnerability['cve']} has a tag named {tag['name']}")        
                         base_info["prima_cloud_tag"] = tag['name']
                         base_info["prima_cloud_tag_comment"] = tag_vuln.get('comment')
 
