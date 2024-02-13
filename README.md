@@ -216,3 +216,34 @@ Get all drift across all Github repositories:
 ```
 pc repositories search --integration_type Github --categories Drift
 ```
+
+
+### Container registries  
+
+#### Listing registries
+To list all container registries:  
+
+```bash
+pc registry list
+```
+
+#### Triggering Scans
+To trigger scans on all registries:
+
+```bash
+pc registry scan
+```
+
+#### Including Specific Registries
+To include specific registries or repositories in the scan:
+
+```bash
+pc registry scan --include "registry_name/repo_name" --i "another_registry"
+```
+
+#### Excluding Specific Registries
+To exclude specific registries or repositories from the scan:
+
+```bash
+pc registry scan --exclude "registry_name/repo_name" --e "another_registry"
+```
