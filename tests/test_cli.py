@@ -22,7 +22,7 @@ def check_env_vars_or_credentials_file():
     required_env_vars = {
         "PC_ACCESS_KEY": "access_key_id",
         "PC_SAAS_API_ENDPOINT": "api_endpoint",
-        "PC_SECRET_KEY": "secret_key"
+        "PC_SECRET_KEY": "secret_key",
     }
 
     env_vars_set = all(os.environ.get(env_var) for env_var in required_env_vars)
