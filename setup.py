@@ -38,7 +38,7 @@ setup(
         "pydantic",
         "datetime",
         "pyyaml",
-        "prismacloud-api==5.2.14",
+        "prismacloud-api==5.2.15",
         "pytest",
         "pytest-benchmark",
     ],
