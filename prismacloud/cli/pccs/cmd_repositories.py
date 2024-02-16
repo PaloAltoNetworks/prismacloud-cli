@@ -132,18 +132,18 @@ def global_search(integration_type, details, repo, max, full_details):
 
     logging.info("API - Search across all repositories ...")
     if repo:
-        repositories = pc_api.repositories_list_read_v2(query_params={"errorsCount": "true", "search": repo })
+        repositories = pc_api.repositories_list_read_v2(query_params={"errorsCount": "true", "search": repo})
     else:
         repositories = pc_api.repositories_list_read_v2(query_params={"errorsCount": "true"})
 
     i = 1
-    impacted_files = []
     with click.progressbar(repositories["repositories"]) as repositories_bar:
         for repository in repositories_bar:
             logging.debug(f"API - Search across all repositories ...{repository}")
             if repository["lastScanDate"] is not None and repository["source"] in integration_type:
                 logging.info(
-                    "ID for the repository %s, Name of the Repository to scan: %s, Type=%s, default branch=%s, repo_full_name=%s",
+                    "ID for the repository %s, Name of the Repository to scan: %s, Type=%s, \
+                        default branch=%s, repo_full_name=%s",
                     repository["id"],
                     repository["repository"],
                     repository["source"],
@@ -153,27 +153,13 @@ def global_search(integration_type, details, repo, max, full_details):
 
                 parameters = {
                     "filters": {
-                        "repositories": [
-                            repository["id"]
-                        ],
+                        "repositories": [repository["id"]],
                         "branch": repository["scannedBranch"],
-                        "checkStatus": "Error"
+                        "checkStatus": "Error",
                     },
                     "offset": 0,
-                    "search": {
-                        "scopes": [],
-                        "term": ""
-                    },
-                    "sortBy": [
-                        {
-                            "key": "Count",
-                            "direction": "DESC"
-                        },
-                        {
-                            "key": "Severity",
-                            "direction": "DESC"
-                        }
-                    ]
+                    "search": {"scopes": [], "term": ""},
+                    "sortBy": [{"key": "Count", "direction": "DESC"}, {"key": "Severity", "direction": "DESC"}],
                 }
 
                 impacted_resources = pc_api.resources_list(body_params=parameters)
@@ -185,24 +171,21 @@ def global_search(integration_type, details, repo, max, full_details):
                         logging.info("API - Imapcted resource: %s", resource)
                         parameters = {
                             "filters": {
-                                "repositories": [
-                                    repository["id"]
-                                ],
+                                "repositories": [repository["id"]],
                                 "branch": repository["scannedBranch"],
-                                "checkStatus": "Error"
+                                "checkStatus": "Error",
                             },
                             "codeCategory": resource["codeCategory"],
                             "offset": 0,
                             "sortBy": [],
-                            "search": {
-                                "scopes": [],
-                                "term": ""
-                            }
+                            "search": {"scopes": [], "term": ""},
                         }
-                        impacted_resources_with_details = pc_api.policies_list(resource_uuid=resource["resourceUuid"], body_params=parameters)
+                        impacted_resources_with_details = pc_api.policies_list(
+                            resource_uuid=resource["resourceUuid"], body_params=parameters
+                        )
 
                         for details in impacted_resources_with_details["data"]:
-                            logging.debug("======= details  %s", details)
+                            # logging.debug("======= details  %s", details)
                             if resource["codeCategory"] == "Vulnerabilities":
                                 data = data + [
                                     {
@@ -215,9 +198,8 @@ def global_search(integration_type, details, repo, max, full_details):
                                         "owner": repository["owner"],
                                         "sourceType": resource["sourceType"],
                                         "frameworkType": resource["frameworkType"],
-                                        "resourceName": resource["resourceName"],                                                
+                                        "resourceName": resource["resourceName"],
                                         "filePath": resource["filePath"],
-                                        "severity": resource["severity"],
                                         "codeCategory": resource["codeCategory"],
                                         "counter": resource["counter"],
                                         "fixableIssuesCount": resource["fixableIssuesCount"],
@@ -228,7 +210,7 @@ def global_search(integration_type, details, repo, max, full_details):
                                         "fixVersion": details["fixVersion"],
                                         "causePackageName": details["causePackageName"],
                                         "cvss": details["cvss"],
-                                        "riskFactors": ', '.join(details["riskFactors"]),
+                                        "riskFactors": ", ".join(details["riskFactors"]),
                                     }
                                 ]
                             elif resource["codeCategory"] == "Licenses":
@@ -243,9 +225,8 @@ def global_search(integration_type, details, repo, max, full_details):
                                         "owner": repository["owner"],
                                         "sourceType": resource["sourceType"],
                                         "frameworkType": resource["frameworkType"],
-                                        "resourceName": resource["resourceName"],                                                
+                                        "resourceName": resource["resourceName"],
                                         "filePath": resource["filePath"],
-                                        "severity": resource["severity"],
                                         "codeCategory": resource["codeCategory"],
                                         "counter": resource["counter"],
                                         "fixableIssuesCount": resource["fixableIssuesCount"],
@@ -270,9 +251,8 @@ def global_search(integration_type, details, repo, max, full_details):
                                         "owner": repository["owner"],
                                         "sourceType": resource["sourceType"],
                                         "frameworkType": resource["frameworkType"],
-                                        "resourceName": resource["resourceName"],                                                
+                                        "resourceName": resource["resourceName"],
                                         "filePath": resource["filePath"],
-                                        "severity": resource["severity"],
                                         "codeCategory": resource["codeCategory"],
                                         "counter": resource["counter"],
                                         "fixableIssuesCount": resource["fixableIssuesCount"],
@@ -284,14 +264,14 @@ def global_search(integration_type, details, repo, max, full_details):
                                     }
                                 ]
                             elif resource["codeCategory"] == "IacMisconfiguration":
-                                if full_details: 
+                                if full_details:
                                     policy = pc_api.code_policies_list_read(policy_id=details["violationId"])
                                     # Assuming policy["benchmarkChecks"] is your input list of dictionaries
                                     benchmark_checks = policy["benchmarkChecks"]
 
                                     # Extract unique benchmark.id values
-                                    unique_benchmark_ids = list({check['benchmark']['id'] for check in benchmark_checks})
-                            
+                                    unique_benchmark_ids = list({check["benchmark"]["id"] for check in benchmark_checks})
+
                                     data = data + [
                                         {
                                             "repository": repository["fullRepositoryName"],
@@ -305,7 +285,6 @@ def global_search(integration_type, details, repo, max, full_details):
                                             "frameworkType": resource["frameworkType"],
                                             "resourceName": resource["resourceName"],
                                             "filePath": resource["filePath"],
-                                            "severity": resource["severity"],
                                             "codeCategory": resource["codeCategory"],
                                             "counter": resource["counter"],
                                             "fixableIssuesCount": resource["fixableIssuesCount"],
@@ -314,20 +293,20 @@ def global_search(integration_type, details, repo, max, full_details):
                                             "policy": details["policy"],
                                             "resourceScanType": details["resourceScanType"],
                                             "severity": details["severity"],
-                                            "labels": ', '.join(details["labels"]),
+                                            "labels": ", ".join(details["labels"]),
                                             "title": policy["title"],
                                             "isCustom": policy["isCustom"],
                                             "checkovCheckId": policy["checkovCheckId"],
                                             "provider": policy["provider"],
-                                            "frameworks": ', '.join(policy["frameworks"]),
+                                            "frameworks": ", ".join(policy["frameworks"]),
                                             "pcGuidelines": policy["pcGuidelines"],
-                                            "benchmarkChecks": ', '.join(unique_benchmark_ids),
+                                            "benchmarkChecks": ", ".join(unique_benchmark_ids),
                                         }
                                     ]
-                                else:  
+                                else:
                                     for policy in policies:
                                         if details["violationId"] == policy["incidentId"]:
-                                            break                                      
+                                            break
                                     data = data + [
                                         {
                                             "repository": repository["fullRepositoryName"],
@@ -341,7 +320,6 @@ def global_search(integration_type, details, repo, max, full_details):
                                             "frameworkType": resource["frameworkType"],
                                             "resourceName": resource["resourceName"],
                                             "filePath": resource["filePath"],
-                                            "severity": resource["severity"],
                                             "codeCategory": resource["codeCategory"],
                                             "counter": resource["counter"],
                                             "fixableIssuesCount": resource["fixableIssuesCount"],
@@ -350,12 +328,12 @@ def global_search(integration_type, details, repo, max, full_details):
                                             "policy": details["policy"],
                                             "resourceScanType": details["resourceScanType"],
                                             "severity": details["severity"],
-                                            "labels": ', '.join(details["labels"]),
+                                            "labels": ", ".join(details["labels"]),
                                             "title": policy["title"],
                                             "isCustom": policy["isCustom"],
                                             "checkovCheckId": policy["checkovCheckId"],
                                             "provider": policy["provider"],
-                                            "frameworks": ', '.join(policy["frameworks"]),
+                                            "frameworks": ", ".join(policy["frameworks"]),
                                             "pcGuidelines": policy["pcGuidelines"],
                                         }
                                     ]
