@@ -270,7 +270,7 @@ def global_search(integration_type, details, repo, max, full_details):
                                     "start": {"row": 0, "column": 0},
                                     "end": {"row": 0, "column": 0},
                                 }
-                                
+
                                 # Safely get the first location, or use a default structure if unavailable
                                 first_location = details.get("locations", [default_location])[0]
                                 data = data + [
@@ -285,7 +285,6 @@ def global_search(integration_type, details, repo, max, full_details):
                                         "sourceType": resource.get("sourceType"),
                                         "frameworkType": resource.get("frameworkType"),
                                         "resourceName": resource.get("resourceName"),
-                                        "filePath": resource.get("filePath"),
                                         "codeCategory": resource.get("codeCategory"),
                                         "counter": resource.get("counter"),
                                         "fixableIssuesCount": resource.get("fixableIssuesCount"),
