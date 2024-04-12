@@ -13,9 +13,7 @@ def cli(ctx):
 @click.command(name="list")
 def inventory():
     """Returns Cloud Accounts."""
-    payload = {}
     query_params = {"timeType": "relative", "timeAmount": "24", "timeUnit": "hour"}
-
     result = pc_api.asset_inventory_list_read_v3(query_params=query_params)
     cli_output(result)
 
