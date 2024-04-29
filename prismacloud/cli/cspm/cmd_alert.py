@@ -1,9 +1,20 @@
 import logging
 import click
+import datetime
 
 from prismacloud.cli import cli_output, pass_environment
 from prismacloud.cli.api import pc_api
 from urllib.parse import quote
+
+
+# Helper function to convert epoch (in milliseconds) to a datetime object
+def convert_epoch_to_datetime(epoch_ms):
+    return datetime.datetime.fromtimestamp(int(epoch_ms) / 1000)
+
+
+# Helper function to convert datetime to human-readable format
+def datetime_to_readable(dt):
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 
 @click.group(
@@ -12,7 +23,6 @@ from urllib.parse import quote
 @pass_environment
 def cli(ctx):
     pass
-
 
 @click.command(name="list")
 @click.option("--compliance-standard", help="Compliance standard, e.g.: 'CIS v1.4.0 (AWS)'")
@@ -28,7 +38,8 @@ def cli(ctx):
     "--status", default="open", type=click.Choice(["open", "resolved", "snoozed", "dismissed"], case_sensitive=False)
 )
 @click.option("--detailed/--no-detailed", default=False)
-def list_alerts(compliance_standard, cloud_account, account_group, amount, unit, status, detailed, policy_id, alert_rule):
+@click.option("--days-ahead", default=0, type=int, help="Filter alerts that are dismissing until the next X days.")
+def list_alerts(compliance_standard, cloud_account, account_group, amount, unit, status, detailed, policy_id, alert_rule, days_ahead):
     """Returns a list of alerts from the Prisma Cloud platform"""
     data = {
         "alert.status": status,
@@ -52,6 +63,17 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
 
     # Fetch the alerts
     alerts = pc_api.get_endpoint("alert", query_params=data, api="cspm")
+    
+    if days_ahead > 0 and status == 'snoozed':
+        # Calculate future date for filter only if days_ahead > 0 and status is 'snoozed'
+        future_date = datetime.datetime.now() + datetime.timedelta(days=days_ahead)
+
+        # Filter alerts where dismissalUntilTs is before the future date
+        alerts = [
+            alert for alert in alerts
+            if 'dismissalUntilTs' in alert and convert_epoch_to_datetime(alert['dismissalUntilTs']) < future_date
+        ]
+
 
     # Try to add a new column with a url to the alert investigate page
     base_url = f"https://{pc_api.api.replace('api', 'app')}/alerts/overview?viewId=default"
@@ -59,6 +81,11 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
     for alert in alerts:
         try:
             alert_id = alert["id"]
+
+            for key in ['firstSeen', 'lastSeen', 'alertTime', 'lastUpdated', 'eventOccurred', 'dismissalUntilTs']:
+                if key in alert:
+                    alert[key] = datetime_to_readable(convert_epoch_to_datetime(alert[key]))
+
             # Correctly using double braces for literal curly braces in f-string
             filters = (
                 f'{{"timeRange":{{"type":"to_now","value":"epoch"}},'
