@@ -14,7 +14,7 @@ def convert_epoch_to_datetime(epoch_ms):
 
 # Helper function to convert datetime to human-readable format
 def datetime_to_readable(dt):
-    return dt.strftime('%Y-%m-%d %H:%M:%S')
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
 
 
 @click.group(
@@ -23,6 +23,7 @@ def datetime_to_readable(dt):
 @pass_environment
 def cli(ctx):
     pass
+
 
 @click.command(name="list")
 @click.option("--compliance-standard", help="Compliance standard, e.g.: 'CIS v1.4.0 (AWS)'")
@@ -39,7 +40,9 @@ def cli(ctx):
 )
 @click.option("--detailed/--no-detailed", default=False)
 @click.option("--days-ahead", default=0, type=int, help="Filter alerts that are dismissing until the next X days.")
-def list_alerts(compliance_standard, cloud_account, account_group, amount, unit, status, detailed, policy_id, alert_rule, days_ahead):
+def list_alerts(
+    compliance_standard, cloud_account, account_group, amount, unit, status, detailed, policy_id, alert_rule, days_ahead
+):
     """Returns a list of alerts from the Prisma Cloud platform"""
     data = {
         "alert.status": status,
@@ -63,17 +66,17 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
 
     # Fetch the alerts
     alerts = pc_api.get_endpoint("alert", query_params=data, api="cspm")
-    
-    if days_ahead > 0 and status == 'snoozed':
+
+    if days_ahead > 0 and status == "snoozed":
         # Calculate future date for filter only if days_ahead > 0 and status is 'snoozed'
         future_date = datetime.datetime.now() + datetime.timedelta(days=days_ahead)
 
         # Filter alerts where dismissalUntilTs is before the future date
         alerts = [
-            alert for alert in alerts
-            if 'dismissalUntilTs' in alert and convert_epoch_to_datetime(alert['dismissalUntilTs']) < future_date
+            alert
+            for alert in alerts
+            if "dismissalUntilTs" in alert and convert_epoch_to_datetime(alert["dismissalUntilTs"]) < future_date
         ]
-
 
     # Try to add a new column with a url to the alert investigate page
     base_url = f"https://{pc_api.api.replace('api', 'app')}/alerts/overview?viewId=default"
@@ -82,7 +85,7 @@ def list_alerts(compliance_standard, cloud_account, account_group, amount, unit,
         try:
             alert_id = alert["id"]
 
-            for key in ['firstSeen', 'lastSeen', 'alertTime', 'lastUpdated', 'eventOccurred', 'dismissalUntilTs']:
+            for key in ["firstSeen", "lastSeen", "alertTime", "lastUpdated", "eventOccurred", "dismissalUntilTs"]:
                 if key in alert:
                     alert[key] = datetime_to_readable(convert_epoch_to_datetime(alert[key]))
 
