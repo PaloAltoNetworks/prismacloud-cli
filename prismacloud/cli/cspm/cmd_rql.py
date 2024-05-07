@@ -89,6 +89,8 @@ def cli(ctx, query, amount, unit, field="", file=False):
         elif query.startswith("config from"):
             result_list = pc_api.search_config_read(search_params=search_params)
         elif query.startswith("network from"):
+            # For a network query, focus on field data.nodes
+            field = "data.nodes"
             result_list = pc_api.search_network_read(search_params=search_params)
         elif query.startswith("event from"):
             result_list = pc_api.search_event_read(search_params=search_params)
