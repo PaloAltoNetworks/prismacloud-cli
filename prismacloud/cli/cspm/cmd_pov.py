@@ -209,7 +209,7 @@ def start_pov():
 
     # Get the cloud security reports
     reports = pc_api.adoptionadvisor_report_read()
-    logging.info("API - Update default alert rule")
+    logging.info("API - Get existing cloud security reports")
 
     # Initialize the flag to False
     found = False
