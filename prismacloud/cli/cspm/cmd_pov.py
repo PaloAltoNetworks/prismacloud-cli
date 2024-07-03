@@ -191,21 +191,20 @@ def start_pov():
         # Update the alert rule
         pc_api.alert_rule_create(body_params)
         logging.info("API - Create compute alert rule")
-    
+
     # Add current user to SSO Bypass List
     current_user = pc_api.current_user()
-    logging.info(f"API - Current user email address: {current_user['email']}")    
-    
-    body_params = [current_user['email']]
+    logging.info(f"API - Current user email address: {current_user['email']}")
+
+    body_params = [current_user["email"]]
     # Update the alert rule
     pc_api.user_bypass_sso(body_params)
     logging.info("API - Current user added to SSO Bypass list")
 
     # Create Cloud Security report with a schedule
     users = pc_api.user_list_read()
-    user_emails = [user['email'] for user in users]
+    user_emails = [user["email"] for user in users]
     logging.info(f"API - List email addresses: {user_emails}")
-    
 
     # Get the cloud security reports
     reports = pc_api.adoptionadvisor_report_read()
@@ -232,74 +231,41 @@ def start_pov():
             "isRecurring": True,
             "target": {
                 "scheduleEnabled": True,
-                "schedule": "DTSTART;TZID=Europe/Brussels:20240701T000000\nINTERVAL=1;FREQ=WEEKLY;BYHOUR=3;BYMINUTE=0;BYSECOND=0;BYDAY=MO"
+                "schedule": "DTSTART;TZID=Europe/Brussels:20240701T000000\nINTERVAL=1;FREQ=WEEKLY;BYHOUR=3;BYMINUTE=0;BYSECOND=0;BYDAY=MO",  # noqa: E501
             },
             "ruleOptions": {
                 "target": {
-                "schedule": {
-                    "interval": "1",
-                    "frequency": 2,
-                    "weekday": [
-                    0
-                    ],
-                    "hour": 3,
-                    "timezone": "Europe/Brussels"
-                }
+                    "schedule": {"interval": "1", "frequency": 2, "weekday": [0], "hour": 3, "timezone": "Europe/Brussels"}
                 }
             },
-            "schedule": "DTSTART;TZID=Europe/Brussels:20240701T000000\nINTERVAL=1;FREQ=WEEKLY;BYHOUR=3;BYMINUTE=0;BYSECOND=0;BYDAY=MO",
-            "enabled": True
+            "schedule": "DTSTART;TZID=Europe/Brussels:20240701T000000\nINTERVAL=1;FREQ=WEEKLY;BYHOUR=3;BYMINUTE=0;BYSECOND=0;BYDAY=MO",  # noqa: E501
+            "enabled": True,
         }
 
         # Update the alert rule
         pc_api.adoptionadvisor_report_create(report_to_add=body_params)
         logging.info("API - Created Cloud Security Report")
 
-    
     # Prepare the body parameters for the update
     body_params = {
         "id": "8d57f69b-fbe6-4749-b53c-1e0f0881ad3d",
         "name": "Security default findings",
         "repositories": [],
         "codeCategories": {
-            "LICENSES": {
-            "softFailThreshold": "LOW",
-            "hardFailThreshold": "OFF",
-            "commentsBotThreshold": "LOW"
-            },
-            "VULNERABILITIES": {
-            "softFailThreshold": "LOW",
-            "hardFailThreshold": "OFF",
-            "commentsBotThreshold": "LOW"
-            },
-            "IAC": {
-            "softFailThreshold": "INFO",
-            "hardFailThreshold": "OFF",
-            "commentsBotThreshold": "INFO"
-            },
-            "WEAKNESSES": {
-            "softFailThreshold": "OFF",
-            "hardFailThreshold": "OFF",
-            "commentsBotThreshold": "OFF"
-            },
-            "SECRETS": {
-            "softFailThreshold": "LOW",
-            "hardFailThreshold": "OFF",
-            "commentsBotThreshold": "LOW"
-            },
-            "BUILD_INTEGRITY": {
-            "softFailThreshold": "OFF",
-            "hardFailThreshold": "OFF",
-            "commentsBotThreshold": "OFF"
-            }
-        }
+            "LICENSES": {"softFailThreshold": "LOW", "hardFailThreshold": "OFF", "commentsBotThreshold": "LOW"},
+            "VULNERABILITIES": {"softFailThreshold": "LOW", "hardFailThreshold": "OFF", "commentsBotThreshold": "LOW"},
+            "IAC": {"softFailThreshold": "INFO", "hardFailThreshold": "OFF", "commentsBotThreshold": "INFO"},
+            "WEAKNESSES": {"softFailThreshold": "OFF", "hardFailThreshold": "OFF", "commentsBotThreshold": "OFF"},
+            "SECRETS": {"softFailThreshold": "LOW", "hardFailThreshold": "OFF", "commentsBotThreshold": "LOW"},
+            "BUILD_INTEGRITY": {"softFailThreshold": "OFF", "hardFailThreshold": "OFF", "commentsBotThreshold": "OFF"},
+        },
     }
 
     # Update the alert rule
     pc_api.enforcement_rules_update(rules=body_params)
     logging.info("API - Enforcement rules updated")
 
-
     logging.info("API - === END ===")
+
 
 cli.add_command(start_pov)
