@@ -25,7 +25,8 @@ def list_(limit=50):
 @click.option("-l", "--limit", default=50, help="Limit the number of images to process. Default limit is 50")
 def packages_(package, image_name, cluster, limit):
     """Show deployed images package information."""
-    query_params = {"limit": limit}
+    # query_params = {"limit": limit}
+    query_params = {}
     if image_name:
         query_params["image_name"] = image_name
     if cluster:

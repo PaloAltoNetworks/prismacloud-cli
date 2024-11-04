@@ -246,17 +246,24 @@ def start_pov():
         pc_api.adoptionadvisor_report_create(report_to_add=body_params)
         logging.info("API - Created Cloud Security Report")
 
+    enforcement_rules = pc_api.enforcement_rules_read()
+
+    # Extract the id where mainRule is True
+    main_rule_id = next((rule["id"] for rule in enforcement_rules["rules"] if rule.get("mainRule")), None)
+
+    logging.info(f"API - Enforcement rules - Main Rule ID: {main_rule_id}")
     # Prepare the body parameters for the update
     body_params = {
-        "id": "8d57f69b-fbe6-4749-b53c-1e0f0881ad3d",
+        "id": f"{main_rule_id}",
         "name": "Security default findings",
         "repositories": [],
+        "labels": [],
         "codeCategories": {
-            "LICENSES": {"softFailThreshold": "LOW", "hardFailThreshold": "OFF", "commentsBotThreshold": "LOW"},
-            "VULNERABILITIES": {"softFailThreshold": "LOW", "hardFailThreshold": "OFF", "commentsBotThreshold": "LOW"},
+            "LICENSES": {"softFailThreshold": "LOW", "hardFailThreshold": "OFF", "commentsBotThreshold": "HIGH"},
+            "VULNERABILITIES": {"softFailThreshold": "LOW", "hardFailThreshold": "OFF", "commentsBotThreshold": "HIGH"},
             "IAC": {"softFailThreshold": "INFO", "hardFailThreshold": "OFF", "commentsBotThreshold": "INFO"},
             "WEAKNESSES": {"softFailThreshold": "OFF", "hardFailThreshold": "OFF", "commentsBotThreshold": "OFF"},
-            "SECRETS": {"softFailThreshold": "LOW", "hardFailThreshold": "OFF", "commentsBotThreshold": "LOW"},
+            "SECRETS": {"softFailThreshold": "LOW", "hardFailThreshold": "OFF", "commentsBotThreshold": "HIGH"},
             "BUILD_INTEGRITY": {"softFailThreshold": "OFF", "hardFailThreshold": "OFF", "commentsBotThreshold": "OFF"},
         },
     }
